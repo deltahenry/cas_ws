@@ -457,7 +457,7 @@ class MyROSNode(Node):
         picker_finished = msg.picker_finished
         assembly_finished = msg.assembly_finished
         manual_aligment_finished = msg.manual_aligment_finished
-        auto_aligment_finished = msg.auto_aligment_finished
+        auto_aligment_finished = msg.auto_alignment_finished
         system_error = msg.system_error
         self.get_logger().info(f"Received MotionState: {msg}")
     

@@ -23,6 +23,7 @@ setup(
             'multi_threading = state_machine_module.multi_threading:main',
             'yasmin_demo = state_machine_module.magic_yasmin:main',
             'transitions_demo = state_machine_module.magic_transitions:main',
+            'andy_demo = state_machine_module.magic_transitions_andy:main',
         ],
     },
 )

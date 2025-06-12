@@ -28,21 +28,22 @@ class RosPublisherNode(Node):
         msg.stop_button = button_states["Stop"]
         msg.init_button = button_states["Init"]
         msg.reselect_button = button_states["Reselect"]
-        msg.picker_button = button_states["Picker"]
-        msg.assembly_button = button_states["Assembly"]
-        msg.error_handler_button = button_states["ErrorHandler"]
+        msg.pull_button = button_states["Pull"]
+        msg.push_button = button_states["Push"]
+        msg.debug_button = button_states["Debug"]
+
         self.button_cmd_publisher.publish(msg)
         self.get_logger().info("Published ButtonCommand message")
 
     def publish_motion_state(self, motion_flags):
         msg = MotionState()
-        msg.motion_finished = motion_flags["MotionFinished"]
-        msg.init_finished = motion_flags["InitFinished"]
-        msg.picker_finished = motion_flags["PickerFinished"]
-        msg.assembly_finished = motion_flags["AssemblyFinished"]
-        msg.manual_aligment_finished = motion_flags["ManualAlignmentFinished"]
-        msg.auto_aligment_finished = motion_flags["AutoAlignmentFinished"]
-        msg.system_error = motion_flags["SystemError"]
+        msg.motion_finish = motion_flags["Motion Finish"]
+        msg.init_finish = motion_flags["Init Finish"]
+        msg.pull_finish = motion_flags["Pull Finish"]
+        msg.push_finish = motion_flags["Push Finish"]
+        msg.rough_pos_finish = motion_flags["Rough Pos Finish"]
+        msg.auto_pos_finish = motion_flags["Auto Pos Finish"]
+        msg.system_error = motion_flags["System Error"]
         self.motion_state_publisher.publish(msg)
         self.get_logger().info("Published MotionState message")
 
@@ -66,19 +67,19 @@ class ControlUI(QWidget):
             "Stop": False,
             "Init": False,
             "Reselect": False,
-            "Picker": False,
-            "Assembly": False,
-            "ErrorHandler": False,
+            "Pull": False,
+            "Push": False,
+            "Debug": False,
         }
 
         self.motion_flags = {
-            "MotionFinished": False,
-            "InitFinished": False,
-            "PickerFinished": False,
-            "AssemblyFinished": False,
-            "ManualAlignmentFinished": False,
-            "AutoAlignmentFinished": False,
-            "SystemError": False,
+            "Motion Finish": False,
+            "Init Finish": False,
+            "Pull Finish": False,
+            "Push Finish": False,
+            "Rough Pos Finish": False,
+            "Auto Pos Finish": False,
+            "System Error": False,
         }
 
         self.button_widgets = {}
@@ -145,9 +146,9 @@ class ControlUI(QWidget):
             "Stop": msg.stop_button,
             "Init": msg.init_button,
             "Reselect": msg.reselect_button,
-            "Picker": msg.picker_button,
-            "Assembly": msg.assembly_button,
-            "ErrorHandler": msg.error_handler_button,
+            "Pull": msg.pull_button,
+            "Push": msg.push_button,
+            "Debug": msg.debug_button,
         }
         for key, val in mapping.items():
             self.button_states[key] = val
@@ -155,13 +156,14 @@ class ControlUI(QWidget):
 
     def update_ui_from_motion_state(self, msg=MotionState):
         mapping = {
-            "MotionFinished": msg.motion_finished,
-            "InitFinished": msg.init_finished,
-            "PickerFinished": msg.picker_finished,
-            "AssemblyFinished": msg.assembly_finished,
-            "ManualAlignmentFinished": msg.manual_aligment_finished,
-            "AutoAlignmentFinished": msg.auto_aligment_finished,
-            "SystemError": msg.system_error,
+            "Motion Finish": msg.motion_finish,
+            "Init Finish": msg.init_finish,
+            "Pull Finish": msg.pull_finish,
+            "Push Finish": msg.push_finish,
+            "Rough Pos Finish": msg.rough_pos_finish,
+            "Auto Pos Finish": msg.auto_pos_finish,
+            "System Error": msg.system_error,
+
         }
         for key, val in mapping.items():
             self.motion_flags[key] = val
