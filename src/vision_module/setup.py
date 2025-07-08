@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'state_machine_module'
+package_name = 'vision_module'
 
 setup(
     name=package_name,
@@ -20,11 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'multi_threading = state_machine_module.multi_threading:main',
-            'yasmin_demo = state_machine_module.magic_yasmin:main',
-            'transitions_demo = state_machine_module.magic_transitions:main',
-            'andy_demo = state_machine_module.magic_transitions_andy:main',
-            'fsm_magiccube = state_machine_module.fsm_magiccube:main',
+            'realsense_rough = vision_module.realsense_rough:main',
+            'realsenselib = vision_module.realsenselib:main',
         ],
     },
 )

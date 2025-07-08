@@ -9,7 +9,8 @@ class RobotModel:
     
     #model information
     def magic_cube_model(self):
-        
+
+        self.home_position = [345.0, 0.0, 0.0] #robot home position
         #link length
         #joint position/definition
         self.real_motor_home_position = [436.5, 525.5, 0.0] #m1 len ...
@@ -60,8 +61,6 @@ class RobotModel:
     #for dynamic control(torque)
     def compute_gravity(self, joint_angles):
         pass
-
-
 
 
 

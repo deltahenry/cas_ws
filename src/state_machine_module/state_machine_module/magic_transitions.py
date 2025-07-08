@@ -273,9 +273,6 @@ class AssemblySystem:
         self.data_node.rewrite_button_cmd('debug_button', False)  # 重置除錯按鈕狀態
         self.data_node.rewrite_motion_state('system_error', False)  # 重置系統錯誤狀態
 
-
-
-
 @with_plot
 def fsm_logic(system: AssemblySystem,data: DataNode):
 
