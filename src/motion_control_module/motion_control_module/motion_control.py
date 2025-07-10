@@ -6,6 +6,7 @@ from collections import deque
 from model_module.magic_cube import RobotModel  # 自訂 model.py 模組
 from copy import deepcopy
 import numpy as np
+from std_msgs.msg import Float32MultiArray
 
 class MotionController(Node):
     def __init__(self):
@@ -20,7 +21,7 @@ class MotionController(Node):
         #Subscriber
         self.create_subscription(MotionCmd, '/motion_cmd', self.motion_cmd_callback, 10)
         #Publisher
-        # self.motor_pub = self.create_publisher(JointPosition, '/motor_position_ref', 10)
+        self.motor_cmd_publisher = self.create_publisher(Float32MultiArray, '/motor_position_ref', 10)
         # self.done_pub = self.create_publisher(Bool, '/motion_finished', 10)
 
         # Timer，每次發送 1 筆指令（從 queue 中）
@@ -35,6 +36,7 @@ class MotionController(Node):
         
         self.current_motor_len = [0.0, 0.0, 0.0]
         self.current_cartesian_pose = self.robot_model.home_position  # 初始 cartesian pose
+        self.last_sent_joint_command = [0.0, 0.0, 0.0]  # 上次發送的關節指令
 
 
         self.get_logger().info('MotionController ready.')
@@ -147,7 +149,7 @@ class MotionController(Node):
             # self.current_motor_len = [-135.0, -136.0, 0.0]  # 模擬目前 joint state
 
             if self.check_home:
-                if self.current_motor_len == [-136.0, -136.0, 0.0]:  # 假設這是 home position
+                if  np.allclose(self.current_motor_len, [-136.0, -136.0, 0.0], atol=1e-2):  # 假設這是 home position
                     self.current_cartesian_pose = self.robot_model.home_position  # 更新目前 cartesian pose
                     self.get_logger().info("Motors are in home position.")
 
@@ -157,16 +159,19 @@ class MotionController(Node):
 
                 else:
                     self.get_logger().warning("Motors are not in home position yet.")
-                    self.current_motor_len = [-136.0, -136.0, 0.0]  # 模擬目前 joint state
+                    self.send_motor_command([self.last_sent_joint_command] * 10)
+
                     self.motion_finished = False
 
             elif self.check_position:
                 if np.allclose(self.current_cartesian_pose, self.cartesian_pos_cmd):  # 假設這是目標 cartesian position
                     self.get_logger().info("Motors are in target position.")
+
                     self.check_position = False
                     self.motion_finished = True
                 else:
                     self.get_logger().warning("Motors are not in target position yet.")
+                    self.send_motor_command([self.last_sent_joint_command] * 10)
                     self.motion_finished = False
 
             return
@@ -174,24 +179,19 @@ class MotionController(Node):
         # 如果有 trajectory，取出一個 batch
         else:
             self.motion_finished = False
-
             batch = self.trajectory_queue.popleft()
-
-            for joint in batch:
-                # self.send_motor_command(joint)
-                print(f"Sending joint command: {joint}")
-                self.current_joint_state = joint  # 更新目前 joint state
-
-            # # 發送完成標記（你也可以設成延遲最後一包再送）
-            # if not self.trajectory_queue:
-            #     self.done_pub.publish(Bool(data=True))
+            self.send_motor_command(batch)
+            self.last_sent_joint_command = batch[-1]
 
 
-    # # 發送馬達命令
-    # def send_motor_command(self, joint_angles,joint_velocity,joint_torque):
-    #     msg = JointPosition()
-    #     msg.joint_position = joint_angles
-    #     self.motor_pub.publish(msg)
+    # 發送馬達命令
+    def send_motor_command(self, batch):
+        # motor_positions 可能是 list of float 或 np.array
+        flat_positions = [val for joint in batch for val in joint]  # 展平為一維
+
+        msg = Float32MultiArray()
+        msg.data = flat_positions
+        self.motor_cmd_publisher.publish(msg)
 
 
 
