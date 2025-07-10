@@ -1,3 +1,0 @@
-<behavior name="ExampleBehavior" package="my_flexbe_behaviors">
-  <state_machine outcomes="finished" />
-</behavior>

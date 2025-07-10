@@ -118,16 +118,17 @@ class DataNode(Node):
         else:
             print(f"運動狀態名稱 {motion_name} 不存在。")
 
-    def publish_motion_cmd(self, command: str,pose_data=None, speed=0.5):
+    def publish_motion_cmd(self, command: str,pose_data=[345.0,0.0,0.0], speed=0.5):
         msg = MotionCmd()
         if command == 'home':
-            msg.command_type = MotionCmd.TYPE_HOME
             msg.command_type = MotionCmd.TYPE_HOME
             self.motion_cmd_publisher.publish(msg)
 
         elif command == 'goto':
             msg.command_type = MotionCmd.TYPE_GOTO
-
+            msg.pose_data = pose_data 
+            self.motion_cmd_publisher.publish(msg)
+            
         elif command == 'goto_relative':
             msg.command_type = MotionCmd.TYPE_GOTO_RELATIVE
 
@@ -189,6 +190,7 @@ class InitStateMachine(Machine):
             return InitState.IDLE.value
         
         elif self.phase == InitState.RUN:
+            # 模擬初始化過程
             if self.data_node.motion_states["init_finish"]:
                 self.run_to_done()  # 模擬初始化完成
             else:
