@@ -185,7 +185,7 @@ class InitStateMachine(Machine):
 
     def run(self):
         if self.phase == InitState.IDLE:
-            self.data_node.publish_motion_cmd(command='goto',pose_data=[600.0,0.0,0.0],speed=100.0)  # 發佈初始化命令
+            self.data_node.publish_motion_cmd(command='goto',pose_data=[1100.0,0.0,0.0],speed=200.0)  # 發佈初始化命令
             print("publish init command...")
             self.idle_to_run()
             return InitState.IDLE.value

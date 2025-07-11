@@ -102,49 +102,77 @@ class MotionController(Node):
         self.check_position = True
 
     #--interpolate function--
-    # interpolate the cartesian trajectory
-    # def interpolate_cartesian(self, start_pose, end_pose, vdes):
-    #         dt=time_period/ batch_size
-    #         d = [e - s for s, e in zip(start_pose, end_pose)]
-    #         total_dist = sum((x**2 for x in d))**0.5
-    #         step_dist = vdes * dt
-    #         steps = max(int(total_dist / step_dist), 1)
-    #         step_vec = [x / steps for x in d]
-
-    #         cartesian_trajectory = [[start_pose[i] + step_vec[i] * j for i in range(len(start_pose))] 
-    #                     for j in range(1, steps + 1)]
-    #         return cartesian_trajectory
-    
     def interpolate_cartesian(self, start_pose, end_pose, vdes):
         dt = time_period / batch_size
+        
+        ramp_ratio=0.3 
+        ramp_speed=0.5
+
+        # 位移向量與總長度
         d = [e - s for s, e in zip(start_pose, end_pose)]
         total_dist = sum((x**2 for x in d))**0.5
         step_dist = vdes * dt
         total_steps = max(int(total_dist / step_dist), 1)
 
-        # 速度 profile：前10% + 中間 + 後10%
-        slow_steps = max(int(total_steps * 0.1), 1)
-        fast_steps = total_steps - 2 * slow_steps
-        speed_profile = [0.5 * vdes] * slow_steps + [vdes] * fast_steps + [0.5 * vdes] * slow_steps
+        # 計算各區段步數
+        ramp_steps = max(int(total_steps * ramp_ratio), 1)
+        mid_steps = total_steps - 2 * ramp_steps
 
-        # 實際總距離需累加，轉為每一步「累積比率」
+        # 建立速度 profile
+        speed_profile = (
+            [ramp_speed * vdes] * ramp_steps +
+            [vdes] * mid_steps +
+            [ramp_speed * vdes] * ramp_steps
+        )
+
+        # 將每步速度轉為累積距離
         dist_acc = 0.0
         distances = []
-        for s in speed_profile:
-            delta = s * dt
-            dist_acc += delta
+        for speed in speed_profile:
+            dist_acc += speed * dt
             distances.append(dist_acc)
 
-        # 正規化 → 把最後一步對應到 1.0（總長度）
+        # 正規化為比例 [0 ~ 1]
         normalized = [d / dist_acc for d in distances]
 
-        # 根據比例產生每個點
-        trajectory = []
-        for ratio in normalized:
-            point = [start_pose[i] + ratio * d[i] for i in range(len(d))]
-            trajectory.append(point)
+        # 根據比例插值每一點
+        trajectory = [
+            [start_pose[i] + ratio * d[i] for i in range(len(d))]
+            for ratio in normalized
+        ]
 
         return trajectory
+    
+    # def interpolate_cartesian(self, start_pose, end_pose, vdes):
+    #     dt = time_period / batch_size
+    #     d = [e - s for s, e in zip(start_pose, end_pose)]
+    #     total_dist = sum((x**2 for x in d))**0.5
+    #     step_dist = vdes * dt
+    #     total_steps = max(int(total_dist / step_dist), 1)
+
+    #     # 速度 profile：前10% + 中間 + 後10%
+    #     slow_steps = max(int(total_steps * 0.1), 1)
+    #     fast_steps = total_steps - 2 * slow_steps
+    #     speed_profile = [0.5 * vdes] * slow_steps + [vdes] * fast_steps + [0.5 * vdes] * slow_steps
+
+    #     # 實際總距離需累加，轉為每一步「累積比率」
+    #     dist_acc = 0.0
+    #     distances = []
+    #     for s in speed_profile:
+    #         delta = s * dt
+    #         dist_acc += delta
+    #         distances.append(dist_acc)
+
+    #     # 正規化 → 把最後一步對應到 1.0（總長度）
+    #     normalized = [d / dist_acc for d in distances]
+
+    #     # 根據比例產生每個點
+    #     trajectory = []
+    #     for ratio in normalized:
+    #         point = [start_pose[i] + ratio * d[i] for i in range(len(d))]
+    #         trajectory.append(point)
+
+    #     return trajectory
     
 
 
