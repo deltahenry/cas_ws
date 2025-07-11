@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'motion_control = motion_control_module.motion_control:main',
+            'control = motion_control_module.123:main',
         ],
     },
 )

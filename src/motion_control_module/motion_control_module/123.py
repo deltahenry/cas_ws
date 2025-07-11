@@ -116,35 +116,33 @@ class MotionController(Node):
     #         return cartesian_trajectory
     
     def interpolate_cartesian(self, start_pose, end_pose, vdes):
-        dt = time_period / batch_size  # 每點對應的時間間隔
-
+        dt = time_period / batch_size
         d = [e - s for s, e in zip(start_pose, end_pose)]
         total_dist = sum((x**2 for x in d))**0.5
         step_dist = vdes * dt
         total_steps = max(int(total_dist / step_dist), 1)
 
-        # 計算不同速度區段的步數
+        # 速度 profile：前10% + 中間 + 後10%
         slow_steps = max(int(total_steps * 0.1), 1)
-        fast_steps = total_steps - 2 * slow_steps  # 中間段落
+        fast_steps = total_steps - 2 * slow_steps
+        speed_profile = [0.5 * vdes] * slow_steps + [vdes] * fast_steps + [0.5 * vdes] * slow_steps
 
-        # 建立每段對應速度
-        speed_profile = (
-            [0.5 * vdes] * slow_steps + 
-            [vdes] * fast_steps + 
-            [0.5 * vdes] * slow_steps
-        )
+        # 實際總距離需累加，轉為每一步「累積比率」
+        dist_acc = 0.0
+        distances = []
+        for s in speed_profile:
+            delta = s * dt
+            dist_acc += delta
+            distances.append(dist_acc)
 
-        # 根據速度 profile 動態產生軌跡
+        # 正規化 → 把最後一步對應到 1.0（總長度）
+        normalized = [d / dist_acc for d in distances]
+
+        # 根據比例產生每個點
         trajectory = []
-        current_pose = list(start_pose)
-        for speed in speed_profile:
-            step_dist = speed * dt
-            norm = sum(x**2 for x in d)**0.5
-            if norm == 0:
-                break
-            step_vec = [x / norm * step_dist for x in d]  # 單位方向 * 每步長
-            current_pose = [current_pose[i] + step_vec[i] for i in range(len(current_pose))]
-            trajectory.append(current_pose.copy())
+        for ratio in normalized:
+            point = [start_pose[i] + ratio * d[i] for i in range(len(d))]
+            trajectory.append(point)
 
         return trajectory
     
