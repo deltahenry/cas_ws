@@ -17,6 +17,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/ButtonCommand.msg"
     "msg/MotionState.msg"
     "msg/MotionCmd.msg"
+    "msg/MultipleMotors.msg"
+    "msg/SingleMotor.msg"
+    
 )
 
 if(BUILD_TESTING)

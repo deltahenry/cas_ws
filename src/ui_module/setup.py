@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'magic_cube = ui_module.ui_magic_cube:main',
+            "ui_motor_control = ui_module.ui_motor_control:main",
         ],
     },
 )

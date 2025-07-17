@@ -10,10 +10,8 @@ class RobotModel:
     #model information
     def magic_cube_model(self):
 
-        self.home_position = [345.0, 0.0, 0.0] #robot home position
+        self.home_position = [0.0, 0.0, 0.0] #robot home position
         #link length
-        #joint position/definition
-        self.real_motor_home_position = [436.5, 525.5, 0.0] #m1 len ...
 
         #Relative Position definition
         self.P_J1MC = np.array([[-250],[-318],[0]])
@@ -30,28 +28,34 @@ class RobotModel:
     def inverse_kinematics(self, target_pose):
         sin = math.sin
         cos = math.cos
-        sqrt = math.sqrt
         
         joint_length = []
         
         x, y, yaw = target_pose
         # for x, y, yaw in target_pose:
-        J1_x = x + cos(yaw)*self.P_J1MC[0,0] - sin(yaw)*self.P_J1MC[1,0]
-        J1_y = 0 + sin(yaw)*self.P_J1MC[0,0] - cos(yaw)*self.P_J1MC[1,0]
-        M1 = J1_x + sqrt(205.5**2-(abs(J1_y)-abs(self.P_J1MC[1,0]))**2)-self.real_motor_home_position[0]
-
-        J2_x = x + cos(yaw)*self.P_J2MC[0,0] - sin(yaw)*self.P_J2MC[1,0]
-        J2_y = 0 + sin(yaw)*self.P_J2MC[0,0] - cos(yaw)*self.P_J2MC[1,0]
-        M2 = J2_x - sqrt(205.5**2-(abs(J2_y)-abs(self.P_J2MC[1,0]))**2)-self.real_motor_home_position[1]
-
+        M1 = -400.0 * -sin(yaw) + x
+        M2 = -880.0 * -sin(yaw) + x
         M3 = y #need to change
-        joint_length = [M1,M2,M3]
+        joint_length = [M3,M2,M1]
 
         return joint_length
 
 
-    def check_joint_limits(self, joint_angles):
-        pass
+    def check_workspace_limits(self, target_pose):
+        sin = math.sin
+        cos = math.cos
+        x, y, yaw = target_pose
+
+        if yaw<=0:
+            if -880.0*-sin(yaw) + x>-139.5:
+                return True
+            else:
+                return False
+        else:
+            if -880.0*sin(yaw) + x <160.5:
+                return True
+            else:
+                return False
 
     #for velocity control
     def compute_jacobian(self, joint_angles):
