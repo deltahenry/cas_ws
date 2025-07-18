@@ -6,7 +6,8 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from uros_interface.srv import ESMcmd
-from common_msgs.msg import MotionCmd,MultipleMotors, SingleMotor
+from common_msgs.msg import MotionCmd,MultipleM, SingleM
+from std_msgs.msg import Bool
 
 
 class RosNode(Node):
@@ -15,10 +16,11 @@ class RosNode(Node):
 
         # Publisher for testing
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
+        self.tcp_stream_pub = self.create_publisher(Bool, '/start_tcp_stream', 10)
 
         # Subscriber for testing
         self.test_sub = self.create_subscription(String, '/gui_test', self.test_callback, 10)
-        self.motors_info_sub = self.create_subscription(MultipleMotors,'/multi_motor_info',self.motors_info_callback,10)
+        self.motors_info_sub = self.create_subscription(MultipleM,'/multi_motor_info',self.motors_info_callback,10)
 
         # Async service client
         self.cli = self.create_client(ESMcmd, '/esm_command')
@@ -30,7 +32,7 @@ class RosNode(Node):
     def test_callback(self, msg):
         self.get_logger().info(f"[GUI SUBSCRIBER] Received: {msg.data}")
 
-    def motors_info_callback(self, msg:MultipleMotors):
+    def motors_info_callback(self, msg:MultipleM):
         self.current_motor_len = [msg.motor_info[0].fb_position,msg.motor_info[1].fb_position,msg.motor_info[2].fb_position]
         print("motor_info callback",self.current_motor_len)
 
@@ -69,6 +71,8 @@ class MyGUI(QWidget):
         self.frame_timer.timeout.connect(self.update_gui)
         self.frame_timer.start(500)
 
+        self.tcp_stream_on = False  # 用來記錄狀態
+
 
     def init_ui(self):
         self.setWindowTitle("ROS2 Non-blocking GUI")
@@ -78,6 +82,11 @@ class MyGUI(QWidget):
         self.status_label = QLabel("Press button to send service", self)
         self.status_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.status_label)
+
+        # TCP Stream 切換按鈕
+        self.toggle_tcp_btn = QPushButton("Start TCP Stream")
+        self.toggle_tcp_btn.clicked.connect(self.toggle_tcp_stream)
+        layout.addWidget(self.toggle_tcp_btn)   
 
         # Servo ON/OFF Buttons
         self.btn_on = QPushButton("Servo ON", self)
@@ -132,6 +141,17 @@ class MyGUI(QWidget):
         msg.pose_data = [m1, m2, m3]
         msg.speed = speed
         self.ros_node.motion_cmd_publisher.publish(msg)
+
+    def toggle_tcp_stream(self):
+        self.tcp_stream_on = not self.tcp_stream_on
+        msg = Bool()
+        msg.data = self.tcp_stream_on
+        self.ros_node.tcp_stream_pub.publish(msg)
+
+        if self.tcp_stream_on:
+            self.toggle_tcp_btn.setText("Stop TCP Stream")
+        else:
+            self.toggle_tcp_btn.setText("Start TCP Stream")
 
     def send_init_cmd(self):
         

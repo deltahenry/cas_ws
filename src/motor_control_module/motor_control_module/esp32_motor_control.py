@@ -1,5 +1,5 @@
 from uros_interface.msg import Joint2DArr,JointArr
-from custom_msgs.msg import InterfaceSingleMotor,InterfaceMultipleMotors
+from common_msgs.msg import MultipleM,SingleM
 from std_msgs.msg import Float32MultiArray
 from rclpy.node import Node
 import rclpy
@@ -11,7 +11,7 @@ class MotorController(Node):
 
         # Publishers
         self.esp_control_publisher = self.create_publisher(Joint2DArr,'/theta_command',10)
-        self.motors_info_publisher = self.create_publisher(InterfaceMultipleMotors,'/multi_motor_info',10) 
+        self.motors_info_publisher = self.create_publisher(MultipleM,'/multi_motor_info',10) 
 
         #Subscribers
         self.pos_ref_sub = self.create_subscription(Float32MultiArray, '/motor_position_ref',self.motor_cmd_callback , 10) #motor_node
@@ -33,9 +33,9 @@ class MotorController(Node):
         self.esp_control_publisher.publish(msg)
 
     def esp_info_callback(self,msg:JointArr):
-        motors_info = InterfaceMultipleMotors()
+        motors_info = MultipleM()
         motors_info.quantity = 3
-        motors_info.motor_info = [InterfaceSingleMotor() for _ in range(motors_info.quantity)]
+        motors_info.motor_info = [SingleM() for _ in range(motors_info.quantity)]
         motors_info.motor_info[0].id = 1
         motors_info.motor_info[0].fb_position = float(msg.theta_arr[0])
         motors_info.motor_info[1].id = 2

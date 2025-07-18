@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool
-from common_msgs.msg import MotionCmd,MultipleMotors, SingleMotor
+from common_msgs.msg import MotionCmd,MultipleM, SingleM
 from collections import deque
 from model_module.magic_cube import RobotModel  # 自訂 model.py 模組
 from copy import deepcopy
@@ -25,7 +25,7 @@ class MotionController(Node):
         # ROS 2 介面
         #Subscriber
         self.create_subscription(MotionCmd, '/motion_cmd', self.motion_cmd_callback, 10)
-        self.motors_info_sub = self.create_subscription(MultipleMotors,'/multi_motor_info',self.motors_info_callback,10)
+        self.motors_info_sub = self.create_subscription(MultipleM,'/multi_motor_info',self.motors_info_callback,10)
         #Publisher
         self.motor_cmd_publisher = self.create_publisher(Float32MultiArray, '/motor_position_ref', 10)
         # self.done_pub = self.create_publisher(Bool, '/motion_finished', 10)
@@ -60,7 +60,7 @@ class MotionController(Node):
         else:
             self.get_logger().error(f"Unknown command type: {msg.command_type}")
 
-    def motors_info_callback(self, msg:MultipleMotors):
+    def motors_info_callback(self, msg:MultipleM):
         self.current_motor_len = [msg.motor_info[0].fb_position,msg.motor_info[1].fb_position,msg.motor_info[2].fb_position]
         print("motor_info callback",self.current_motor_len)
 

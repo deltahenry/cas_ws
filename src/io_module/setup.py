@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'rangefinder = io_module.rangefinder:main',
+            'test_rangefinder = io_module.rangefinder_2:main',
         ],
     },
 )
