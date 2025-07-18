@@ -20,8 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'rangefinder = io_module.rangefinder:main',
-            'test_rangefinder = io_module.rangefinder_2:main',
+            'depth_rangefinder = io_module.depth_rangefinder:main',
         ],
     },
 )

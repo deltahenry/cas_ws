@@ -49,15 +49,28 @@ class TcpRangefinderNode(Node):
                             data = s.recv(256)
                             message = data.decode('ascii').strip()
 
-                            msg = String()
-                            msg.data = message
-                            self.publisher_.publish(msg)
-                            self.get_logger().info(f'Received: {message}')
+                            # 解析數值字串：格式應為 M0,-000005154,-000004835
+                            try:
+                                parts = message.split(",")
+                                if len(parts) == 3 and parts[0].startswith("M"):
+                                    value1 = float(parts[1]) / 100.0
+                                    value2 = float(parts[2]) / 100.0
+
+                                    # 儲存轉換結果
+                                    self.range1 = value1
+                                    self.range2 = value2
+
+                                    self.get_logger().info(f'Parsed values: {value1:.2f}, {value2:.2f}')
+                                else:
+                                    self.get_logger().warn(f'Unexpected message format: {message}')
+                            except Exception as e:
+                                self.get_logger().error(f'Error parsing message: {e}')
 
                     except Exception as e:
                         self.get_logger().warn(f'TCP Error: {e}')
 
             time.sleep(rate)
+
 
 
 def main(args=None):
@@ -69,3 +82,4 @@ def main(args=None):
         pass
     node.destroy_node()
     rclpy.shutdown()
+
