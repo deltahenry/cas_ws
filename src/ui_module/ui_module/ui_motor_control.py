@@ -5,7 +5,7 @@ from PySide6.QtCore import QTimer, Qt
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-from uros_interface.srv import ESMcmd
+from uros_interface.srv import ESMCmd
 from common_msgs.msg import MotionCmd,MultipleM, SingleM
 from std_msgs.msg import Bool
 
@@ -23,7 +23,7 @@ class RosNode(Node):
         self.motors_info_sub = self.create_subscription(MultipleM,'/multi_motor_info',self.motors_info_callback,10)
 
         # Async service client
-        self.cli = self.create_client(ESMcmd, '/esm_command')
+        self.cli = self.create_client(ESMCmd, '/esm_command')
         self.waiting_for_result = False
 
         # 初始化機器人模型的電機長度
@@ -41,7 +41,7 @@ class RosNode(Node):
             self.get_logger().warn('Service not available')
             return
 
-        request = ESMcmd.Request()
+        request = ESMCmd.Request()
         request.servo_status = on
         request.mode = 4
         request.speed_limit = 50

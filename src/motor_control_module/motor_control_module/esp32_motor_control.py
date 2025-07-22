@@ -4,10 +4,17 @@ from std_msgs.msg import Float32MultiArray
 from rclpy.node import Node
 import rclpy
 import numpy as np
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy
+
 
 class MotorController(Node):
     def __init__(self):
         super().__init__('motor_controller')
+
+        qos_profile = QoSProfile(
+            depth=10,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT
+        )
 
         # Publishers
         self.esp_control_publisher = self.create_publisher(Joint2DArr,'/theta_command',10)
@@ -15,7 +22,7 @@ class MotorController(Node):
 
         #Subscribers
         self.pos_ref_sub = self.create_subscription(Float32MultiArray, '/motor_position_ref',self.motor_cmd_callback , 10) #motor_node
-        self.esp_info_subscriber = self.create_subscription(JointArr, '/theta_feedback', self.esp_info_callback ,10)
+        self.esp_info_subscriber = self.create_subscription(JointArr, '/theta_feedback', self.esp_info_callback ,qos_profile)
     
         # Timer
         self.timer = self.create_timer(2, self.timer_callback)  #20Hz       
@@ -28,8 +35,8 @@ class MotorController(Node):
         msg = Joint2DArr()
         msg.theta_2d_arr = [JointArr() for _ in range(10)]
         for i in range (10):
-            print([pos_ref_queue[i][0],pos_ref_queue[i][1],pos_ref_queue[i][2],0.0,0.0,0.0])
-            msg.theta_2d_arr[i].theta_arr = [float(pos_ref_queue[i][0]),float(pos_ref_queue[i][1]),float(pos_ref_queue[i][2]),0.0,0.0,0.0]
+            print([pos_ref_queue[i][0],pos_ref_queue[i][1],pos_ref_queue[i][2],0.0])
+            msg.theta_2d_arr[i].theta_arr = [float(pos_ref_queue[i][0]),float(pos_ref_queue[i][1]),float(pos_ref_queue[i][2]),0.0]
         self.esp_control_publisher.publish(msg)
 
     def esp_info_callback(self,msg:JointArr):
