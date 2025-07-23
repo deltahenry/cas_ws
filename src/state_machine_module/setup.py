@@ -21,10 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             'multi_threading = state_machine_module.multi_threading:main',
-            'yasmin_demo = state_machine_module.magic_yasmin:main',
-            'transitions_demo = state_machine_module.magic_transitions:main',
-            'andy_demo = state_machine_module.magic_transitions_andy:main',
             'fsm_magiccube = state_machine_module.fsm_magiccube:main',
+            'fsm_logic = state_machine_module.fsm_logic:main',
         ],
     },
 )

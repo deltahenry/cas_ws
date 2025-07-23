@@ -6,7 +6,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from uros_interface.srv import ESMCmd
-from common_msgs.msg import MotionCmd,MultipleM, SingleM
+from common_msgs.msg import MotionCmd,MultipleM, SingleM,StateCmd
 from std_msgs.msg import Bool
 
 
@@ -15,6 +15,7 @@ class RosNode(Node):
         super().__init__('ros_gui_node')
 
         # Publisher for testing
+        self.state_cmd_publisher = self.create_publisher(StateCmd, '/state_cmd', 10)
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
         self.tcp_stream_pub = self.create_publisher(Bool, '/start_tcp_stream', 10)
 
@@ -28,6 +29,13 @@ class RosNode(Node):
 
         # 初始化機器人模型的電機長度
         self.current_motor_len = [10.0, 0.0, 0.0]
+
+        # 初始化狀態命令
+        self.state_cmd = {
+            'init_button': False,
+            'run_button': False,   
+            'pause_button': False,
+        }
 
     def test_callback(self, msg):
         self.get_logger().info(f"[GUI SUBSCRIBER] Received: {msg.data}")
@@ -98,9 +106,17 @@ class MyGUI(QWidget):
         layout.addWidget(self.btn_off)
 
         # 新增初始化按鈕
-        self.init_button = QPushButton("初始化位置")
+        self.init_button = QPushButton("Initialize")
         self.init_button.clicked.connect(self.send_init_cmd)
         layout.addWidget(self.init_button)
+
+        self.run_button = QPushButton("Run")
+        self.run_button.clicked.connect(self.send_run_cmd)
+        layout.addWidget(self.run_button)
+
+        self.pause_button = QPushButton("Pause")
+        self.pause_button.clicked.connect(self.send_pause_cmd)
+        layout.addWidget(self.pause_button)
 
         # --- 新增: M1, M2, M3 輸入欄位 ---
         motor_layout = QHBoxLayout()
@@ -154,17 +170,41 @@ class MyGUI(QWidget):
             self.toggle_tcp_btn.setText("Start TCP Stream")
 
     def send_init_cmd(self):
-        
-        m1 = 0.0
-        m2 = 0.0
-        m3 = 0.0
-        speed = 50.0
+        msg = StateCmd()
+        self.ros_node.state_cmd['init_button'] = True
+        msg.init_button = self.ros_node.state_cmd['init_button']
+        msg.run_button = self.ros_node.state_cmd['run_button']
+        msg.pause_button = self.ros_node.state_cmd['pause_button']
+        self.ros_node.state_cmd_publisher.publish(msg)      
+    
+    def send_run_cmd(self):
+        msg = StateCmd()
+        self.ros_node.state_cmd['run_button'] = True
+        msg.init_button = self.ros_node.state_cmd['init_button']
+        msg.run_button = self.ros_node.state_cmd['run_button']
+        msg.pause_button = self.ros_node.state_cmd['pause_button']
+        self.ros_node.state_cmd_publisher.publish(msg)
+    
+    def send_pause_cmd(self):
+        msg = StateCmd()
+        self.ros_node.state_cmd['pause_button'] = True
+        msg.init_button = self.ros_node.state_cmd['init_button']
+        msg.run_button = self.ros_node.state_cmd['run_button']
+        msg.pause_button = self.ros_node.state_cmd['pause_button']
+        self.ros_node.state_cmd_publisher.publish(msg)
 
-        msg = MotionCmd()
-        msg.command_type = MotionCmd.TYPE_HOME
-        msg.pose_data = [m1, m2, m3]
-        msg.speed = speed
-        self.ros_node.motion_cmd_publisher.publish(msg)
+    # def send_init_cmd(self):
+        
+    #     m1 = 0.0
+    #     m2 = 0.0
+    #     m3 = 0.0
+    #     speed = 50.0
+
+    #     msg = MotionCmd()
+    #     msg.command_type = MotionCmd.TYPE_HOME
+    #     msg.pose_data = [m1, m2, m3]
+    #     msg.speed = speed
+    #     self.ros_node.motion_cmd_publisher.publish(msg)
             
     def update_gui(self):
         # 每次更新也可以做其他檢查或顯示狀態

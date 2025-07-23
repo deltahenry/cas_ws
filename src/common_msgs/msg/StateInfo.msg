@@ -1,0 +1,9 @@
+bool start
+bool connect 
+bool init
+bool idle
+bool manual_alignment
+bool auto_alignment
+bool auto_pick
+bool auto_assemble
+bool alarm
