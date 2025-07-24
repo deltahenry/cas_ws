@@ -46,7 +46,7 @@ class DataNode(Node):
         )
 
         #publisher
-        self.state_info_publisher = self.create_publisher(StateCmd, '/state_cmd', 10)
+        self.state_info_publisher = self.create_publisher(StateCmd, '/state_info', 10)
         self.motion_state_publisher = self.create_publisher(MotionState, '/motion_state', 10)
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
 

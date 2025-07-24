@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'state_machine_module'
+package_name = 'task_module'
 
 setup(
     name=package_name,
@@ -20,10 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'multi_threading = state_machine_module.multi_threading:main',
-            'fsm_magiccube = state_machine_module.fsm_magiccube:main',
-            'fsm_logic = state_machine_module.fsm_logic:main',
-            'manual_align = state_machine_module.manual_align:main',
+            'manual_align = task_module.manual_align:main',
         ],
     },
 )

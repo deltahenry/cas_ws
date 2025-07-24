@@ -40,6 +40,23 @@ class RobotModel:
 
         return joint_length
 
+    # def tcp_transform(self, x_move, yaw_move, delta_y):
+
+    #     Xp_x = x_move*math.cos(yaw_move)
+    #     Xp_y = -x_move*math.sin(yaw_move) + delta_y
+
+    #     Xcc_x = delta_y*math.sin(yaw_move) + x_move*math.cos(yaw_move)
+    #     Xcc_y = -delta_y*math.cos(yaw_move) + self.x_move*math.sin(yaw_move) + delta_y
+
+    #     m = (Xcc_y - Xp_y) / (Xcc_x - Xp_x) if (Xcc_x - Xp_x) != 0 else float('inf')  # slope
+
+    #     Xc_y = 0
+    #     Xc_x = (Xc_y - Xcc_y)/ m + Xcc_x if m != 0 else Xcc_x  # x coordinate of the center point
+    #     clipper_len = math.sqrt((Xc_x-Xcc_x)**2 + (Xc_y-Xcc_y)**2)  # distance from the center point to the clipper
+
+    #     Xc_x = Xc_x + 345.0  # offset for the center point
+
+    #     return Xc_x, clipper_len, yaw_move
 
     def check_workspace_limits(self, target_pose):
         sin = math.sin

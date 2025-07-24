@@ -14,12 +14,13 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/PoseCommand.msg"
-    "msg/ButtonCommand.msg"
+    "msg/FuncCmd.msg"
     "msg/MotionState.msg"
     "msg/MotionCmd.msg"
     "msg/MultipleM.msg"
     "msg/SingleM.msg"
     "msg/StateCmd.msg"
+    "msg/TaskFlags.msg"
     
 )
 

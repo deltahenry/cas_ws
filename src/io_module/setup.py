@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'depth_rangefinder = io_module.depth_rangefinder:main',
+            'height = io_module.height:main',
         ],
     },
 )

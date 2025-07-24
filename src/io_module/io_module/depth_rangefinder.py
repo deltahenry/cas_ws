@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String, Bool
+from std_msgs.msg import String, Bool,Float32MultiArray
 import socket
 import threading
 import time
@@ -18,7 +18,7 @@ class TcpRangefinderNode(Node):
 
         # ROS Topic 設定
         self.create_subscription(Bool, 'start_tcp_stream', self.command_callback, 10)
-        self.publisher_ = self.create_publisher(String, 'rangefinder_data', 10)
+        self.publisher_ = self.create_publisher(Float32MultiArray, 'depth_data', 10)
 
         # 控制旗標
         self.streaming = False
@@ -61,6 +61,10 @@ class TcpRangefinderNode(Node):
                                     self.range2 = value2
 
                                     self.get_logger().info(f'Parsed values: {value1:.2f}, {value2:.2f}')
+                                    # 發佈到 ROS Topic
+                                    depth_data_msg = Float32MultiArray()
+                                    depth_data_msg.data = [value1, value2]
+                                    self.publisher_.publish(depth_data_msg)
                                 else:
                                     self.get_logger().warn(f'Unexpected message format: {message}')
                             except Exception as e:
