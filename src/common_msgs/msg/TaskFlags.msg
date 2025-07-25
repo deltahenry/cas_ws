@@ -1,1 +1,0 @@
-bool manual_align_run

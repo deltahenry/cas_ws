@@ -15,8 +15,12 @@ class RosNode(Node):
         super().__init__('ros_gui_node')
 
         # Publisher for testing
+        self.mode_cmd_publisher = self.create_publisher(String, '/mode_cmd', 10)
         self.state_cmd_publisher = self.create_publisher(StateCmd, '/state_cmd', 10)
+        self.task_trigger_publisher = self.create_publisher(String, '/task_trigger', 10)
+
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
+
         self.tcp_stream_pub = self.create_publisher(Bool, '/start_tcp_stream', 10)
 
         # Subscriber for testing
@@ -35,6 +39,7 @@ class RosNode(Node):
             'init_button': False,
             'run_button': False,   
             'pause_button': False,
+            'reselect_button': False,
         }
 
     def test_callback(self, msg):
@@ -105,11 +110,7 @@ class MyGUI(QWidget):
         self.btn_off.clicked.connect(lambda: self.ros_node.call_servo(False))
         layout.addWidget(self.btn_off)
 
-        # 新增初始化按鈕
-        self.init_button = QPushButton("Initialize")
-        self.init_button.clicked.connect(self.send_init_cmd)
-        layout.addWidget(self.init_button)
-
+        # 新增按鈕
         self.run_button = QPushButton("Run")
         self.run_button.clicked.connect(self.send_run_cmd)
         layout.addWidget(self.run_button)
@@ -118,30 +119,17 @@ class MyGUI(QWidget):
         self.pause_button.clicked.connect(self.send_pause_cmd)
         layout.addWidget(self.pause_button)
 
-        # --- 新增: M1, M2, M3 輸入欄位 ---
-        motor_layout = QHBoxLayout()
-        self.m1_input = QLineEdit()
-        self.m1_input.setPlaceholderText("M1_len")
-        self.m2_input = QLineEdit()
-        self.m2_input.setPlaceholderText("M2_len")
-        self.m3_input = QLineEdit()
-        self.m3_input.setPlaceholderText("M3_len")
+        self.init_button = QPushButton("Init")
+        self.init_button.clicked.connect(self.send_init_task_cmd)
+        layout.addWidget(self.init_button)
 
-        motor_layout.addWidget(self.m1_input)
-        motor_layout.addWidget(self.m2_input)
-        motor_layout.addWidget(self.m3_input)
-        layout.addLayout(motor_layout)
+        self.auto_button = QPushButton("Auto")
+        self.auto_button.clicked.connect(self.send_auto_mode_cmd)
+        layout.addWidget(self.auto_button)
 
-        # 速度輸入
-        self.speed_input = QLineEdit()
-        self.speed_input.setPlaceholderText("Speed")
-        layout.addWidget(self.speed_input)
-
-        # 發布按鈕
-        self.send_button = QPushButton("發佈位置指令")
-        self.send_button.clicked.connect(self.publish_motor_cmd)
-        layout.addWidget(self.send_button)
-        # -------------------------------------------
+        self.manual_button = QPushButton("Manual")
+        self.manual_button.clicked.connect(self.send_manual_mode_cmd)
+        layout.addWidget(self.manual_button)
 
         self.setLayout(layout)
     
@@ -169,13 +157,10 @@ class MyGUI(QWidget):
         else:
             self.toggle_tcp_btn.setText("Start TCP Stream")
 
-    def send_init_cmd(self):
-        msg = StateCmd()
-        self.ros_node.state_cmd['init_button'] = True
-        msg.init_button = self.ros_node.state_cmd['init_button']
-        msg.run_button = self.ros_node.state_cmd['run_button']
-        msg.pause_button = self.ros_node.state_cmd['pause_button']
-        self.ros_node.state_cmd_publisher.publish(msg)      
+    def send_init_task_cmd(self):
+        msg = String()
+        msg.data = "init"
+        self.ros_node.task_trigger_publisher.publish(msg)
     
     def send_run_cmd(self):
         msg = StateCmd()
@@ -192,6 +177,16 @@ class MyGUI(QWidget):
         msg.run_button = self.ros_node.state_cmd['run_button']
         msg.pause_button = self.ros_node.state_cmd['pause_button']
         self.ros_node.state_cmd_publisher.publish(msg)
+
+    def send_auto_mode_cmd(self):
+        msg = String()
+        msg.data = "auto"
+        self.ros_node.mode_cmd_publisher.publish(msg)
+    
+    def send_manual_mode_cmd(self):
+        msg = String()
+        msg.data = "manual"
+        self.ros_node.mode_cmd_publisher.publish(msg)
 
     # def send_init_cmd(self):
         

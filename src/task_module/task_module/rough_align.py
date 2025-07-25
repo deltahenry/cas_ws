@@ -23,24 +23,21 @@ class DataNode(Node):
         }
 
         self.func_cmds = {
-            'pick_button': True,
+            'pick_button': False,
             'push_button': False,
-        }
-
-        self.task_flags = {
-            'manual_align_run': True,  # 手動對齊任務旗標
         }
        
         self.depth_data = [500.0,500.0]
 
+        self.state_info = "idle"  # 狀態信息
        
         # 初始化 ROS2 Node
         #subscriber
         super().__init__('data_node')
-        self.state_cmd_subscriber = self.create_subscription(
-            StateCmd,
-            '/state_cmd',
-            self.state_cmd_callback,
+        self.state_info_subscriber = self.create_subscription(
+            String,
+            '/state_info',
+            self.state_info_callback,
             10
         )
         self.motion_state_subscriber = self.create_subscription(
@@ -60,12 +57,16 @@ class DataNode(Node):
         self.motion_state_publisher = self.create_publisher(MotionState, '/motion_state', 10)
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
 
-    def state_cmd_callback(self, msg: StateCmd):
-        print(f"接收到狀態命令: {msg}")
-        # 在這裡可以處理狀態命令
-        self.state_cmds = {
-            'pause_button': msg.pause_button,
-        }
+    # def state_cmd_callback(self, msg: StateCmd):
+    #     print(f"接收到狀態命令: {msg}")
+    #     # 在這裡可以處理狀態命令
+    #     self.state_cmds = {
+    #         'pause_button': msg.pause_button,
+    #     }
+
+    def state_info_callback(self, msg: String):
+        print(f"接收到狀態信息: {msg.data}")
+        self.state_info = msg.data      
     
     def motion_state_callback(self, msg=MotionState):
         print(f"接收到運動狀態: {msg}")
@@ -92,61 +93,8 @@ class DataNode(Node):
             self.get_logger().warn("接收到的深度數據長度不足，無法更新。")
 
 
-    def rewrite_button_cmd(self,button_name,value):
-        if button_name in self.button_cmds:
-            self.button_cmds[button_name] = value
-            self.button_cmd_publisher.publish(
-                ButtonCommand(
-                    stop_button=self.button_cmds['stop_button'],
-                    init_button=self.button_cmds['init_button'],
-                    reselect_button=self.button_cmds['reselect_button'],
-                    pull_button=self.button_cmds['pull_button'],
-                    push_button=self.button_cmds['push_button'],
-                    debug_button=self.button_cmds['debug_button']
-                )
-            )
-        else:
-            print(f"按鈕名稱 {button_name} 不存在。")
-
-    def rewrite_motion_state(self,motion_name,value):
-        if motion_name in self.motion_states:
-            self.motion_states[motion_name] = value
-            self.motion_state_publisher.publish(
-                MotionState(
-                    motion_finish=self.motion_states['motion_finish'],
-                    init_finish=self.motion_states['init_finish'],
-                    pull_finish=self.motion_states['pull_finish'],                 
-                    push_finish=self.motion_states['push_finish'],
-                    rough_pos_finish=self.motion_states['rough_pos_finish'],
-                    auto_pos_finish=self.motion_states['auto_pos_finish'],
-                    system_error=self.motion_states['system_error']
-                )
-            )
-        else:
-            print(f"運動狀態名稱 {motion_name} 不存在。")
-
-    def publish_motion_cmd(self, command: str,pose_data, speed):
-        msg = MotionCmd()
-        if command == 'home':
-            msg.command_type = MotionCmd.TYPE_HOME
-            self.motion_cmd_publisher.publish(msg)
-
-        elif command == 'goto':
-            msg.command_type = MotionCmd.TYPE_GOTO
-            msg.pose_data = pose_data 
-            msg.speed = speed
-            self.motion_cmd_publisher.publish(msg)
-            
-        elif command == 'goto_relative':
-            msg.command_type = MotionCmd.TYPE_GOTO_RELATIVE
-
-        else:
-            print(f"未知的運動命令: {command}")
-            return
-        print(f"發佈運動命令: {command}")
-
-
 class ManualAlignState(Enum):
+    IDLE = "idle"
     INIT = "init"
     CHECK_DEPTH = "check_depth"
     ROUGH_ALIGN = "rough_align"
@@ -155,11 +103,12 @@ class ManualAlignState(Enum):
 
 class ManualAlignFSM(Machine):
     def __init__(self, data_node: DataNode):
-        self.phase = ManualAlignState.INIT
+        self.phase = ManualAlignState.IDLE  # 初始狀態
         self.data_node = data_node
         self.run_mode = "pick"
 
         states = [
+            ManualAlignState.IDLE.value,
             ManualAlignState.INIT.value,
             ManualAlignState.CHECK_DEPTH.value,
             ManualAlignState.ROUGH_ALIGN.value,
@@ -168,10 +117,12 @@ class ManualAlignFSM(Machine):
         ]
         
         transitions = [
+            {'trigger': 'idle_to_init', 'source': ManualAlignState.IDLE.value, 'dest': ManualAlignState.INIT.value},
             {'trigger': 'init_to_check_depth', 'source': ManualAlignState.INIT.value, 'dest': ManualAlignState.CHECK_DEPTH.value},
             {'trigger': 'check_depth_to_rough_align', 'source': ManualAlignState.CHECK_DEPTH.value, 'dest': ManualAlignState.ROUGH_ALIGN.value},
             {'trigger': 'rough_align_to_done', 'source': ManualAlignState.ROUGH_ALIGN.value, 'dest': ManualAlignState.DONE.value},
             {'trigger': 'done_to_fail', 'source': ManualAlignState.DONE.value, 'dest': ManualAlignState.FAIL.value},    
+            {'trigger': 'return_to_idle', 'source': '*', 'dest': ManualAlignState.IDLE.value},
         ]
 
         self.machine = Machine(model=self, states=states,transitions=transitions,initial=self.phase.value,
@@ -187,27 +138,54 @@ class ManualAlignFSM(Machine):
         elif run_mode == "push":
             return 0.3
 
-    def step(self):
-        """由外部週期性呼叫的 step 函式。自動判斷能否執行"""
-        if not self.data_node.task_flags.get("manual_align_run", False):
-            print("[ManualAlignmentFSM] 任務未下達")
-            return  # 任務未下達
+    def reset_parameters(self):
+        """重置參數"""
+        self.run_mode = "pick"
+        self.data_node.state_info = "idle"
+        self.data_node.depth_data = [600.0, 600.0]
+        self.data_node.state_cmds = {
+            'pause_button': False,
+        }
+        self.data_node.func_cmds = {
+            'pick_button': False,
+            'push_button': False,
+        }
 
+    def step(self):
         if self.data_node.state_cmds.get("pause_button", False):
             print("[ManualAlignmentFSM] 被暫停中")
             return  # 暫停中，不執行
-
-        self.run()
+        
+        if self.data_node.state_info == "rough_align":
+            print("[ManualAlignmentFSM] 開始手動對齊任務")
+            self.run()
+        else:
+            print("[ManualAlignmentFSM] 手動對齊任務未啟動，等待中")
+            self.reset_parameters()  # 重置參數
+            self.return_to_idle()  # 返回到空閒狀態
+            self.run()
+            return
 
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
-        if self.state == ManualAlignState.INIT.value:
+        if self.state == ManualAlignState.IDLE.value:
+            print("[ManualAlignmentFSM] 等待開始手動對齊")
+            if self.data_node.state_info == "rough_align":
+                print("[ManualAlignmentFSM] 開始手動對齊")
+                self.idle_to_init()
+            else:
+                print("[ManualAlignmentFSM] 手動對齊任務未啟動，等待中")
+        
+        elif self.state == ManualAlignState.INIT.value:
             print("[ManualAlignmentFSM] 初始化階段")
             if self.data_node.func_cmds.get("pick_button", False):
                 self.run_mode = "pick"
             elif self.data_node.func_cmds.get("push_button", False):
                 self.run_mode = "push"
+            else:
+                print("[ManualAlignmentFSM] 未選擇運行模式，等待人為選擇")
+                return
             #open_vision_guide_line(red=True, green=False, blue=False)
             #open_guide_raser
             self.init_to_check_depth()

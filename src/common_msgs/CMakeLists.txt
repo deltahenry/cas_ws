@@ -20,7 +20,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/MultipleM.msg"
     "msg/SingleM.msg"
     "msg/StateCmd.msg"
-    "msg/TaskFlags.msg"
     
 )
 
