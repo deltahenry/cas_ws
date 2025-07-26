@@ -28,6 +28,9 @@ setup(
             'realsense_rough = vision_module.realsense_rough:main',
             'realsenselib = vision_module.realsenselib:main',
             'detection_node = vision_module.detection_node:main',
+            'screw_detector = vision_module.screw_detector:main',
+            'l_shape_detector = vision_module.l_shape_detector:main',
+            'icp_fitter = vision_module.icp_fitter:main',
         ],
     },
 )
