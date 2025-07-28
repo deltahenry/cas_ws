@@ -6,7 +6,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from uros_interface.srv import ESMCmd
-from common_msgs.msg import MotionCmd,MultipleM, SingleM
+from common_msgs.msg import MotionCmd,MultipleM, JogCmd
 from std_msgs.msg import Bool
 
 
@@ -15,6 +15,7 @@ class RosNode(Node):
         super().__init__('ros_gui_node')
 
         # Publisher for testing
+        self.jog_cmd_publisher = self.create_publisher(JogCmd,'/jog_cmd', 10)
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
         self.tcp_stream_pub = self.create_publisher(Bool, '/start_tcp_stream', 10)
 
@@ -102,6 +103,14 @@ class MyGUI(QWidget):
         self.init_button.clicked.connect(self.send_init_cmd)
         layout.addWidget(self.init_button)
 
+        # add jogging command input
+        self.x_positive_button = QPushButton("Jog X+")
+        self.x_positive_button.clicked.connect(self.x_positive_cmd)
+        layout.addWidget(self.x_positive_button)    
+        self.x_negative_button = QPushButton("Jog X-")
+        self.x_negative_button.clicked.connect(self.x_negative_cmd)
+        layout.addWidget(self.x_negative_button)
+
         # --- 新增: M1, M2, M3 輸入欄位 ---
         motor_layout = QHBoxLayout()
         self.m1_input = QLineEdit()
@@ -129,6 +138,22 @@ class MyGUI(QWidget):
 
         self.setLayout(layout)
     
+    def x_positive_cmd(self):
+        msg = JogCmd()
+        msg.target = "x_axis"
+        msg.direction = 1.0  # 正方向
+        msg.distance = 5.0  # 移動距離
+        msg.speed = 50.0  # 移動速度
+        self.ros_node.jog_cmd_publisher.publish(msg)
+
+    def x_negative_cmd(self):
+        msg = JogCmd()
+        msg.target = "x_axis"
+        msg.direction = -1.0  # 負方向
+        msg.distance = 5.0  # 移動距離
+        msg.speed = 50.0  # 移動速度
+        self.ros_node.jog_cmd_publisher.publish(msg)
+
     def publish_motor_cmd(self):
         
         m1 = float(self.m1_input.text())

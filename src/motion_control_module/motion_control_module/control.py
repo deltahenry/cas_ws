@@ -41,24 +41,37 @@ class MotionController(Node):
         self.check_position = False
         
         self.current_motor_len = [10.0, 0.0, 0.0]
-        self.current_cartesian_pose = [10.0,0.0,0.0]  # 初始 cartesian pose
+        self.current_cartesian_pose = [10.0,0.0,0.0]  # 初始 cartesian pose x y yaw
         self.last_sent_joint_command = [0.0, 0.0, 0.0]  # 上次發送的關節指令
         self.get_logger().info('MotionController ready.')
 
     #--motion command callback--
     def motion_cmd_callback(self, msg=MotionCmd):
         self.get_logger().info(f"Received motion command: {msg.command_type}")
-        
-        self.motion_finished = False  # 收到指令後，將 motion_finished 設為 False
 
-        if msg.command_type == MotionCmd.TYPE_HOME:
-            self.move_home()  # 回到機器人原點
+        if  self.motion_finished:
+            if msg.command_type == MotionCmd.TYPE_HOME:
+                self.move_home()  # 回到機器人原點
+                self.motion_finished = False  # 收到指令後，將 motion_finished 設為 False
 
-        elif msg.command_type == MotionCmd.TYPE_GOTO:
-            self.move_p(msg.pose_data,msg.speed)  # 移動到指定的 cartesian 位置
+            elif msg.command_type == MotionCmd.TYPE_GOTO:
+                self.move_p(msg.pose_data,msg.speed)  # 移動到指定的 cartesian 位置
+                self.motion_finished = False  # 收到指令後，將 motion_finished 設為 False
 
+            elif msg.command_type == MotionCmd.TYPE_GOTO_RELATIVE:
+                # 相對移動到指定的 cartesian 位置
+                relative_pose = [
+                    self.current_cartesian_pose[0] + msg.pose_data[0],
+                    self.current_cartesian_pose[1] + msg.pose_data[1],
+                    self.current_cartesian_pose[2] + msg.pose_data[2]
+                ]
+                self.move_p(relative_pose, msg.speed)
+                self.motion_finished = False  # 收到指令後，將 motion_finished 設為 False
+            else:
+                self.get_logger().error(f"Unknown command type: {msg.command_type}")
         else:
-            self.get_logger().error(f"Unknown command type: {msg.command_type}")
+            self.get_logger().warn("Cannot accept new motion command while in motion.")
+            
 
     def motors_info_callback(self, msg:MultipleM):
         self.current_motor_len = [msg.motor_info[0].fb_position,msg.motor_info[1].fb_position,msg.motor_info[2].fb_position]
@@ -110,51 +123,6 @@ class MotionController(Node):
         else:
             self.get_logger().error("Target position is out of workspace limits.")
             
-
-    #--interpolate function--
-    # def interpolate_cartesian(self, start_pose, end_pose, vdes):
-        # dt = time_period / batch_size
-
-        # ramp_ratio = 0.2  # 每邊加減速比例 (20%)
-        # d = [e - s for s, e in zip(start_pose, end_pose)]
-
-        # total_dist = sum((x**2 for x in d))**0.5
-        # step_dist = vdes * dt
-        # total_steps = max(int(total_dist / step_dist), 1)
-
-        # ramp_steps = max(int(total_steps * ramp_ratio), 1)
-        # mid_steps = total_steps - 2 * ramp_steps
-
-        # # -- 梯形速度 profile --
-        # # 前段加速：從 0 線性增至 vdes
-        # accel_profile = [(vdes * (i + 1) / ramp_steps) for i in range(ramp_steps)]
-
-        # # 中段恆速
-        # constant_profile = [vdes] * mid_steps
-
-        # # 後段減速：從 vdes 線性降至 0
-        # decel_profile = [(vdes * (ramp_steps - i) / ramp_steps) for i in range(ramp_steps)]
-
-        # speed_profile = accel_profile + constant_profile + decel_profile
-
-        # # -- 將速度積分為累積距離 --
-        # dist_acc = 0.0
-        # distances = []
-        # for speed in speed_profile:
-        #     dist_acc += speed * dt
-        #     distances.append(dist_acc)
-
-        # # 正規化為比例
-        # normalized = [d / dist_acc for d in distances]
-
-        # # 插值位置
-        # trajectory = [
-        #     [start_pose[i] + ratio * d[i] for i in range(len(d))]
-        #     for ratio in normalized
-        # ]
-
-        # return trajectory
-
     def interpolate_cartesian(self, start_pose, end_pose, vdes):
         dt = time_period / batch_size
         ramp_ratio = 0.2
@@ -206,20 +174,6 @@ class MotionController(Node):
         ]
 
         return trajectory
-
-
-    # interpolate the joint commandself.motion_finished = False
-    # def interpolate_joint_space(self,joint_start_pose, joint_end_pose, vdes):
-    #     dM1_len, dM2_len, dM3_len = joint_end_pose[0] - joint_start_pose[0], \
-    #                                 joint_end_pose[1] - joint_start_pose[1], \
-    #                                 joint_end_pose[2] - joint_start_pose[2]
-        
-    #     max_dist = max(abs(dM1_len), abs(dM2_len), abs(dM3_len))
-        
-    #     steps = max(int(max_dist / vdes), 1)
-
-    #     M1_step, M2_step, M3_step = dM1_len / steps, dM2_len / steps, dM3_len / steps
-    #     return [[joint_start_pose[0] + i *M1_step, joint_start_pose[1] + i * M2_step, joint_start_pose[2] + i * M3_step] for i in range(1, steps + 1)]
 
     def interpolate_joint_space(self, start_pose, end_pose, vdes):
         dt = time_period / batch_size

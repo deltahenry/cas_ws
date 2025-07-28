@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
             'init = task_module.init:main',
             'rough_align = task_module.rough_align:main',
+            'component_control = task_module.component_control:main',
         ],
     },
 )
