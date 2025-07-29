@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
             'depth_rangefinder = io_module.depth_rangefinder:main',
             'height = io_module.height:main',
+            'forklift = io_module.forklift:main',
         ],
     },
 )

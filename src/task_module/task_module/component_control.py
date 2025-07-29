@@ -125,11 +125,12 @@ class ComponentControlState(Enum):
     IDLE = "idle"
     INIT = "init"
     POSE_Control = "pose_control"
+    FORKLIFT_Control = "forklift_control"
     VISION_Control = "vision_control"
     CLIPPER_Control = "clipper_control"
     FAIL = "fail"
 
-class ManualAlignFSM(Machine):
+class ComponentControlFSM(Machine):
     def __init__(self, data_node: DataNode):
         self.phase = ComponentControlState.IDLE  # 初始狀態
         self.data_node = data_node
@@ -248,7 +249,7 @@ class ManualAlignFSM(Machine):
 def main():
     rclpy.init()
     data = DataNode()                 # ROS2 subscriber node
-    system = ManualAlignFSM(data)    # FSM 實體
+    system = ComponentControlFSM(data)    # FSM 實體
 
     executor = rclpy.executors.SingleThreadedExecutor()
     executor.add_node(data)

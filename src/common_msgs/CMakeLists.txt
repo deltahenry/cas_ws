@@ -20,6 +20,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/SingleM.msg"
     "msg/StateCmd.msg"
     "msg/JogCmd.msg"
+    "msg/ForkCmd.msg"
     
 )
 
