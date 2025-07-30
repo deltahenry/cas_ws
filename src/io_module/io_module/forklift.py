@@ -24,6 +24,8 @@ class DataNode(Node):
         self.distance = 0
         self.current_height = 0  # 當前高度，初始為0
 
+        self.control = 0.0
+
         self.can_forklift_cmd = True  # 是否可以發送叉車命令
 
         
@@ -91,6 +93,7 @@ class ForkliftControl(Machine):
     def __init__(self, data_node: DataNode):
         self.phase = ForkliftControlState.IDLE  # 初始狀態
         self.data_node = data_node
+        self.count = 0
 
         states = [
             ForkliftControlState.IDLE.value,
@@ -116,7 +119,7 @@ class ForkliftControl(Machine):
     def step(self):
 
         height_info = Float32MultiArray()
-        height_info.data = [float(self.data_node.distance), float(self.data_node.current_height)]
+        height_info.data = [float(self.data_node.distance), float(self.data_node.current_height),float(self.data_node.control)]
         self.data_node.height_cmd_info_publisher.publish(height_info)
 
         # if self.data_node.state_cmds.get("pause_button", False):
@@ -166,24 +169,22 @@ class ForkliftControl(Machine):
         
         tolerance = 3  # 容差範圍
         result = "waiting"
-
+        register_address = self.data_node.register_address
+        slave_id = self.data_node.slave_id
         # pid 
 
         if self.data_node.current_height > distance_cmd+ tolerance:
-            if (self.data_node.current_height - distance_cmd) < 20:
-                value_to_write = self.encode("slow", "down")
-            else:
-                value_to_write = self.encode("fast", "down")
+            value_to_write = self.encode(speed_cmd, "down")
+            # if (self.data_node.current_height - distance_cmd) < 20:
+            #     value_to_write = self.encode("medium", "down")
+            # else:
+            #     value_to_write = self.encode("medium", "down")
         elif self.data_node.current_height < distance_cmd- tolerance:
             value_to_write = self.encode(speed_cmd, "up")
             
         else:
             value_to_write = 0
             result = "done"
-        
-        register_address = self.data_node.register_address
-        slave_id = self.data_node.slave_id
-        
 
         # send Modbus write command
         print(f"[ForkliftControl] 發送 Modbus 寫入命令: 地址={register_address}, 值={value_to_write}, 從站ID={slave_id}")
@@ -204,12 +205,15 @@ class ForkliftControl(Machine):
             
             result=self.forklift_controller(self.data_node.speed, self.data_node.direction, self.data_node.distance)
             self.data_node.can_forklift_cmd = False  # 禁止發送新的命令，直到任務完成
+            self.data_node.control = 1.0
             
             if result == "done":
                 print("[ForkliftControl] 叉車控制任務完成")
                 self.data_node.mode = "stop"
                 self.stop()
                 self.data_node.can_forklift_cmd = True  # 任務完成後允許發送新的命令
+                self.data_node.control = 0.0
+                self.count = 0
             else:
                 print("waiting")
 
