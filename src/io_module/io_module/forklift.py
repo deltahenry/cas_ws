@@ -5,12 +5,12 @@ from enum import Enum, auto
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String,Float32MultiArray
+from std_msgs.msg import String,Int32,Float32MultiArray
 from common_msgs.msg import ForkCmd
 from pymodbus.client import ModbusTcpClient
 
 #parameters
-timer_period = 0.5  # seconds
+timer_period = 0.1  # seconds
 
 
 # --- ROS2 Node ---
@@ -18,12 +18,15 @@ class DataNode(Node):
     def __init__(self):
         super().__init__('data_node')
 
-        self.mode = "run"  # 狀態信息
+        self.mode = "stop"  # 狀態信息
         self.speed = "slow"
         self.direction = "up"
-        self.distance = 10.0
-        self.current_height = 0.0  # 當前高度，初始為0
+        self.distance = 0
+        self.current_height = 0  # 當前高度，初始為0
 
+        self.can_forklift_cmd = True  # 是否可以發送叉車命令
+
+        
         self.init_fork_modubus()  # 初始化叉車Modbus通訊
         
         self.fork_cmd_subscriber = self.create_subscription(
@@ -32,9 +35,16 @@ class DataNode(Node):
             self.fork_cmd_callback,
             10
         )
+        
+        self.height_info_subscriber = self.create_subscription(
+            Int32,
+            'lr_distance',
+            self.height_info_callback,
+            10
+        )
 
-        # self.component_control_cmd = "idle"  # 組件控制信息
-        self.component_control_cmd = "forklift_control"  # 組件控制信息
+        self.height_cmd_info_publisher = self.create_publisher(Float32MultiArray, 'height_cmd_info', 10)
+
 
     def init_fork_modubus(self):
         """初始化叉車Modbus通訊"""
@@ -46,15 +56,30 @@ class DataNode(Node):
         self.value_to_write = 0        # 寫入的值（16-bit 整數）
 
         # 建立連線S
-        # self.client = ModbusTcpClient(ip, port=port)
-        # self.client.connect()
+        self.client = ModbusTcpClient(ip, port=port)
+        self.client.connect()
 
     def fork_cmd_callback(self, msg: ForkCmd):
-        print(f"[ForkCmd] 接收到叉車控制命令: {msg}")
-        self.mode = msg.mode
-        self.speed = msg.speed
-        self.direction = msg.direction
-        self.distance = msg.distance
+        if msg.mode == "stop":
+            print(f"[ForkCmd] 接收到叉車停止命令: {msg}")
+            self.mode = msg.mode
+            self.speed = msg.speed
+            self.direction = msg.direction
+            self.distance = msg.distance
+        else:
+            if self.can_forklift_cmd:
+                self.get_logger().info(f"[ForkCmd] 接收到叉車控制命令: {msg}")
+                self.mode = msg.mode
+                self.speed = msg.speed
+                self.direction = msg.direction
+                self.distance = msg.distance
+            else:
+                print("[ForkCmd] 忽略一般命令，等待當前任務完成") 
+        
+    def height_info_callback(self,msg: Int32):
+        """接收來自LR Sensor的高度信息"""
+        self.get_logger().info(f"Received height info: {msg.data} mm")
+        self.current_height = msg.data
         
 class ForkliftControlState(Enum):
     IDLE = "idle"
@@ -88,25 +113,31 @@ class ForkliftControl(Machine):
     def _update_phase(self):
         self.phase = ForkliftControlState(self.state)
 
-
-    def reset_parameters(self):
-        """重置參數"""
-        self.data_node.component_control_cmd = "idle"
-
-
     def step(self):
+
+        height_info = Float32MultiArray()
+        height_info.data = [float(self.data_node.distance), float(self.data_node.current_height)]
+        self.data_node.height_cmd_info_publisher.publish(height_info)
+
         # if self.data_node.state_cmds.get("pause_button", False):
         #     print("[ManualAlignmentFSM] 被暫停中")
         #     return  # 暫停中，不執行
         
-        if self.data_node.component_control_cmd == "forklift_control":
-            print("[ForkliftControl] 開始manual執行叉車控制任務")
+        if self.data_node.mode == "run":
+            print("[ForkliftControl] 開始執行叉車控制任務")
             self.run()
+            return
+        
         else:
-            print("[ForkliftControl] 未收到叉車控制命令，等待中")
-            self.reset_parameters()  # 重置參數
-            self.return_to_idle()  # 返回到空閒狀態
-            self.run()
+            print("[ForkliftControl] 非執行模式，強制回到 IDLE 狀態")
+            if self.state != ForkliftControlState.IDLE.value:
+                self.return_to_idle()
+                self.data_node.can_forklift_cmd = True  # 允許發送新的命令
+                register_address = self.data_node.register_address
+                slave_id = self.data_node.slave_id
+                value_to_write = 0
+                self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
+
             return
 
     def encode(self, speed, direction):
@@ -117,6 +148,9 @@ class ForkliftControl(Machine):
         elif speed == "slow":
             y0 = 0
             y1 = 1
+        elif speed == "medium":
+            y0 = 0
+            y1 = 0
         if direction == "up":
             y2 = 1
             y3 = 0
@@ -124,45 +158,58 @@ class ForkliftControl(Machine):
             y2 = 0
             y3 = 1
         
-        value = 2^3*y3 + 2^2*y2 + 2^1*y1 + 2^0*y0
+        value = (2**3)*y3 + (2**2)*y2 + (2**1)*y1 + (2**0)*y0
         return value
 
-        # 任務完成或失敗時自動清除任務旗標
+     # 任務完成或失敗時自動清除任務旗標
     def forklift_controller(self,speed_cmd, direction_cmd, distance_cmd):
         
-        tolerance = 5  # 容差範圍
+        tolerance = 3  # 容差範圍
+        result = "waiting"
+
+        # pid 
 
         if self.data_node.current_height > distance_cmd+ tolerance:
-            value_to_write = self.encode("slow", "down")
+            if (self.data_node.current_height - distance_cmd) < 20:
+                value_to_write = self.encode("slow", "down")
+            else:
+                value_to_write = self.encode("fast", "down")
         elif self.data_node.current_height < distance_cmd- tolerance:
-            value_to_write = self.encode("fast", "up")
+            value_to_write = self.encode(speed_cmd, "up")
+            
         else:
             value_to_write = 0
+            result = "done"
         
         register_address = self.data_node.register_address
         slave_id = self.data_node.slave_id
+        
 
         # send Modbus write command
         print(f"[ForkliftControl] 發送 Modbus 寫入命令: 地址={register_address}, 值={value_to_write}, 從站ID={slave_id}")
-        # self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
+        self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
+        
+        return result
 
     def run(self):
+
         if self.state == ForkliftControlState.IDLE.value:
             print("[ForkliftControl] 叉車控制系統處於空閒狀態")
             if self.data_node.mode == "run":
                 print("[ForkliftControl] 接收到運行命令，開始運行")
                 self.start()
-            elif self.data_node.mode == "stop":
-                print("[ForkliftControl] 接收到停止命令，停止運行")
-                self.stop()
 
         elif self.state == ForkliftControlState.RUNNING.value:
             print("[ForkliftControl] 叉車控制系統正在運行")
+            
             result=self.forklift_controller(self.data_node.speed, self.data_node.direction, self.data_node.distance)
-            if result:
+            self.data_node.can_forklift_cmd = False  # 禁止發送新的命令，直到任務完成
+            
+            if result == "done":
                 print("[ForkliftControl] 叉車控制任務完成")
                 self.data_node.mode = "stop"
-                self.return_to_stop()
+                self.stop()
+                self.data_node.can_forklift_cmd = True  # 任務完成後允許發送新的命令
             else:
                 print("waiting")
 
@@ -173,6 +220,7 @@ class ForkliftControl(Machine):
                 self.return_to_idle()
             elif self.data_node.mode == "stop":
                 print("[ForkliftControl] 接收到停止命令，保持停止狀態")
+
 
 
 

@@ -23,6 +23,7 @@ setup(
             'magic_cube = ui_module.ui_magic_cube:main',
             "ui_motor_control = ui_module.ui_motor_control:main",
             "ui_fsm_logic = ui_module.ui_fsm_logic:main",
+            "ui_forklift = ui_module.ui_forklift:main",
         ],
     },
 )
