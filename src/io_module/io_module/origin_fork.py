@@ -8,6 +8,7 @@ from rclpy.node import Node
 from std_msgs.msg import String,Int32,Float32MultiArray
 from common_msgs.msg import ForkCmd
 from pymodbus.client import ModbusTcpClient
+import time
 
 #parameters
 timer_period = 0.1  # seconds
@@ -22,14 +23,14 @@ class DataNode(Node):
         self.speed = "slow"
         self.direction = "up"
         self.distance = 0
-        self.current_height = 0  # 當前高度，初始為 0 mm
-
-        self.current_direction = "stop"  # 當前方向，初始為 "stop"
-        self.start_time = 0  # 開始時間
-        self.end_fast_speed_time = 0  # 結束快速速度的時間
+        self.current_height = 0  # 當前高度，初始為0
 
         self.control = 0.0
-        self.can_forklift_cmd = True  # 是否可以發送叉車控制命令
+
+        self.can_forklift_cmd = True  # 是否可以發送叉車命令
+
+        self.current_direction = "stop"  # 當前方向，初始為 "stop"
+        self.current_speed = "slow"  # 當前速度，初始為 "slow"
 
 
         
@@ -97,7 +98,6 @@ class ForkliftControl(Machine):
     def __init__(self, data_node: DataNode):
         self.phase = ForkliftControlState.IDLE  # 初始狀態
         self.data_node = data_node
-        self.count = 0
 
         states = [
             ForkliftControlState.IDLE.value,
@@ -136,20 +136,13 @@ class ForkliftControl(Machine):
             return
         
         else:
-            print("[ForkliftControl] 非執行模式，強制回到 IDLE 狀態")
             if self.state != ForkliftControlState.IDLE.value:
+                print("[ForkliftControl] 非執行模式，強制回到 IDLE 狀態")
                 self.return_to_idle()
-                register_address = self.data_node.register_address
-                slave_id = self.data_node.slave_id
-                value_to_write = 0
-                self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
-
-                self.can_forklift_cmd = True  # 允許發送新的叉車控制命令
-                
-                self.current_direction = "stop"  # 當前方向，初始為 "stop"
-                self.start_time = 0  # 開始時間
-                self.end_fast_speed_time = 0  # 結束快速速度的時間
-                self.start_time = 0  # 開始時間
+                self.data_node.can_forklift_cmd = True  # 允許發送新的命令
+                self.forklift_controller("slow","stop", self.data_node.current_height)  # 停止叉車
+            else:
+                print("[ForkliftControl] 叉車控制系統已經處於空閒狀態")
 
             return
 
@@ -161,7 +154,7 @@ class ForkliftControl(Machine):
         elif speed == "slow":
             y0 = 0
             y1 = 1
-        elif speed == "medium":
+        elif speed == "stop":
             y0 = 0
             y1 = 0
         if direction == "up":
@@ -177,15 +170,41 @@ class ForkliftControl(Machine):
         value = (2**3)*y3 + (2**2)*y2 + (2**1)*y1 + (2**0)*y0
         return value
 
-     # 任務完成或失敗時自動清除任務旗標
-    def forklift_controller(self, speed_cmd,direction, distance_cmd):
+    #  # 任務完成或失敗時自動清除任務旗標
+    # def forklift_controller(self,speed_cmd, direction_cmd, distance_cmd):
+        
+    #     tolerance = 3  # 容差範圍
+    #     result = "waiting"
+    #     register_address = self.data_node.register_address
+    #     slave_id = self.data_node.slave_id
+    #     # pid 
+
+    #     if self.data_node.current_height > distance_cmd+ tolerance:
+    #         value_to_write = self.encode(speed_cmd, "down")
+    #         # if (self.data_node.current_height - distance_cmd) < 20:
+    #         #     value_to_write = self.encode("medium", "down")
+    #         # else:
+    #         #     value_to_write = self.encode("medium", "down")
+    #     elif self.data_node.current_height < distance_cmd- tolerance:
+    #         value_to_write = self.encode(speed_cmd, "up")
+            
+    #     else:
+    #         value_to_write = 0
+    #         result = "done"
+
+    #     # send Modbus write command
+    #     print(f"[ForkliftControl] 發送 Modbus 寫入命令: 地址={register_address}, 值={value_to_write}, 從站ID={slave_id}")
+    #     self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
+        
+    #     return result
+
+    def forklift_controller(self, speed_cmd,direction_cmd, distance_cmd):
         result = "waiting"
         register_address = self.data_node.register_address
         slave_id = self.data_node.slave_id
-        tolerance = 3
+        tolerance = 2
 
         current_height = self.data_node.current_height
-        current_direction = self.data_node.current_direction
 
         # 決定目標方向與速度
         if current_height < distance_cmd - tolerance:
@@ -199,60 +218,57 @@ class ForkliftControl(Machine):
         else:
             des_direction = "stop"
             des_speed = "fast"
+            result = "done"  # 任務完成
+
 
         value_to_write = self.encode(des_speed, des_direction)
 
-        # # 狀態穩定，重置時間計數器
-        # if des_direction == current_direction:
-        #     self.data_node.start_time = 0
-        #     self.data_node.end_fast_speed_time = 0
+        # 激磁邏輯：從 stop ➝ 移動
+        if self.data_node.current_direction == "stop" and des_direction != "stop":
 
-        # # 激磁邏輯：從 stop ➝ 移動
-        # elif current_direction == "stop" and des_direction != "stop":
-        #     if self.data_node.start_time < 3:
-        #         value_to_write = self.encode(des_speed, "stop")  # 激磁
-        #         self.data_node.start_time += 1
-        #     else:
-        #         value_to_write = self.encode(des_speed, des_direction)
-        #         self.data_node.current_direction = des_direction
+            value_to_write = self.encode(des_speed, "stop")  # 激磁
+            self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
+            time.sleep(0.1)  # 等待激磁完成
+            
+            self.data_node.current_direction = des_direction
+            self.data_node.current_speed = des_speed
 
-        # # 加速邏輯：up 慢 ➝ up 快
-        # elif current_direction == "up":
-        #     value_to_write = self.encode("fast", "up") 
+        # up邏輯：
+        if self.data_node.current_direction == "up":
+            value_to_write = self.encode(des_speed,des_direction)  # 上升時，保持速度和方向
+            self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
 
-        # # 減速邏輯：down 快 ➝ down 慢
-        # elif current_direction == "down" and des_speed == "slow":
-        #     if self.data_node.end_fast_speed_time < 3:
-        #         value_to_write = self.encode("fast", "stop")  # 解激磁
-        #         self.data_node.end_fast_speed_time += 1
-        #         self.data_node.start_time = 0
-        #     else:
-        #         if self.data_node.start_time < 3:
-        #             value_to_write = self.encode("slow", "stop")
-        #             self.data_node.start_time += 1
-        #         else:
-        #             value_to_write = self.encode("slow", "down")
-        #             self.data_node.current_direction = "down"
-        #             self.data_node.end_fast_speed_time = 0
+        # down邏輯：down 快 ➝ down 慢
+        if self.data_node.current_direction == "down":
+            if self.data_node.current_speed == "fast" and des_speed == "slow":
 
-        # # 停止邏輯：任何方向 ➝ stop
-        # elif des_direction == "stop":
-        #     if self.data_node.end_fast_speed_time < 3:
-        #         value_to_write = self.encode("fast", "stop")  # 解激磁
-        #         self.data_node.end_fast_speed_time += 1
-        #         self.data_node.start_time = 0
-        #     else:
-        #         value_to_write = self.encode("stop", "stop")
-        #         self.data_node.current_direction = "stop"
-        #         self.data_node.end_fast_speed_time = 0
-        #         result = "done"
+                value_to_write = self.encode("fast", "stop")  # 停止快速下降
+                self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
+                time.sleep(0.3)  # 等待停止完成
 
-        # 發送命令
-        print(f"[ForkliftControl] 發送 Modbus 寫入命令: 地址={register_address}, 值={value_to_write}, 從站ID={slave_id}")
-        self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
+                value_to_write = self.encode("slow", "stop")  # 停止快速下降
+                self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
+                time.sleep(0.1)  # 等待停止完成
+
+                self.data_node.current_speed = "slow"  # 更新當前速度
+                value_to_write = self.encode("slow", des_direction)  # 慢速下降
+                self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
+
+            else:
+                value_to_write = self.encode(des_speed, des_direction)
+                self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
+
+        # 停止邏輯：任何方向 ➝ stop
+        if des_direction == "stop" or direction_cmd == "stop":
+
+            value_to_write = self.encode(self.data_node.current_speed, "stop")  # 停止叉車
+            self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
+            time.sleep(0.1)
+
+            self.data_node.current_direction = "stop"  # 更新當前方向
+            self.data_node.current_speed = "stop"  # 更新當前速度
 
         return result
-
 
     def run(self):
 
@@ -264,17 +280,17 @@ class ForkliftControl(Machine):
 
         elif self.state == ForkliftControlState.RUNNING.value:
             print("[ForkliftControl] 叉車控制系統正在運行")
-            self.can_forklift_cmd = False  # 禁止發送新的叉車控制命令
+            
             result=self.forklift_controller(self.data_node.speed, self.data_node.direction, self.data_node.distance)
+            self.data_node.can_forklift_cmd = False  # 禁止發送新的命令，直到任務完成
             self.data_node.control = 1.0
             
             if result == "done":
                 print("[ForkliftControl] 叉車控制任務完成")
                 self.data_node.mode = "stop"
                 self.stop()
+                self.data_node.can_forklift_cmd = True  # 任務完成後允許發送新的命令
                 self.data_node.control = 0.0
-                self.count = 0
-                self.can_forklift_cmd = True  # 允許發送新的叉車控制命令
             else:
                 print("waiting")
 

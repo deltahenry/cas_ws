@@ -23,6 +23,7 @@ setup(
             'depth_rangefinder = io_module.depth_rangefinder:main',
             'height = io_module.height:main',
             'forklift = io_module.forklift:main',
+            'origin_fork = io_module.origin_fork:main',
         ],
     },
 )
