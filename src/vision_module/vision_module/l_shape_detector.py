@@ -2,12 +2,12 @@ import cv2
 import numpy as np
 
 class LShapeDetector:
-    def __init__(self, templates,roi_boxes=None, scales=None, match_threshold=0.65):
+    def __init__(self, templates,roi_boxes=None, scales=None, match_threshold=0.55):
         self.templates = templates
-        self.l_match_threshold = 0.7
+        self.l_match_threshold = 0.55
         self.l_roi_boxes = [
-            (319, 423, 379, 502),
-            (895, 429, 949, 505)
+            (168, 103, 272, 563),
+            (1192, 162, 1260, 527)
         ]
 
     def angle_between(self, v1, v2):
@@ -23,7 +23,7 @@ class LShapeDetector:
 
         for (x1, y1, x2, y2) in self.l_roi_boxes:
             roi = edges[y1:y2, x1:x2]
-            lines = cv2.HoughLinesP(roi, 1, np.pi / 180, threshold=40, minLineLength=20, maxLineGap=10)
+            lines = cv2.HoughLinesP(roi, 1, np.pi / 180, threshold=30, minLineLength=15, maxLineGap=15)
 
             if lines is not None:
                 for i in range(len(lines)):

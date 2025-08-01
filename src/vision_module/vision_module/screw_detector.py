@@ -3,13 +3,13 @@ import numpy as np
 import pyrealsense2 as rs
 
 class ScrewDetector:
-    def __init__(self, templates, roi_boxes=None, scales=None, match_threshold=0.65):
+    def __init__(self, templates, roi_boxes=None, scales=None, match_threshold=0.5):
         self.templates = templates
         self.roi_boxes = roi_boxes if roi_boxes else [
-            (362, 266, 397, 399),
-            (902, 261, 938, 408)
+            (191, 202, 269, 500),
+            (1191, 188, 1263, 503)
         ]
-        self.scales = scales if scales else [0.8, 0.9, 1.0, 1.1, 1.2]
+        self.scales = [0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
         self.match_threshold = match_threshold
 
     def detect(self, color_frame, depth_frame):
@@ -27,6 +27,9 @@ class ScrewDetector:
                     if W < 5 or H < 5:
                         continue
                     tpl = cv2.resize(tpl0, (W, H))
+                    if roi_gray.shape[0] < tpl.shape[0] or roi_gray.shape[1] < tpl.shape[1]:
+                        continue  # 跳過太大的模板
+
                     result = cv2.matchTemplate(roi_gray, tpl, cv2.TM_CCOEFF_NORMED)
                     ys, xs = np.where(result >= self.match_threshold)
 
@@ -44,12 +47,22 @@ class ScrewDetector:
         for i, (x1, y1, x2, y2, score) in enumerate(top4):
             cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
             depth = depth_frame.get_distance(cx, cy)
-            if depth == 0 or depth > 1.0:
+            if depth == 0 or depth > 2.0:
                 continue
             X, Y, Z = rs.rs2_deproject_pixel_to_point(depth_intrin, [cx, cy], depth)
-            results.append({'index': i+1, 'X': X, 'Y': Y, 'Z': Z, 'depth': depth, 'bbox': (x1, y1, x2, y2)})
+            
+            results.append({
+                'index': i + 1,
+                'X': X,
+                'Y': Y,
+                'Z': Z,
+                'u': cx,
+                'v': cy,
+                'depth': depth,
+                'bbox': (x1, y1, x2, y2)
+            })
 
-            # 畫在影像上
+            # 顯示即時資訊與畫面上標註
             cv2.rectangle(color_frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.circle(color_frame, (cx, cy), 4, (0, 0, 255), -1)
             label = f"{depth:.3f}m"
