@@ -1,10 +1,13 @@
 from setuptools import find_packages, setup
 
-package_name = 'io_module'
+package_name = 'ui_app'
 
 setup(
     name=package_name,
     version='0.0.0',
+    # package_data={
+    #     'ui_app': ['*.py'],
+    # },
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -13,17 +16,14 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='henry',
-    maintainer_email='HENRY.HY.CHANG@deltaww.com',
+    maintainer='spencer',
+    maintainer_email='spencer@todo.todo',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'depth_rangefinder = io_module.depth_rangefinder:main',
-            'height = io_module.height:main',
-            'origin_fork = io_module.origin_fork:main',
-            'io_node = io_module.io_node:main',
+            'ui_node = ui_app.ui_node:main'
         ],
     },
 )

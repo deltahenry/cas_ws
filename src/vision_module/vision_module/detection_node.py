@@ -6,11 +6,14 @@ import pyrealsense2 as rs
 import os
 import glob
 from std_msgs.msg import String
+from sensor_msgs.msg import Image
 from ament_index_python.packages import get_package_prefix
 
 from vision_module.screw_detector import ScrewDetector
 from vision_module.l_shape_detector import LShapeDetector
 from vision_module.icp_fitter import ICPFITTER
+from cv_bridge import CvBridge
+
 class RealSenseVision(Node):
     def __init__(self):
         super().__init__('detection_node')
@@ -23,6 +26,9 @@ class RealSenseVision(Node):
             self.task_callback,
             10
         )
+
+        self.image_pub = self.create_publisher(Image, '/color_image', 10)
+        self.bridge = CvBridge()
 
         # 狀態旗標
         self.screw_active = False
@@ -76,6 +82,10 @@ class RealSenseVision(Node):
             self.lshape_active = False
             self.icp_fit_active = False
             self.get_logger().warn(f"未知任務: {task}")
+
+    def publish_image(self, color_image):
+        ros_image = self.bridge.cv2_to_imgmsg(color_image, encoding="bgr8")
+        self.image_pub.publish(ros_image)
 
     def load_templates(self, folder_name):
         prefix = get_package_prefix('vision_module')
@@ -132,7 +142,9 @@ def main():
                 dist = node.icp_fitter.icp_fit(color_image, depth_image, depth_intrin)
                 print(f"ICP Distance: {dist:.4f}" if dist is not None else "ICP fitting failed")
 
-
+            # 發布處理後的影像
+            node.publish_image(color_image)
+            
             cv2.imshow("RealSense Detection", color_image)
             if cv2.waitKey(1) & 0xFF == 27:
                 break

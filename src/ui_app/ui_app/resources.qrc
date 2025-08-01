@@ -1,0 +1,20 @@
+<RCC>
+  <qresource prefix="/">
+    <file>images/delta-logo.png</file>
+    <file>controlArrows/cartesian/down.png</file>
+    <file>controlArrows/cartesian/left.png</file>
+    <file>controlArrows/cartesian/right.png</file>
+    <file>controlArrows/cartesian/up.png</file>
+    <file>controlArrows/cartesian/yawMinus.png</file>
+    <file>controlArrows/cartesian/yawPlus.png</file>
+    <file>controlArrows/lift.svg</file>
+    <file>controlArrows/lower.svg</file>
+    <file>icons/white/dimmer-switch.svg</file>
+    <file>icons/white/home-simple-door.svg</file>
+    <file>icons/white/multiple-pages.svg</file>
+    <file>icons/white/page.svg</file>
+    <file>icons/white/settings.svg</file>
+    <file>icons/white/timeline-circle.svg</file>
+    <file>icons/white/menu.svg</file>
+  </qresource>
+</RCC>
