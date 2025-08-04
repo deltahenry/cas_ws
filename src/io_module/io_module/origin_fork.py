@@ -195,7 +195,6 @@ class ForkliftControl(Machine):
         else:
             des_direction = "stop"
             des_speed = "slow"
-            result = "done"  # 任務完成
 
 
         # value_to_write = self.encode(des_speed, des_direction)
@@ -207,55 +206,56 @@ class ForkliftControl(Machine):
             self.data_node.fork_io_cmd_publisher.publish(value_to_write)
             self.data_node.current_direction = "stop"  # 更新當前方向
             self.data_node.current_speed = "stop"  # 更新當前速度
-            return result
 
         # 激磁邏輯：從 stop ➝ 移動
         if self.data_node.current_direction == "stop" and des_direction != "stop":
 
             value_to_write = self.encode(des_speed, "stop")  # 激磁
             self.data_node.fork_io_cmd_publisher.publish(value_to_write)
-            # self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
-
             time.sleep(0.1)  # 等待激磁完成
             self.data_node.current_direction = des_direction
             self.data_node.current_speed = des_speed
 
         # up邏輯：
-        if self.data_node.current_direction == "up":
+        elif self.data_node.current_direction == "up":
             if des_direction == "stop":
                 value_to_write = self.encode("fast", des_direction)  # 停止叉車
                 self.data_node.fork_io_cmd_publisher.publish(value_to_write)
                 self.data_node.current_direction = "stop"  # 更新當前方向
                 self.data_node.current_speed = "stop"  # 更新當前速度
+                result = "done"  # 任務完成
             else:
                 value_to_write = self.encode(self.data_node.current_speed, self.data_node.current_direction) # 保持當前速度和方向
                 self.data_node.fork_io_cmd_publisher.publish(value_to_write)
-            # self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
 
         # down邏輯：down 快 ➝ down 慢
-        if self.data_node.current_direction == "down":
+        elif self.data_node.current_direction == "down":
             if des_direction == "stop":
                 value_to_write = self.encode("slow", des_direction)  # 停止叉車
                 self.data_node.fork_io_cmd_publisher.publish(value_to_write)
                 self.data_node.current_direction = "stop"  # 更新當前方向
                 self.data_node.current_speed = "stop"  # 更新當前速度
+                result = "done"  # 任務完成
             else:
                 # 如果當前速度是 fast，且目標速度是 slow，則需要先停止 fast 再切換到 slow
                 if self.data_node.current_speed == "fast" and des_speed == "slow":
                     value_to_write = self.encode(self.data_node.current_speed, "stop")  # 停止快速下降
                     self.data_node.fork_io_cmd_publisher.publish(value_to_write)
-                    
                     time.sleep(0.3)  # 等待停止完成
+
                     self.data_node.current_speed = des_speed  # 更新當前速度
                     self.data_node.current_direction = "stop"  # 更新當前方向
 
                     value_to_write = self.encode(self.data_node.current_speed , self.data_node.current_direction)  # CHANGE SPEED TO SLOW
                     self.data_node.fork_io_cmd_publisher.publish(value_to_write)
                     time.sleep(0.1)  # 等待停止完成
+
+                    self.data_node.current_speed = des_speed  # 更新當前速度
+                    self.data_node.current_direction = "down"  # 更新當前方向
+
                 else:
-                    value_to_write = self.encode(self.data_node.current_speed, des_direction)
+                    value_to_write = self.encode(self.data_node.current_speed, self.data_node.current_direction)
                     self.data_node.fork_io_cmd_publisher.publish(value_to_write)
-                    # self.data_node.client.write_register(address=register_address, value=value_to_write, slave=slave_id)
                     print("slow time:", time.time())
 
 
