@@ -153,6 +153,7 @@ class ManualAlignFSM(Machine):
             'push_button': False,
         }
         
+        
 
 
     def step(self):
