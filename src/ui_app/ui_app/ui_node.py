@@ -1,7 +1,8 @@
 import sys
 from datetime import date
+import cv2
 from PySide6.QtCore import Qt, QEvent, QTimer, Signal
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QImage, QPixmap
 from PySide6.QtWidgets import QApplication, QMainWindow
 
 from ui_app.ui_magic_cube import Ui_MainWindow # Import my design made in Qt Designer (already in .py)
@@ -11,20 +12,20 @@ import ui_app.resources_rc  # this includes the images and icons
 from ui_app.ui_components.ui_forklift import ForkliftController
 from ui_app.ui_components.ui_motor import MotorController
 
+#Vision
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+
 # for ROS2
 import threading
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String,Int32
+from std_msgs.msg import String, Int32
 from common_msgs.msg import StateCmd, ForkCmd, JogCmd
 
 class ROSNode(Node):
     def __init__(self):
         super().__init__('ui_node')
-
-        self.ui_update_callback = None  # 🔹 增加這行：用來通知 UI 更新
-        self.current_height = 0  # mm
-        
 
         self.mode_cmd = {
             'auto': True,
@@ -40,14 +41,13 @@ class ROSNode(Node):
             'assem': False,
         }
 
-        # Subscriber to the same topic
-        self.height_info_subscriber = self.create_subscription(
-            Int32,
-            'lr_distance',
-            self.height_info_callback,
-            10
-        )
+        self.menu_cmd = {
+            'main_page': True,
+            'component_control': False
+        }
+        self.forklift_controller = None
 
+        # Subscriber to the same topic
         # self.subscription = self.create_subscription(StateCmd, '/state_cmd', self.ros_message_callback, 10)
 
         # mode cmd
@@ -62,14 +62,65 @@ class ROSNode(Node):
         #fork lift
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, '/fork_cmd', 10)
 
+        self.height_info_subscriber = self.create_subscription(
+            Int32,
+            'lr_distance',
+            self.height_info_callback,
+            10
+        )
+
         #jog control
         self.jog_cmd_publisher = self.create_publisher(JogCmd, '/jog_cmd', 10)
-   
+
+        #menu publishers
+        self.component_control_publisher = self.create_publisher(String, '/run_cmd', 10)
+
+        #vision publish
+        self.vision_control_publisher = self.create_publisher(String, '/detection_task', 10)
+
+        self.bridge = CvBridge()
+
+        self.color_image_subscriber = self.create_subscription(
+        Image,
+        '/color_image',
+        self.image_callback,
+        10
+        )
+
+        # self.detection_task_subscriber = self.create_subscription(
+        #     String,
+        #     '/detection_task',
+        #     self.detection_task_callback,
+        #     10
+        # )
+
+
+        self.detection_task_callback_ui = None
+        self.image_update_callback = None
+
+
     def height_info_callback(self, msg: Int32):
-        self.current_height = msg.data
         self.get_logger().info(f"Received height info: {msg.data} mm")
-        if self.ui_update_callback:
-            self.ui_update_callback(self.current_height)
+
+        if self.forklift_controller:
+            self.forklift_controller.update_height_display(msg.data)
+
+    def image_callback(self, msg):
+        try:
+            cv_img = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
+        except Exception as e:
+            self.get_logger().error(f"Failed to convert image: {e}")
+            return
+        
+        # Pass to Qt
+        if self.image_update_callback:
+            self.image_update_callback(cv_img)
+
+    def detection_task_callback(self, msg: String):
+        if self.detection_task_callback_ui:
+            self.detection_task_callback_ui(msg.data)
+
+
 
 
 class MainWindow(QMainWindow):
@@ -82,14 +133,19 @@ class MainWindow(QMainWindow):
 
         #Start ROS2 Node
         self.ros_node = ros_node
-        self.ros_node.ui_update_callback = self.update_laser_info
+
+        self.ros_node.image_update_callback = self.update_image
+        self.ros_node.detection_task_callback_ui = self.update_detection_mode
+
 
         #motor ui
         self.motor_controller = MotorController(self.ui, self.ros_node)
 
         #forklift ui
         self.forklift_controller = ForkliftController(self.ui, self.ros_node)
-
+        self.ros_node.forklift_controller = self.forklift_controller
+        
+        
 
         # Connect Qt signal to UI handler
         self.ros_msg_received.connect(self.handle_ros_message)
@@ -98,7 +154,6 @@ class MainWindow(QMainWindow):
         self.ui.RunButton.clicked.connect(lambda: self.send_state_cmd("run"))
         self.ui.StopButton.clicked.connect(lambda: self.send_state_cmd("stop"))
         self.ui.AutoResetButton.clicked.connect(lambda: self.send_state_cmd("reset"))
-        # self.ui.ComponentControlButton.clicked.connect(lambda: self.send_state_cmd("init"))
 
         self.ui.AutoButton.toggled.connect(self.on_auto_toggled)
         self.ui.ManualButton.toggled.connect(self.on_manual_toggled)
@@ -108,6 +163,22 @@ class MainWindow(QMainWindow):
         self.ui.PreciseAlignButton.clicked.connect(lambda: self.send_task_cmd("precise align"))
         self.ui.PickButton.clicked.connect(lambda: self.send_task_cmd("pick"))
         self.ui.AssemblyButton.clicked.connect(lambda: self.send_task_cmd("assembly"))
+
+        #VISION
+        # self.ui.VisionOption.clicked.connect(lambda: self.send_detection_task(""))
+        self.ui.VisionOne.toggled.connect(lambda checked: checked and self.send_vision_cmd("screw"))
+        self.ui.VisionTwo.toggled.connect(lambda checked: checked and self.send_vision_cmd("l_shape"))
+        self.ui.VisionThree.toggled.connect(lambda checked: checked and self.send_vision_cmd("icp_fit"))
+
+
+
+        '''menu buttons'''
+
+        #main page - publisher
+
+
+        #component control - publisher
+        self.ui.ComponentControlButton.clicked.connect(lambda: self.send_menu_cmd("component_control"))
 
         # Get Today's date
         today = date.today()
@@ -138,6 +209,9 @@ class MainWindow(QMainWindow):
         self.ui.ChooseClipper.clicked.connect(self.choose_clipper)
         self.ui.ChooseForklift.clicked.connect(self.choose_forklift)
 
+        #Vision
+        self.ui.VisionTextInComponentControl.setFixedSize(640, 480)
+
         #Main Page, go to other pages
         self.ui.MainPageButton.clicked.connect(self.change_to_main_page)
         self.ui.ProductionRecordButton.clicked.connect(self.change_to_production_record_page)
@@ -153,13 +227,34 @@ class MainWindow(QMainWindow):
         self.ui.HamburgerMenu.clicked.connect(self.toggle_menu)
 
         self.ui.MotorOption.clicked.connect(lambda: self.component_control_switch_page("Motor", 0))
+        # self.ui.VisionOption.clicked.connect(lambda: self.component_control_switch_page("Vision", 1))
         self.ui.VisionOption.clicked.connect(lambda: self.component_control_switch_page("Vision", 1))
         self.ui.ClipperOption.clicked.connect(lambda: self.component_control_switch_page("Clipper", 2))
         self.ui.ForkliftOption.clicked.connect(lambda: self.component_control_switch_page("Forklift", 3))
-    
-    
-    def update_laser_info(self, height):
-        QTimer.singleShot(0, lambda: self.ui.LaserInfoText.setText(f"{height} mm"))
+
+        
+
+    def update_image(self, cv_img):
+        qt_img = convert_cv_to_qt(cv_img)
+        pixmap = QPixmap.fromImage(qt_img)
+        self.ui.VisionTextInComponentControl.setPixmap(pixmap)  # Replace with your QLabel name
+
+    def update_detection_mode(self, mode):
+        print(f"[UI] Detection mode is now: {mode}")
+        # Optionally update label or status bar
+
+
+    #ROS2 Menu
+    def send_menu_cmd(self, flag):
+        msg = String()
+
+        # msg.main_page = False
+        msg.data = flag
+        
+        print(f"[DEBUG] Publishing MenuCmd: {msg}")
+        self.ros_node.component_control_publisher.publish(msg)
+        print(f"[UI] Sent MenuCmd: {flag}")
+
 
     #ROS2 Flag
     def send_state_cmd(self, flag):
@@ -213,6 +308,18 @@ class MainWindow(QMainWindow):
             button.setText("Clipper ON")
         else:
             button.setText("Clipper OFF")
+
+    def send_vision_cmd(self, mode):
+        print(f"[DEBUG] Trying to publish: {mode}")  
+
+        if hasattr(self, 'last_vision_mode') and self.last_vision_mode == mode:
+            return
+        self.last_vision_mode = mode
+        msg = String()
+        msg.data = mode
+        self.ros_node.vision_control_publisher.publish(msg)
+        print(f"[UI] Sent VisionCmd: {mode}")
+
     
     #Principal Menu - StackedWidget
     def change_to_main_page(self):
@@ -298,6 +405,21 @@ class MainWindow(QMainWindow):
         self.ui.ListOptionsWidget.setVisible(False)
 
 
+    #Vision
+
+
+    # def activate_vision_view(self):
+        # Switch to Vision page
+        # self.choose_vision()
+
+        # Optional: Manually refresh or send trigger to vision system
+        # print("[UI] Vision page activated — ready to receive image")
+
+        # Optionally send a ROS signal to start detection (if needed)
+        # self.send_detection_task("start")  # <-- if you want to publish to /detection_task
+
+
+
     def on_touch_controls(self, button):
         # 1. Visual press feedback
         button.setStyleSheet("""
@@ -358,6 +480,15 @@ class MainWindow(QMainWindow):
         else:
             self.showMaximized()
             print("Only one screen, maximized")
+
+
+
+def convert_cv_to_qt(cv_img):
+    rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+    h, w, ch = rgb_image.shape
+    bytes_per_line = ch * w
+    return QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+
 
 
 def ros_spin(node):
