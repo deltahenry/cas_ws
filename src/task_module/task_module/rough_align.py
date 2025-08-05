@@ -95,7 +95,7 @@ class DataNode(Node):
             self.get_logger().warn("接收到的深度數據長度不足，無法更新。")
 
 
-class ManualAlignState(Enum):
+class RoughAlignState(Enum):
     IDLE = "idle"
     INIT = "init"
     CHECK_DEPTH = "check_depth"
@@ -103,35 +103,35 @@ class ManualAlignState(Enum):
     DONE = "done"
     FAIL = "fail"
 
-class ManualAlignFSM(Machine):
+class RoughAlignFSM(Machine):
     def __init__(self, data_node: DataNode):
-        self.phase = ManualAlignState.IDLE  # 初始狀態
+        self.phase = RoughAlignState.IDLE  # 初始狀態
         self.data_node = data_node
         self.run_mode = "pick"
 
         states = [
-            ManualAlignState.IDLE.value,
-            ManualAlignState.INIT.value,
-            ManualAlignState.CHECK_DEPTH.value,
-            ManualAlignState.ROUGH_ALIGN.value,
-            ManualAlignState.DONE.value,
-            ManualAlignState.FAIL.value
+            RoughAlignState.IDLE.value,
+            RoughAlignState.INIT.value,
+            RoughAlignState.CHECK_DEPTH.value,
+            RoughAlignState.ROUGH_ALIGN.value,
+            RoughAlignState.DONE.value,
+            RoughAlignState.FAIL.value
         ]
         
         transitions = [
-            {'trigger': 'idle_to_init', 'source': ManualAlignState.IDLE.value, 'dest': ManualAlignState.INIT.value},
-            {'trigger': 'init_to_check_depth', 'source': ManualAlignState.INIT.value, 'dest': ManualAlignState.CHECK_DEPTH.value},
-            {'trigger': 'check_depth_to_rough_align', 'source': ManualAlignState.CHECK_DEPTH.value, 'dest': ManualAlignState.ROUGH_ALIGN.value},
-            {'trigger': 'rough_align_to_done', 'source': ManualAlignState.ROUGH_ALIGN.value, 'dest': ManualAlignState.DONE.value},
-            {'trigger': 'done_to_fail', 'source': ManualAlignState.DONE.value, 'dest': ManualAlignState.FAIL.value},    
-            {'trigger': 'return_to_idle', 'source': '*', 'dest': ManualAlignState.IDLE.value},
+            {'trigger': 'idle_to_init', 'source': RoughAlignState.IDLE.value, 'dest': RoughAlignState.INIT.value},
+            {'trigger': 'init_to_check_depth', 'source': RoughAlignState.INIT.value, 'dest': RoughAlignState.CHECK_DEPTH.value},
+            {'trigger': 'check_depth_to_rough_align', 'source': RoughAlignState.CHECK_DEPTH.value, 'dest': RoughAlignState.ROUGH_ALIGN.value},
+            {'trigger': 'rough_align_to_done', 'source': RoughAlignState.ROUGH_ALIGN.value, 'dest': RoughAlignState.DONE.value},
+            {'trigger': 'done_to_fail', 'source': RoughAlignState.DONE.value, 'dest': RoughAlignState.FAIL.value},    
+            {'trigger': 'return_to_idle', 'source': '*', 'dest': RoughAlignState.IDLE.value},
         ]
 
         self.machine = Machine(model=self, states=states,transitions=transitions,initial=self.phase.value,
                                auto_transitions=False,after_state_change=self._update_phase)
         
     def _update_phase(self):
-        self.phase = ManualAlignState(self.state)
+        self.phase = RoughAlignState(self.state)
 
     def depth_ref(self,run_mode):
         """根據運行模式返回參考深度"""
@@ -157,13 +157,13 @@ class ManualAlignFSM(Machine):
 
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
-            print("[ManualAlignmentFSM] 被暫停中")
+            print("[RoughAlignmentFSM] 被暫停中")
         
         elif self.data_node.task_cmd == "rough_align":
-            print("[ManualAlignmentFSM] 開始手動對齊任務")
+            print("[RoughAlignmentFSM] 開始手動對齊任務")
             self.run()
         else:
-            print("[ManualAlignmentFSM] 手動對齊任務未啟動，等待中")
+            print("[RoughAlignmentFSM] 手動對齊任務未啟動，等待中")
             self.reset_parameters()  # 重置參數
             self.return_to_idle()  # 返回到空閒狀態
             self.run()
@@ -172,30 +172,30 @@ class ManualAlignFSM(Machine):
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
-        if self.state == ManualAlignState.IDLE.value:
-            print("[ManualAlignmentFSM] 等待開始手動對齊")
+        if self.state == RoughAlignState.IDLE.value:
+            print("[RoughAlignmentFSM] 等待開始手動對齊")
             if self.data_node.task_cmd == "rough_align":
-                print("[ManualAlignmentFSM] 開始手動對齊")
+                print("[RoughAlignmentFSM] 開始手動對齊")
                 self.idle_to_init()
             else:
-                print("[ManualAlignmentFSM] 手動對齊任務未啟動，等待中")
+                print("[RoughAlignmentFSM] 手動對齊任務未啟動，等待中")
         
-        elif self.state == ManualAlignState.INIT.value:
-            print("[ManualAlignmentFSM] 初始化階段")
+        elif self.state == RoughAlignState.INIT.value:
+            print("[RoughAlignmentFSM] 初始化階段")
             if self.data_node.func_cmd.get("pick_button", False):
                 self.run_mode = "pick"
             elif self.data_node.func_cmd.get("push_button", False):
                 self.run_mode = "push"
             else:
-                print("[ManualAlignmentFSM] 未選擇運行模式，等待人為選擇")
+                print("[RoughAlignmentFSM] 未選擇運行模式，等待人為選擇")
                 return
             #open_vision_guide_line(red=True, green=False)
             #open_guide_laser
             self.init_to_check_depth()
 
 
-        elif self.state == ManualAlignState.CHECK_DEPTH.value:
-            print("[ManualAlignmentFSM] 深度檢查階段")
+        elif self.state == RoughAlignState.CHECK_DEPTH.value:
+            print("[RoughAlignmentFSM] 深度檢查階段")
             # 檢查深度數據
             depth_ref = self.depth_ref(self.run_mode)
 
@@ -205,8 +205,8 @@ class ManualAlignFSM(Machine):
             else:
                 print("depth_data 大於或等於參考深度，waiting for human push")
         
-        elif self.state == ManualAlignState.ROUGH_ALIGN.value:
-            print("[ManualAlignmentFSM] 粗對齊階段")
+        elif self.state == RoughAlignState.ROUGH_ALIGN.value:
+            print("[RoughAlignmentFSM] 粗對齊階段")
             #open rough aligh check
             self.data_node.detection_cmd_publisher.publish(String(data='icp_fit'))
             if self.data_node.point_dist < 0.05:  # 假設 0.05 是粗對齊的閾值
@@ -217,13 +217,13 @@ class ManualAlignFSM(Machine):
             else:
                 print("粗對齊未完成，等待人為調整")
         
-        elif self.state == ManualAlignState.DONE.value:
-            print("[ManualAlignmentFSM] 對齊完成階段")
+        elif self.state == RoughAlignState.DONE.value:
+            print("[RoughAlignmentFSM] 對齊完成階段")
             #change_vision_guide_line(red=False, green=True, blue=False)
             #open_guide_raser
             
-        elif self.state == ManualAlignState.FAIL.value:
-            print("[ManualAlignmentFSM] 對齊失敗階段")
+        elif self.state == RoughAlignState.FAIL.value:
+            print("[RoughAlignmentFSM] 對齊失敗階段")
             #change_vision_guide_line(red=False, green=False, blue=True)
             #open_guide_raser
             # 這裡可以加入對齊失敗的處理邏輯，例如重試或報錯
@@ -233,7 +233,7 @@ class ManualAlignFSM(Machine):
 def main():
     rclpy.init()
     data = DataNode()                 # ROS2 subscriber node
-    system = ManualAlignFSM(data)    # FSM 實體
+    system = RoughAlignFSM(data)    # FSM 實體
 
     executor = rclpy.executors.SingleThreadedExecutor()
     executor.add_node(data)

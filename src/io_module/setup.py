@@ -22,7 +22,7 @@ setup(
         'console_scripts': [
             'depth_rangefinder = io_module.depth_rangefinder:main',
             'height = io_module.height:main',
-            'origin_fork = io_module.origin_fork:main',
+            'forklift = io_module.forklift:main',
             'io_node = io_module.io_node:main',
         ],
     },

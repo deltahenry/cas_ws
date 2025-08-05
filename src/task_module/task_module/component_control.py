@@ -25,6 +25,7 @@ class DataNode(Node):
         self.component_control_cmd = "idle"  # 組件控制信息
 
         self.can_accept_pose_cmd = False  # 是否可以接受姿態控制命令
+
        
         # 初始化 ROS2 Node
         #subscriber

@@ -9,6 +9,7 @@ from std_msgs.msg import String,Int32,Float32MultiArray,Int32MultiArray
 from common_msgs.msg import ForkCmd
 from pymodbus.client import ModbusTcpClient
 import time
+import csv
 
 #parameters
 timer_period = 0.1  # seconds
@@ -51,7 +52,6 @@ class DataNode(Node):
         self.height_cmd_info_publisher = self.create_publisher(Float32MultiArray, 'height_cmd_info', 10)
 
         self.fork_io_cmd_publisher = self.create_publisher(Int32MultiArray, 'fork_io_cmd', 10)
-
 
     def init_fork_modubus(self):
         """初始化叉車Modbus通訊"""
@@ -96,6 +96,11 @@ class ForkliftControlState(Enum):
 
 class ForkliftControl(Machine):
     def __init__(self, data_node: DataNode):
+
+        self.csv_file_path = '/home/henry/cas_ws/height_log.csv'
+        self.csv_file = open(self.csv_file_path, 'a', newline='')
+        self.csv_writer = csv.writer(self.csv_file)
+
         self.phase = ForkliftControlState.IDLE  # 初始狀態
         self.data_node = data_node
 
@@ -125,8 +130,11 @@ class ForkliftControl(Machine):
         height_info = Float32MultiArray()
         height_info.data = [float(self.data_node.distance), float(self.data_node.current_height),float(self.data_node.control)]
         self.data_node.height_cmd_info_publisher.publish(height_info)
+        # 寫入 CSV 文件
+        self.csv_writer.writerow([float(self.data_node.distance), float(self.data_node.current_height),float(self.data_node.control)])
 
-        # if self.data_node.state_cmds.get("pause_button", False):
+
+        # if self.data_node.state_cmd.get("pause_button", False):
         #     print("[ManualAlignmentFSM] 被暫停中")
         #     return  # 暫停中，不執行
         
@@ -227,6 +235,17 @@ class ForkliftControl(Machine):
             else:
                 value_to_write = self.encode(self.data_node.current_speed, self.data_node.current_direction) # 保持當前速度和方向
                 self.data_node.fork_io_cmd_publisher.publish(value_to_write)
+                # if current_height < distance_cmd - 5.0:
+                #     value_to_write = self.encode("fast", "up") # 保持當前速度和方向
+                #     self.data_node.fork_io_cmd_publisher.publish(value_to_write)
+                #     time.sleep(0.1)  
+                #     value_to_write = self.encode("fast", "stop") # stop
+                #     self.data_node.fork_io_cmd_publisher.publish(value_to_write)
+                #     time.sleep(1.0)  # 等待停止完成
+
+                # else:
+                #     value_to_write = self.encode(self.data_node.current_speed, self.data_node.current_direction) # 保持當前速度和方向
+                #     self.data_node.fork_io_cmd_publisher.publish(value_to_write)
 
         # down邏輯：down 快 ➝ down 慢
         elif self.data_node.current_direction == "down":
@@ -316,6 +335,7 @@ def main():
         pass
     finally:
         data.destroy_node()
+        system.csv_file.close()
         rclpy.shutdown()
         plt.ioff()
         plt.show()

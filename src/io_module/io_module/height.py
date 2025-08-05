@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int32
 from pycomm3 import CIPDriver
+import csv
 
 
 class LRSensorNode(Node):
@@ -9,7 +10,7 @@ class LRSensorNode(Node):
         super().__init__('lr_sensor_node')
         self.declare_parameter('sensor_ip', '192.168.1.101')
         self.declare_parameter('instance_id', 1)
-        self.declare_parameter('read_rate', 0.1)
+        self.declare_parameter('read_rate', 0.5)
 
         self.sensor_ip = self.get_parameter('sensor_ip').get_parameter_value().string_value
         self.instance_id = self.get_parameter('instance_id').get_parameter_value().integer_value
@@ -18,6 +19,10 @@ class LRSensorNode(Node):
         self.publisher_ = self.create_publisher(Int32, 'lr_distance', 10)
         self.timer = self.create_timer(self.read_rate, self.read_sensor_data)
         self.get_logger().info(f'LR Sensor Node started. IP: {self.sensor_ip}, Instance: {self.instance_id}')
+
+        self.csv_file_path = '/home/henry/cas_ws/laser_height_data.csv'
+        self.csv_file = open(self.csv_file_path, 'a', newline='')
+        self.csv_writer = csv.writer(self.csv_file)
 
     def read_sensor_data(self):
         try:
@@ -36,6 +41,8 @@ class LRSensorNode(Node):
                     msg.data = int_value
                     self.publisher_.publish(msg)
                     self.get_logger().info(f'Published Distance: {int_value} mm')
+                    # Write to CSV
+                    self.csv_writer.writerow([int_value])
                 else:
                     self.get_logger().warn('No value returned from sensor.')
         except Exception as e:
@@ -47,4 +54,5 @@ def main(args=None):
     node = LRSensorNode()
     rclpy.spin(node)
     node.destroy_node()
+    node.csv_file.close()
     rclpy.shutdown()
