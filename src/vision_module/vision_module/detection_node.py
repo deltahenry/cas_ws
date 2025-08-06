@@ -5,6 +5,7 @@ import numpy as np
 import pyrealsense2 as rs
 import os, glob
 from std_msgs.msg import String
+from geometry_msgs.msg import PoseStamped
 from ament_index_python.packages import get_package_prefix
 from tf2_ros import TransformBroadcaster
 from geometry_msgs.msg import TransformStamped
@@ -34,6 +35,8 @@ class RealSenseVision(Node):
         self.get_logger().info('✅ RealSense Detection Node Started')
         self.subscription = self.create_subscription(String, '/detection_task', self.task_callback, 10)
 
+        self.pose_pub = self.create_publisher(PoseStamped, '/screw_center_pose', 10)
+
         self.screw_active = self.lshape_active = self.icp_fit_active = False
 
         self.pipeline = rs.pipeline()
@@ -56,6 +59,11 @@ class RealSenseVision(Node):
         self.prev_avg_center = None
         self.prev_avg_pose = None
         self.frame_count = 0
+        # ✅ 加入角度記憶變數
+        self.prev_yaw = 0.0
+        self.prev_pitch = 0.0
+        self.prev_roll = 1.5
+        
 
     def load_templates(self, folder_name, augment=False):
         source_root = os.path.dirname(os.path.abspath(__file__))
@@ -106,6 +114,20 @@ class RealSenseVision(Node):
 
         self.br.sendTransform(t)
 
+    def publish_avg_pose(self, x, y, z, quat):
+        msg = PoseStamped()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'camera_link'
+        msg.pose.position.x = x
+        msg.pose.position.y = y
+        msg.pose.position.z = z
+        msg.pose.orientation.x = quat[0]
+        msg.pose.orientation.y = quat[1]
+        msg.pose.orientation.z = quat[2]
+        msg.pose.orientation.w = quat[3]
+        self.pose_pub.publish(msg)
+        
+
 def main():
     rclpy.init()
     node = RealSenseVision()
@@ -144,12 +166,29 @@ def main():
                     yaw_deg = np.degrees(yaw_rad)
                     quat = tf_transformations.quaternion_from_euler(0, 0, yaw_rad)
 
-                    for i, r in enumerate(screw_results):
-                        u, v = r['u'], r['v']
-                        X, Y, Z = r['X'], r['Y'], r['Z']
+                    # ✅ 轉換為 Yaw/Pitch/Roll
+                    r = R.from_quat(quat)
+                    yaw_deg, pitch_deg, roll_deg = r.as_euler('zyx', degrees=True)
+                    
+
+
+                    # ✅ 檢查角度震動過大，則不輸出
+                    yaw_thresh = 1.0
+                    pitch_thresh = 1.0
+                    roll_thresh = 1.0
+
+                    if node.prev_yaw is not None:
+                        if (abs(yaw_deg - node.prev_yaw) > yaw_thresh or
+                            abs(pitch_deg - node.prev_pitch) > pitch_thresh or
+                            abs(roll_deg - node.prev_roll) > roll_thresh):
+                            print("⚠️ Yaw/Pitch/Roll 跳動過大，跳過輸出此幀")
+                            continue  # 🔁 跳過此 frame，不輸出 TF 和 Pose
+
+                    for i, r_ in enumerate(screw_results):
+                        u, v = r_['u'], r_['v']
+                        X, Y, Z = r_['X'], r_['Y'], r_['Z']
 
                         quats.append(quat)
-
                         node.broadcast_screw_tf(i + 1, X, Y, Z, quat)
                         avg_x += X
                         avg_y += Y
@@ -168,23 +207,28 @@ def main():
                     center_u = avg_u // 4
                     center_v = avg_v // 4
 
-                    # 使用 SciPy 計算歐拉角
-                    r = R.from_quat(quat)
-                    yaw_deg, pitch_deg, roll_deg = r.as_euler('zyx', degrees=True)
                     print(f"[INFO] Orientation: Yaw={yaw_deg:.1f}°, Pitch={pitch_deg:.1f}°, Roll={roll_deg:.1f}°")
 
                     node.prev_avg_center = (center_u, center_v)
                     node.prev_avg_pose = (avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg)
 
+                    node.publish_avg_pose(avg_x, avg_y, avg_z, quat)
+
+                    # ✅ 更新穩定的角度紀錄
+                    node.prev_yaw = yaw_deg
+                    node.prev_pitch = pitch_deg
+                    node.prev_roll = roll_deg
+
                 if node.prev_avg_center and node.prev_avg_pose:
                     center_u, center_v = node.prev_avg_center
                     avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg = node.prev_avg_pose
                     text1 = f"Avg X={avg_x:.2f} Y={avg_y:.2f} Z={avg_z:.2f}"
-                    # 顯示黃色圓點在平均位置
+                    text2 = f"Yaw={yaw_deg:.1f}deg Pitch={pitch_deg:.1f}deg Roll={roll_deg:.1f}deg"
                     cv2.circle(color_image, (int(center_u), int(center_v)), 8, (0, 255, 255), -1)
-
                     cv2.putText(color_image, text1, (center_u - 100, center_v - 20),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+                    cv2.putText(color_image, text2, (center_u - 100, center_v + 20),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
 
             if node.lshape_active:
                 results = node.l_shape_dector.detect_l_shape_lines(color_image)
