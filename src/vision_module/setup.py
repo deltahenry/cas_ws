@@ -15,6 +15,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('lib', package_name, 'template'), glob('vision_module/template/*.png')),
         (os.path.join('lib', package_name, 'template_l_shape'), glob('vision_module/template_l_shape/*.png')),
+        (os.path.join('lib', package_name, 'template2_shape'), glob('vision_module/template2_shape/*.png')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

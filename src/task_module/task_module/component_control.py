@@ -6,7 +6,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray
-from common_msgs.msg import StateCmd,MotionState, MotionCmd,JogCmd
+from common_msgs.msg import StateCmd,RunCmd,ComponentCmd,JogCmd,MotionCmd
 
 #parameters
 timer_period = 0.5  # seconds
@@ -20,7 +20,7 @@ class DataNode(Node):
             'pause_button': False,
         }
        
-        self.mode_cmd = "idle"  # 狀態信息 "component_control", "auto", "manual"
+        self.run_cmd = "idle"  # 狀態信息 "component_control", "auto", "manual"
 
         self.component_control_cmd = "idle"  # 組件控制信息
 
@@ -39,14 +39,14 @@ class DataNode(Node):
         )
 
         self.run_cmd_subscriber = self.create_subscription(
-            String,
+            RunCmd,
             "/run_cmd",
             self.run_cmd_callback,
             10
         )
 
         self.component_control_cmd_subscriber = self.create_subscription(
-            String,
+            ComponentCmd,
             "/component_control_cmd",
             self.component_control_cmd_callback,
             10
@@ -69,15 +69,15 @@ class DataNode(Node):
             'pause_button': msg.pause_button,
         }
     
-    def run_cmd_callback(self, msg: String):
-        print(f"接收到運行命令: {msg.data}")
+    def run_cmd_callback(self, msg: RunCmd):
+        print(f"接收到運行命令: {msg.mode}")
         # 在這裡可以處理運行命令
-        self.run_cmd = msg.data
+        self.run_cmd = msg.mode
     
-    def component_control_cmd_callback(self, msg: String):
-        print(f"接收到組件控制命令: {msg.data}")
+    def component_control_cmd_callback(self, msg: ComponentCmd):
+        print(f"接收到組件控制命令: {msg.mode}")
         # 在這裡可以處理組件控制命令
-        self.component_control_cmd = msg.data
+        self.component_control_cmd = msg.mode
         
     def jog_cmd_callback(self, msg: JogCmd):
         print(f"接收到JOG控制命令: {msg}")

@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray
-from common_msgs.msg import StateCmd,MotionState, MotionCmd
+from common_msgs.msg import StateCmd,TaskCmd, MotionCmd,MotionState,TaskState
 
 #parameters
 timer_period = 0.5  # seconds
@@ -23,7 +23,6 @@ class DataNode(Node):
         }
 
         self.task_cmd = "idle"  # rough align,precise align,pick,assembly
-        # self.task_cmd = "rough_align"  # rough align,precise align,pick,assembly
 
         self.func_cmd = {
             'pick_button': False,
@@ -43,6 +42,13 @@ class DataNode(Node):
             10
         )
 
+        self.task_cmd_subscriber = self.create_subscription(
+            TaskCmd,
+            '/task_cmd',
+            self.task_cmd_callback,
+            10
+        )
+
         self.motion_state_subscriber = self.create_subscription(
             MotionState,
             "/motion_state",
@@ -58,7 +64,7 @@ class DataNode(Node):
         )
 
         #publisher
-        self.rough_align_state_publisher = self.create_publisher(String, '/task_state_rough_align', 10)
+        self.rough_align_state_publisher = self.create_publisher(TaskState, '/task_state_rough_align', 10)
         self.motion_state_publisher = self.create_publisher(MotionState, '/motion_state', 10)
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
         self.detection_cmd_publisher = self.create_publisher(String,'/detection_task',10)
@@ -69,6 +75,11 @@ class DataNode(Node):
         self.state_cmd = {
             'pause_button': msg.pause_button,
         }
+
+    def task_cmd_callback(self, msg: TaskCmd):
+        print(f"接收到任務命令: {msg.mode}")
+        # 在這裡可以處理任務命令
+        self.task_cmd = msg.mode
 
     def motion_state_callback(self, msg=MotionState):
         print(f"接收到運動狀態: {msg}")
@@ -244,7 +255,9 @@ def main():
             system.step()
             print(f"[現在狀態] {system.state}")
             # 更新狀態發布
-            data.rough_align_state_publisher.publish(String(data=system.state))
+            data.rough_align_state_publisher.publish(
+                TaskState(mode="rough_align", state=system.state)
+            )
             time.sleep(timer_period)
 
     except KeyboardInterrupt:

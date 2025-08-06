@@ -1,59 +1,99 @@
 import cv2
 import numpy as np
-import pyrealsense2 as rs
+import os
+import glob
+import pyrealsense2 as rs 
 
 class ScrewDetector:
-    def __init__(self, templates, roi_boxes=None, scales=None, match_threshold=0.65):
-        self.templates = templates
-        self.roi_boxes = roi_boxes if roi_boxes else [
-            (362, 266, 397, 399),
-            (902, 261, 938, 408)
-        ]
-        self.scales = scales if scales else [0.8, 0.9, 1.0, 1.1, 1.2]
-        self.match_threshold = match_threshold
+    def __init__(self, template_dir):
+        self.templates = self.load_templates(template_dir)
+        print(f"✅ Loaded {len(self.templates)} augmented templates from {template_dir}")
 
-    def detect(self, color_frame, depth_frame):
-        gray = cv2.cvtColor(color_frame, cv2.COLOR_BGR2GRAY)
-        all_boxes = []
+        # ROI 區域，可外部修改
+        self.roi_top_left = (55, 8)
+        self.roi_bottom_right = (1255, 711)
 
-        for roi in self.roi_boxes:
-            x1, y1, x2, y2 = roi
-            roi_gray = gray[y1:y2, x1:x2]
+    def augment_template_rotation(self, img, angles=[-10, -5, 0, 5, 10]):
+        augmented = []
+        h, w = img.shape
+        center = (w // 2, h // 2)
+        for angle in angles:
+            M = cv2.getRotationMatrix2D(center, angle, 1.0)
+            rotated = cv2.warpAffine(img, M, (w, h), borderValue=255)
+            augmented.append(rotated)
+        return augmented
 
-            for tpl0 in self.templates:
-                h0, w0 = tpl0.shape
-                for s in self.scales:
-                    W, H = int(w0 * s), int(h0 * s)
-                    if W < 5 or H < 5:
-                        continue
-                    tpl = cv2.resize(tpl0, (W, H))
-                    result = cv2.matchTemplate(roi_gray, tpl, cv2.TM_CCOEFF_NORMED)
-                    ys, xs = np.where(result >= self.match_threshold)
+    def load_templates(self, folder_path):
+        if not isinstance(folder_path, str):
+            raise TypeError(f"❌ template_dir should be a string path, but got {type(folder_path)}")
+        templates = []
+        paths = sorted(glob.glob(os.path.join(folder_path, "*.png")))
+        for path in paths:
+            img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+            if img is not None:
+                augmented = self.augment_template_rotation(img)
+                templates.extend(augmented)
+            else:
+                print(f"⚠️ Failed to load image from: {path}")
+        return templates
 
-                    for y, x in zip(ys, xs):
-                        global_x1 = x + x1
-                        global_y1 = y + y1
-                        global_x2 = global_x1 + W
-                        global_y2 = global_y1 + H
-                        all_boxes.append([global_x1, global_y1, global_x2, global_y2, float(result[y, x])])
+    def match_templates(self, frame_gray, threshold=0.55):
+        matches = []
+        for template in self.templates:
+            th, tw = template.shape
+            res = cv2.matchTemplate(frame_gray, template, cv2.TM_CCOEFF_NORMED)
+            loc = np.where(res >= threshold)
+            for pt in zip(*loc[::-1]):
+                matches.append({
+                    "pt": pt,
+                    "size": (tw, th),
+                    "score": res[pt[1], pt[0]]
+                })
+        return matches
 
-        depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
-        top4 = sorted(all_boxes, key=lambda b: -b[4])[:4]
+    def remove_duplicates(self, matches, min_distance=20):
+        filtered = []
+        for m in matches:
+            is_duplicate = False
+            for f in filtered:
+                dist = np.linalg.norm(np.array(m["pt"]) - np.array(f["pt"]))
+                if dist < min_distance:
+                    is_duplicate = True
+                    break
+            if not is_duplicate:
+                filtered.append(m)
+        return filtered
+
+    def detect(self, color_image, depth_frame):
+        gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+        edges = cv2.Canny(gray, 100, 200)
+
+        matches = self.match_templates(edges)
+        filtered_matches = self.remove_duplicates(matches)
 
         results = []
-        for i, (x1, y1, x2, y2, score) in enumerate(top4):
-            cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
-            depth = depth_frame.get_distance(cx, cy)
-            if depth == 0 or depth > 1.0:
-                continue
-            X, Y, Z = rs.rs2_deproject_pixel_to_point(depth_intrin, [cx, cy], depth)
-            results.append({'index': i+1, 'X': X, 'Y': Y, 'Z': Z, 'depth': depth, 'bbox': (x1, y1, x2, y2)})
+        for m in filtered_matches:
+            x, y = m["pt"]
+            w, h = m["size"]
+            center_u = x + w // 2
+            center_v = y + h // 2
 
-            # 畫在影像上
-            cv2.rectangle(color_frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.circle(color_frame, (cx, cy), 4, (0, 0, 255), -1)
-            label = f"{depth:.3f}m"
-            cv2.putText(color_frame, label, (cx + 5, cy + 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            if not (self.roi_top_left[0] <= center_u <= self.roi_bottom_right[0] and
+                    self.roi_top_left[1] <= center_v <= self.roi_bottom_right[1]):
+                continue
+
+            Z = depth_frame.get_distance(center_u, center_v)
+            depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
+            X, Y, Z = rs.rs2_deproject_pixel_to_point(depth_intrin, [center_u, center_v], Z)
+
+            results.append({
+                "u": center_u,
+                "v": center_v,
+                "X": X,
+                "Y": Y,
+                "Z": Z,
+                "score": m["score"],
+                "bbox": (x, y, w, h)
+            })
 
         return results

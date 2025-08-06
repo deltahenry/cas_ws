@@ -3,39 +3,46 @@ from rclpy.node import Node
 import cv2
 import numpy as np
 import pyrealsense2 as rs
-import os
-import glob
+import os, glob
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from ament_index_python.packages import get_package_prefix
+from tf2_ros import TransformBroadcaster
+from geometry_msgs.msg import TransformStamped, PoseStamped
+import transformations as tf_transformations
+from scipy.spatial.transform import Rotation as R
 
 from vision_module.screw_detector import ScrewDetector
 from vision_module.l_shape_detector import LShapeDetector
 from vision_module.icp_fitter import ICPFITTER
 from cv_bridge import CvBridge
 
+def remove_duplicate_detections(results, threshold=15):
+    filtered = []
+    for r in results:
+        if 'u' not in r or 'v' not in r:
+            continue
+        is_duplicate = any(
+            abs(r['u'] - f['u']) < threshold and abs(r['v'] - f['v']) < threshold
+            for f in filtered
+        )
+        if not is_duplicate:
+            filtered.append(r)
+    return filtered
+
 class RealSenseVision(Node):
     def __init__(self):
         super().__init__('detection_node')
-        self.get_logger().info('RealSense Detection Node Started')
-
-        # 任務指令訂閱者
-        self.subscription = self.create_subscription(
-            String,
-            '/detection_task',
-            self.task_callback,
-            10
-        )
-
+        self.get_logger().info('✅ RealSense Detection Node Started')
+        self.subscription = self.create_subscription(String, '/detection_task', self.task_callback, 10)
+        
         self.image_pub = self.create_publisher(Image, '/color_image', 10)
+        self.pose_pub = self.create_publisher(PoseStamped, '/screw_center_pose', 10)
+
         self.bridge = CvBridge()
 
-        # 狀態旗標
-        self.screw_active = False
-        self.lshape_active = False
-        self.icp_fit_active = False
+        self.screw_active = self.lshape_active = self.icp_fit_active = False
 
-        # RealSense pipeline
         self.pipeline = rs.pipeline()
         config = rs.config()
         config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
@@ -43,55 +50,34 @@ class RealSenseVision(Node):
         self.profile = self.pipeline.start(config)
         self.align = rs.align(rs.stream.color)
 
-        # 螺絲孔模板
-        self.templates = self.load_templates('template')
-        self.template_size = self.templates[0].shape[::-1]
+        # source_root = os.path.dirname(os.path.abspath(__file__))
+        # template_path = os.path.join(source_root, 'template2_shape')
+        # self.screw_detector = ScrewDetector(template_path)
+        self.screw_detector = ScrewDetector('template2_shape')
 
-        # L型線模板
         self.l_templates = self.load_templates('template_l_shape')
-
-        # 初始化螺絲檢測器
-        self.screw_detector = ScrewDetector(self.templates)
-
-        # 初始化L型線檢測器
         self.l_shape_dector = LShapeDetector(self.l_templates)
 
-        # 初始化ICP配準器
         self.icp_fitter = ICPFITTER()
 
-
-    def task_callback(self, msg):
-        task = msg.data.lower()
-        if task == 'screw':
-            self.screw_active = True
-            self.lshape_active = False
-            self.icp_fit_active = False
-            self.get_logger().info("螺絲檢測已啟動")
-        elif task == 'l_shape':
-            self.screw_active = False
-            self.lshape_active = True
-            self.icp_fit_active = False
-            self.get_logger().info("L型線檢測已啟動")
-        elif task == 'icp_fit':
-            self.screw_active = False
-            self.lshape_active = False
-            self.icp_fit_active = True
-            self.get_logger().info("ICP配準已啟動")
-        else:
-            self.screw_active = False
-            self.lshape_active = False
-            self.icp_fit_active = False
-            self.get_logger().warn(f"未知任務: {task}")
+        self.br = TransformBroadcaster(self)
+        self.prev_screw_results = []
+        self.prev_avg_center = None
+        self.prev_avg_pose = None
+        self.frame_count = 0
+        # ✅ 加入角度記憶變數
+        self.prev_yaw = 0.0
+        self.prev_pitch = 0.0
+        self.prev_roll = 1.5
 
     def publish_image(self, color_image):
-        ros_image = self.bridge.cv2_to_imgmsg(color_image, encoding="bgr8")
+        resized_image = cv2.resize(color_image, (701, 481), interpolation=cv2.INTER_AREA)
+        ros_image = self.bridge.cv2_to_imgmsg(resized_image, encoding="bgr8")
         self.image_pub.publish(ros_image)
 
     def load_templates(self, folder_name):
         prefix = get_package_prefix('vision_module')
         folder_path = os.path.join(prefix, 'lib', 'vision_module', folder_name)
-        # script_dir = os.path.dirname(os.path.abspath(__file__))
-        # folder_path = os.path.join(script_dir, folder_name)
         paths = sorted(glob.glob(os.path.join(folder_path, "*.png")))
 
         templates = []
@@ -105,55 +91,170 @@ class RealSenseVision(Node):
             raise RuntimeError(f"No template found in folder: {folder_name}")
         return templates
 
+    def task_callback(self, msg):
+        task = msg.data.lower()
+        self.screw_active = task == 'screw'
+        self.lshape_active = task == 'l_shape'
+        self.icp_fit_active = task == 'icp_fit'
+        self.get_logger().info(f"🔄 任務切換: {task}")
+
+    def broadcast_screw_tf(self, idx, x, y, z, quat=None):
+        t = TransformStamped()
+        t.header.stamp = self.get_clock().now().to_msg()
+        t.header.frame_id = 'camera_link'
+        t.child_frame_id = f'screw_{idx}'
+        t.transform.translation.x = float(x)
+        t.transform.translation.y = float(y)
+        t.transform.translation.z = float(z)
+
+        if quat is None:
+            quat = [0, 0, 0, 1]  # default: no rotation
+
+        t.transform.rotation.x = float(quat[0])
+        t.transform.rotation.y = float(quat[1])
+        t.transform.rotation.z = float(quat[2])
+        t.transform.rotation.w = float(quat[3])
+
+        self.br.sendTransform(t)
+
+    def publish_avg_pose(self, x, y, z, quat):
+        msg = PoseStamped()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'camera_link'
+        msg.pose.position.x = x
+        msg.pose.position.y = y
+        msg.pose.position.z = z
+        msg.pose.orientation.x = quat[0]
+        msg.pose.orientation.y = quat[1]
+        msg.pose.orientation.z = quat[2]
+        msg.pose.orientation.w = quat[3]
+        self.pose_pub.publish(msg)
 
 def main():
     rclpy.init()
     node = RealSenseVision()
-
     try:
         while rclpy.ok():
             rclpy.spin_once(node, timeout_sec=0.01)
-
             frames = node.pipeline.wait_for_frames()
-            aligned_frames = node.align.process(frames)
-            color_frame = aligned_frames.get_color_frame()
-            depth_frame = aligned_frames.get_depth_frame()
-            depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
-
+            aligned = node.align.process(frames)
+            color_frame = aligned.get_color_frame()
+            depth_frame = aligned.get_depth_frame()
             if not color_frame or not depth_frame:
                 continue
 
             color_image = np.asanyarray(color_frame.get_data())
             depth_image = np.asanyarray(depth_frame.get_data())
-            
+            depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
 
             if node.screw_active:
-                screw_results = node.screw_detector.detect(color_image, depth_frame)
-                print(f"Detected {len(screw_results)} screws")
+                if node.frame_count % 10 == 0:
+                    screw_results = node.screw_detector.detect(color_image, depth_frame)
+                    screw_results = remove_duplicate_detections(screw_results)
+                    screw_results = sorted(screw_results, key=lambda r: r['Z'])[:4]
+                    if len(screw_results) == 4:
+                        node.prev_screw_results = screw_results
+                else:
+                    screw_results = node.prev_screw_results
+
+                if len(screw_results) == 4:
+                    avg_x = avg_y = avg_z = 0.0
+                    avg_u = avg_v = 0
+                    quats = []
+
+                    dx = screw_results[2]['u'] - screw_results[0]['u']
+                    dy = screw_results[2]['v'] - screw_results[0]['v']
+                    yaw_rad = np.arctan2(dy, dx)
+                    yaw_deg = np.degrees(yaw_rad)
+                    quat = tf_transformations.quaternion_from_euler(0, 0, yaw_rad)
+
+                    # ✅ 轉換為 Yaw/Pitch/Roll
+                    r = R.from_quat(quat)
+                    yaw_deg, pitch_deg, roll_deg = r.as_euler('zyx', degrees=True)
+                    
+
+
+                    # ✅ 檢查角度震動過大，則不輸出
+                    yaw_thresh = 1.0
+                    pitch_thresh = 1.0
+                    roll_thresh = 1.0
+
+                    if node.prev_yaw is not None:
+                        if (abs(yaw_deg - node.prev_yaw) > yaw_thresh or
+                            abs(pitch_deg - node.prev_pitch) > pitch_thresh or
+                            abs(roll_deg - node.prev_roll) > roll_thresh):
+                            print("⚠️ Yaw/Pitch/Roll 跳動過大，跳過輸出此幀")
+                            continue  # 🔁 跳過此 frame，不輸出 TF 和 Pose
+
+                    for i, r in enumerate(screw_results):
+                        u, v = r['u'], r['v']
+                        X, Y, Z = r['X'], r['Y'], r['Z']
+
+                        quats.append(quat)
+
+                        node.broadcast_screw_tf(i + 1, X, Y, Z, quat)
+                        avg_x += X
+                        avg_y += Y
+                        avg_z += Z
+                        avg_u += u
+                        avg_v += v
+
+                        cv2.circle(color_image, (u, v), 6, (0, 255, 0), -1)
+                        cv2.putText(color_image, f"X={X:.2f} Y={Y:.2f} Z={Z:.2f}", (u + 10, v - 10),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 255), 1)
+                        print(f"🟢 螺絲 {i+1}: (u={u}, v={v}), X={X:.3f}, Y={Y:.3f}, Z={Z:.3f}")
+
+                    avg_x /= 4
+                    avg_y /= 4
+                    avg_z /= 4
+                    center_u = avg_u // 4
+                    center_v = avg_v // 4
+
+                    print(f"[INFO] Orientation: Yaw={yaw_deg:.1f}°, Pitch={pitch_deg:.1f}°, Roll={roll_deg:.1f}°")
+
+                    node.prev_avg_center = (center_u, center_v)
+                    node.prev_avg_pose = (avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg)
+
+                    node.publish_avg_pose(avg_x, avg_y, avg_z, quat)
+
+                    # ✅ 更新穩定的角度紀錄
+                    node.prev_yaw = yaw_deg
+                    node.prev_pitch = pitch_deg
+                    node.prev_roll = roll_deg
+
+                if node.prev_avg_center and node.prev_avg_pose:
+                    center_u, center_v = node.prev_avg_center
+                    avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg = node.prev_avg_pose
+                    text1 = f"Avg X={avg_x:.2f} Y={avg_y:.2f} Z={avg_z:.2f}"
+                    text2 = f"Yaw={yaw_deg:.1f}deg Pitch={pitch_deg:.1f}deg Roll={roll_deg:.1f}deg"
+                    cv2.circle(color_image, (int(center_u), int(center_v)), 8, (0, 255, 255), -1)
+                    cv2.putText(color_image, text1, (center_u - 100, center_v - 20),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+                    cv2.putText(color_image, text2, (center_u - 100, center_v + 20),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
 
             if node.lshape_active:
-                l_results = node.l_shape_dector.detect_l_shape_lines(color_image)
-                for i, (cx, cy) in enumerate(l_results):
+                results = node.l_shape_dector.detect_l_shape_lines(color_image)
+                for cx, cy in results:
                     cv2.circle(color_image, (cx, cy), 5, (0, 255, 255), -1)
-                    cv2.putText(color_image, f"L{i+1}", (cx + 5, cy - 5),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
-            
+
             if node.icp_fit_active:
                 dist = node.icp_fitter.icp_fit(color_image, depth_image, depth_intrin)
-                print(f"ICP Distance: {dist:.4f}" if dist is not None else "ICP fitting failed")
+                print(f"ICP Distance: {dist:.4f}" if dist else "ICP fitting failed")
+
+            cv2.imshow("RealSense Detection", color_image)
 
             # 發布處理後的影像
             node.publish_image(color_image)
-            
-            cv2.imshow("RealSense Detection", color_image)
-            if cv2.waitKey(1) & 0xFF == 27:
+
+            if cv2.waitKey(1) == ord('q'):
                 break
+
+            node.frame_count += 1
 
     finally:
         node.pipeline.stop()
-        node.destroy_node()
-        rclpy.shutdown()
         cv2.destroyAllWindows()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray
-from common_msgs.msg import StateCmd,MotionState, MotionCmd
+from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,MotionState
 
 #parameters
 timer_period = 0.5  # seconds
@@ -23,7 +23,6 @@ class DataNode(Node):
         }
 
         self.task_cmd = "idle"  # rough align,precise align,pick,assembly
-        # self.task_cmd = "rough_align"  # rough align,precise align,pick,assembly
 
         self.func_cmd = {
             'pick_button': False,
@@ -43,6 +42,13 @@ class DataNode(Node):
             10
         )
 
+        self.task_cmd_subscriber = self.create_subscription(
+            TaskCmd,
+            '/task_cmd',
+            self.task_cmd_callback,
+            10
+        )
+
         self.motion_state_subscriber = self.create_subscription(
             MotionState,
             "/motion_state",
@@ -58,7 +64,7 @@ class DataNode(Node):
         )
 
         #publisher
-        self.rough_align_state_publisher = self.create_publisher(String, '/task_state_rough_align', 10)
+        self.precise_align_state_publisher = self.create_publisher(TaskState, '/task_state_precise_align', 10)
         self.motion_state_publisher = self.create_publisher(MotionState, '/motion_state', 10)
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
         self.detection_cmd_publisher = self.create_publisher(String,'/detection_task',10)
@@ -69,6 +75,11 @@ class DataNode(Node):
         self.state_cmd = {
             'pause_button': msg.pause_button,
         }
+
+    def task_cmd_callback(self, msg: TaskCmd):
+        print(f"接收到任務命令: {msg.mode}")
+        # 在這裡可以處理任務命令
+        self.task_cmd = msg.mode
 
     def motion_state_callback(self, msg=MotionState):
         print(f"接收到運動狀態: {msg}")
@@ -201,10 +212,18 @@ class PreciseAlignFSM(Machine):
             #open detection task screw
             self.data_node.detection_cmd_publisher.publish(String(data="screw"))
             #get screw detection result -> TF
-            self.data_node.screw_TF = 
-            # 假設檢測完成後進入下一個狀態
-            self.screw_detect_to_screw_align()
+            if self.data_node.screw_TF  == 123:
+                print("[PreciseAlignmentFSM] 螺絲檢測未完成，等待中")
+                return
+            else:
+                print("[PreciseAlignmentFSM] 螺絲檢測完成，進入螺絲對齊階段")
+                # 假設檢測完成後進入下一個狀態
+                self.screw_detect_to_screw_align()
 
+        elif self.state == PreciseAlignState.SCREW_ALIGN.value:
+            print("[PreciseAlignmentFSM] 螺絲對齊階段")
+            # 根據螺絲檢測結果進行對齊
+            screw_TF = self.data_node.screw_TF
 
 
 
@@ -225,7 +244,9 @@ def main():
             system.step()
             print(f"[現在狀態] {system.state}")
             # 更新狀態發布
-            data.rough_align_state_publisher.publish(String(data=system.state))
+            data.precise_align_state_publisher.publish(
+                TaskState(mode="precise_align", state=system.state)
+            )
             time.sleep(timer_period)
 
     except KeyboardInterrupt:

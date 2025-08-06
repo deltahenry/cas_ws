@@ -21,6 +21,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/StateCmd.msg"
     "msg/JogCmd.msg"
     "msg/ForkCmd.msg"
+    "msg/ComponentCmd.msg"
+    "msg/RunCmd.msg"
+    "msg/TaskCmd.msg"
+    "msg/TaskState.msg"
     
 )
 
