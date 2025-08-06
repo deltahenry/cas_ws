@@ -3,34 +3,27 @@ from rclpy.node import Node
 import cv2
 import numpy as np
 import pyrealsense2 as rs
-import os
-import glob
-import math
+import os, glob
 from std_msgs.msg import String
 from ament_index_python.packages import get_package_prefix
-
-# ⬇️ 加入 tf2 座標廣播
 from tf2_ros import TransformBroadcaster
 from geometry_msgs.msg import TransformStamped
 import transformations as tf_transformations
-from transforms3d.euler import quat2euler
-
+from scipy.spatial.transform import Rotation as R
 
 from vision_module.screw_detector import ScrewDetector
 from vision_module.l_shape_detector import LShapeDetector
 from vision_module.icp_fitter import ICPFITTER
 
-def remove_duplicate_detections(results, threshold=20):
+def remove_duplicate_detections(results, threshold=15):
     filtered = []
     for r in results:
         if 'u' not in r or 'v' not in r:
             continue
-        is_duplicate = False
-        for f in filtered:
-            dist = math.sqrt((r['u'] - f['u'])**2 + (r['v'] - f['v'])**2)
-            if dist < threshold:
-                is_duplicate = True
-                break
+        is_duplicate = any(
+            abs(r['u'] - f['u']) < threshold and abs(r['v'] - f['v']) < threshold
+            for f in filtered
+        )
         if not is_duplicate:
             filtered.append(r)
     return filtered
@@ -38,18 +31,10 @@ def remove_duplicate_detections(results, threshold=20):
 class RealSenseVision(Node):
     def __init__(self):
         super().__init__('detection_node')
-        self.get_logger().info('RealSense Detection Node Started')
+        self.get_logger().info('✅ RealSense Detection Node Started')
+        self.subscription = self.create_subscription(String, '/detection_task', self.task_callback, 10)
 
-        self.subscription = self.create_subscription(
-            String,
-            '/detection_task',
-            self.task_callback,
-            10
-        )
-
-        self.screw_active = False
-        self.lshape_active = False
-        self.icp_fit_active = False
+        self.screw_active = self.lshape_active = self.icp_fit_active = False
 
         self.pipeline = rs.pipeline()
         config = rs.config()
@@ -58,47 +43,31 @@ class RealSenseVision(Node):
         self.profile = self.pipeline.start(config)
         self.align = rs.align(rs.stream.color)
 
-        self.templates = self.load_templates('template')
-        self.template_size = self.templates[0].shape[::-1]
+        source_root = os.path.dirname(os.path.abspath(__file__))
+        template_path = os.path.join(source_root, 'template2_shape')
+        self.screw_detector = ScrewDetector(template_path)
 
-        self.l_templates = self.load_templates('template_l_shape')
-
-        self.screw_detector = ScrewDetector(self.templates)
+        self.l_templates = self.load_templates('template2_shape')
         self.l_shape_dector = LShapeDetector(self.l_templates)
         self.icp_fitter = ICPFITTER()
-        self.last_avg_xyz = None
-        self.last_avg_uv = None
 
-        # ⬇️ 初始化 TF 廣播器
         self.br = TransformBroadcaster(self)
+        self.prev_screw_results = []
+        self.prev_avg_center = None
+        self.prev_avg_pose = None
+        self.frame_count = 0
 
-    def task_callback(self, msg):
-        task = msg.data.lower()
-        if task == 'screw':
-            self.screw_active = True
-            self.lshape_active = False
-            self.icp_fit_active = False
-            self.get_logger().info("螺絲檢測已啟動")
-        elif task == 'l_shape':
-            self.screw_active = False
-            self.lshape_active = True
-            self.icp_fit_active = False
-            self.get_logger().info("L型線檢測已啟動")
-        elif task == 'icp_fit':
-            self.screw_active = False
-            self.lshape_active = False
-            self.icp_fit_active = True
-            self.get_logger().info("ICP配準已啟動")
-        else:
-            self.screw_active = False
-            self.lshape_active = False
-            self.icp_fit_active = False
-            self.get_logger().warn(f"未知任務: {task}")
+    def load_templates(self, folder_name, augment=False):
+        source_root = os.path.dirname(os.path.abspath(__file__))
+        folder_path = os.path.join(source_root, folder_name)
+        print(f"📂 嘗試讀取模板資料夾：{folder_path}")
+        if not os.path.exists(folder_path):
+            print(f"❌ 錯誤：資料夾不存在 - {folder_path}")
+            return []
 
-    def load_templates(self, folder_name):
-        prefix = get_package_prefix('vision_module')
-        folder_path = os.path.join(prefix, 'lib', 'vision_module', folder_name)
         paths = sorted(glob.glob(os.path.join(folder_path, "*.png")))
+        if len(paths) == 0:
+            print(f"⚠️ 警告：找不到任何 .png 模板在資料夾 {folder_path}")
 
         templates = []
         for path in paths:
@@ -106,156 +75,135 @@ class RealSenseVision(Node):
             if img is not None:
                 templates.append(img)
             else:
-                self.get_logger().warn(f"Failed to load: {path}")
-        if not templates:
-            raise RuntimeError(f"No template found in folder: {folder_name}")
+                print(f"⚠️ 無法讀取圖片：{path}")
+
+        print(f"✅ 成功載入 {len(templates)} 張模板圖片")
         return templates
 
-    def broadcast_screw_tf(self, idx, x, y, z):
+    def task_callback(self, msg):
+        task = msg.data.lower()
+        self.screw_active = task == 'screw'
+        self.lshape_active = task == 'l_shape'
+        self.icp_fit_active = task == 'icp_fit'
+        self.get_logger().info(f"🔄 任務切換: {task}")
+
+    def broadcast_screw_tf(self, idx, x, y, z, quat=None):
         t = TransformStamped()
         t.header.stamp = self.get_clock().now().to_msg()
         t.header.frame_id = 'camera_link'
         t.child_frame_id = f'screw_{idx}'
+        t.transform.translation.x = float(x)
+        t.transform.translation.y = float(y)
+        t.transform.translation.z = float(z)
 
-        t.transform.translation.x = x
-        t.transform.translation.y = y
-        t.transform.translation.z = z
+        if quat is None:
+            quat = [0, 0, 0, 1]  # default: no rotation
 
-        quat = tf_transformations.quaternion_from_euler(0.0, 0.0, 0.0)
-        t.transform.rotation.x = quat[0]
-        t.transform.rotation.y = quat[1]
-        t.transform.rotation.z = quat[2]
-        t.transform.rotation.w = quat[3]
+        t.transform.rotation.x = float(quat[0])
+        t.transform.rotation.y = float(quat[1])
+        t.transform.rotation.z = float(quat[2])
+        t.transform.rotation.w = float(quat[3])
 
         self.br.sendTransform(t)
 
 def main():
     rclpy.init()
     node = RealSenseVision()
-
     try:
         while rclpy.ok():
             rclpy.spin_once(node, timeout_sec=0.01)
-
             frames = node.pipeline.wait_for_frames()
-            aligned_frames = node.align.process(frames)
-            color_frame = aligned_frames.get_color_frame()
-            depth_frame = aligned_frames.get_depth_frame()
-            depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
-
+            aligned = node.align.process(frames)
+            color_frame = aligned.get_color_frame()
+            depth_frame = aligned.get_depth_frame()
             if not color_frame or not depth_frame:
                 continue
 
             color_image = np.asanyarray(color_frame.get_data())
             depth_image = np.asanyarray(depth_frame.get_data())
+            depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
 
             if node.screw_active:
-                screw_results = node.screw_detector.detect(color_image, depth_frame)
-
-                unique_results = []
-                for r in screw_results:
-                    is_duplicate = False
-                    for u in unique_results:
-                        if abs(r['u'] - u['u']) < 15 and abs(r['v'] - u['v']) < 15 and abs(r['Z'] - u['Z']) < 0.01:
-                            is_duplicate = True
-                            break
-                    if not is_duplicate:
-                        unique_results.append(r)
-
-                filtered_results = sorted(unique_results, key=lambda x: x['Z'])[:4]
-
-                if len(filtered_results) == 4:
-                    sum_x, sum_y, sum_z = 0.0, 0.0, 0.0
-                    sum_u, sum_v = 0, 0
-
-                    sum_roll, sum_pitch, sum_yaw = 0.0, 0.0, 0.0
-
-                    for i, screw in enumerate(filtered_results):
-                        idx = i + 1
-                        x, y, z = screw['X'], screw['Y'], screw['Z']
-                        u, v = screw['u'], screw['v']
-                        print(f"🟢 孔位 {idx}: (u={u}, v={v}), X={x:.3f}m, Y={y:.3f}m, Z={z:.3f}m")
-
-                        node.broadcast_screw_tf(idx, x, y, z)
-
-                        sum_x += x
-                        sum_y += y
-                        sum_z += z
-                        sum_u += u
-                        sum_v += v
-
-                        x1, y1, x2, y2 = screw['bbox']
-                        cv2.rectangle(color_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                        cv2.circle(color_image, (u, v), 4, (0, 0, 255), -1)
-                        label = f"{z:.3f}m"
-                        cv2.putText(color_image, label, (u + 5, v + 5),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
-
-                        qx = screw.get('qx', 0.0)
-                        qy = screw.get('qy', 0.0)
-                        qz = screw.get('qz', 0.0)
-                        qw = screw.get('qw', 1.0)
-
-                        # transforms3d 的輸入順序為 (w, x, y, z)
-                        roll, pitch, yaw = quat2euler([qw, qx, qy, qz])
-
-                        sum_roll += roll
-                        sum_pitch += pitch
-                        sum_yaw += yaw
-
-                    avg_x = sum_x / 4
-                    avg_y = sum_y / 4
-                    avg_z = sum_z / 4
-                    avg_u = int(sum_u / 4)
-                    avg_v = int(sum_v / 4)
-                    avg_yaw = sum_yaw / 4
-
-                    node.last_avg_xyz = (avg_x, avg_y, avg_z)
-                    node.last_avg_uv = (avg_u, avg_v, avg_yaw)
+                if node.frame_count % 10 == 0:
+                    screw_results = node.screw_detector.detect(color_image, depth_frame)
+                    screw_results = remove_duplicate_detections(screw_results)
+                    screw_results = sorted(screw_results, key=lambda r: r['Z'])[:4]
+                    if len(screw_results) == 4:
+                        node.prev_screw_results = screw_results
                 else:
-                    node.get_logger().warn(f"⚠️ 僅偵測到 {len(filtered_results)} 顆螺絲孔，使用上次資料")
+                    screw_results = node.prev_screw_results
 
-                if node.last_avg_xyz is not None and node.last_avg_uv is not None:
-                    avg_x, avg_y, avg_z = node.last_avg_xyz
-                    avg_u, avg_v, avg_yaw = node.last_avg_uv
+                if len(screw_results) == 4:
+                    avg_x = avg_y = avg_z = 0.0
+                    avg_u = avg_v = 0
+                    quats = []
 
-                    tf_text = f"Center (Avg): X={avg_x:.3f} Y={avg_y:.3f} Z={avg_z:.3f}"
-                    cv2.putText(color_image, tf_text, (30, 40), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.7, (255, 255, 0), 2)
+                    dx = screw_results[2]['u'] - screw_results[0]['u']
+                    dy = screw_results[2]['v'] - screw_results[0]['v']
+                    yaw_rad = np.arctan2(dy, dx)
+                    yaw_deg = np.degrees(yaw_rad)
+                    quat = tf_transformations.quaternion_from_euler(0, 0, yaw_rad)
 
-                    cv2.circle(color_image, (avg_u, avg_v), 6, (0, 255, 255), -1)
-                    cv2.putText(color_image, "Center", (avg_u + 10, avg_v - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
+                    for i, r in enumerate(screw_results):
+                        u, v = r['u'], r['v']
+                        X, Y, Z = r['X'], r['Y'], r['Z']
 
-                    length = 40
-                    x_end_u = int(avg_u + length * np.cos(avg_yaw))
-                    x_end_v = int(avg_v + length * np.sin(avg_yaw))
-                    y_end_u = int(avg_u - length * np.sin(avg_yaw))
-                    y_end_v = int(avg_v + length * np.cos(avg_yaw))
+                        quats.append(quat)
 
-                    cv2.arrowedLine(color_image, (avg_u, avg_v), (x_end_u, x_end_v), (0, 0, 255), 2)
-                    cv2.arrowedLine(color_image, (avg_u, avg_v), (y_end_u, y_end_v), (0, 255, 0), 2)
+                        node.broadcast_screw_tf(i + 1, X, Y, Z, quat)
+                        avg_x += X
+                        avg_y += Y
+                        avg_z += Z
+                        avg_u += u
+                        avg_v += v
+
+                        cv2.circle(color_image, (u, v), 6, (0, 255, 0), -1)
+                        cv2.putText(color_image, f"X={X:.2f} Y={Y:.2f} Z={Z:.2f}", (u + 10, v - 10),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 255), 1)
+                        print(f"🟢 螺絲 {i+1}: (u={u}, v={v}), X={X:.3f}, Y={Y:.3f}, Z={Z:.3f}")
+
+                    avg_x /= 4
+                    avg_y /= 4
+                    avg_z /= 4
+                    center_u = avg_u // 4
+                    center_v = avg_v // 4
+
+                    # 使用 SciPy 計算歐拉角
+                    r = R.from_quat(quat)
+                    yaw_deg, pitch_deg, roll_deg = r.as_euler('zyx', degrees=True)
+                    print(f"[INFO] Orientation: Yaw={yaw_deg:.1f}°, Pitch={pitch_deg:.1f}°, Roll={roll_deg:.1f}°")
+
+                    node.prev_avg_center = (center_u, center_v)
+                    node.prev_avg_pose = (avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg)
+
+                if node.prev_avg_center and node.prev_avg_pose:
+                    center_u, center_v = node.prev_avg_center
+                    avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg = node.prev_avg_pose
+                    text1 = f"Avg X={avg_x:.2f} Y={avg_y:.2f} Z={avg_z:.2f}"
+                    # 顯示黃色圓點在平均位置
+                    cv2.circle(color_image, (int(center_u), int(center_v)), 8, (0, 255, 255), -1)
+
+                    cv2.putText(color_image, text1, (center_u - 100, center_v - 20),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
             if node.lshape_active:
-                l_results = node.l_shape_dector.detect_l_shape_lines(color_image)
-                for i, (cx, cy) in enumerate(l_results):
+                results = node.l_shape_dector.detect_l_shape_lines(color_image)
+                for cx, cy in results:
                     cv2.circle(color_image, (cx, cy), 5, (0, 255, 255), -1)
-                    cv2.putText(color_image, f"L{i+1}", (cx + 5, cy - 5),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
 
             if node.icp_fit_active:
                 dist = node.icp_fitter.icp_fit(color_image, depth_image, depth_intrin)
-                print(f"ICP Distance: {dist:.4f}" if dist is not None else "ICP fitting failed")
+                print(f"ICP Distance: {dist:.4f}" if dist else "ICP fitting failed")
 
             cv2.imshow("RealSense Detection", color_image)
-            if cv2.waitKey(1) & 0xFF == 27:
+            if cv2.waitKey(1) == ord('q'):
                 break
+
+            node.frame_count += 1
 
     finally:
         node.pipeline.stop()
-        node.destroy_node()
-        rclpy.shutdown()
         cv2.destroyAllWindows()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
