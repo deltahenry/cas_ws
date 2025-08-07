@@ -20,7 +20,7 @@ class DataNode(Node):
         super().__init__('data_node')
 
        
-        self.init_modubus()  # 初始化Modbus通訊
+        self.init_modbus()  # 初始化Modbus通訊
         self.init_io_port()  # 初始化IO端口
 
         
@@ -31,7 +31,7 @@ class DataNode(Node):
             10
         )
 
-    def init_modubus(self):
+    def init_modbus(self):
         """初始化叉車Modbus通訊"""
         # 設備參數
         ip = "192.168.1.10"           # 請換成你的設備 IP

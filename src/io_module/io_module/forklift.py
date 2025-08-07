@@ -227,11 +227,19 @@ class ForkliftControl(Machine):
         # up邏輯：
         elif self.data_node.current_direction == "up":
             if des_direction == "stop":
-                value_to_write = self.encode("fast", des_direction)  # 停止叉車
+                value_to_write = self.encode("fast", "stop")  # 停止叉車
                 self.data_node.fork_io_cmd_publisher.publish(value_to_write)
                 self.data_node.current_direction = "stop"  # 更新當前方向
                 self.data_node.current_speed = "stop"  # 更新當前速度
                 result = "done"  # 任務完成
+
+            elif current_height > distance_cmd + tolerance:
+                value_to_write = self.encode("fast", "stop")  # 停止叉車
+                self.data_node.fork_io_cmd_publisher.publish(value_to_write)
+                self.data_node.current_direction = "stop"  # 更新當前方向
+                self.data_node.current_speed = "stop"  # 更新當前速度
+                result = "done"  # 任務完成
+
             else:
                 value_to_write = self.encode(self.data_node.current_speed, self.data_node.current_direction) # 保持當前速度和方向
                 self.data_node.fork_io_cmd_publisher.publish(value_to_write)
