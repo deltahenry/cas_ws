@@ -114,11 +114,11 @@ class MyGUI(QWidget):
         # --- 新增: M1, M2, M3 輸入欄位 ---
         motor_layout = QHBoxLayout()
         self.m1_input = QLineEdit()
-        self.m1_input.setPlaceholderText("M1_len")
+        self.m1_input.setPlaceholderText("X")
         self.m2_input = QLineEdit()
-        self.m2_input.setPlaceholderText("M2_len")
+        self.m2_input.setPlaceholderText("Y")
         self.m3_input = QLineEdit()
-        self.m3_input.setPlaceholderText("M3_len")
+        self.m3_input.setPlaceholderText("Yaw")
 
         motor_layout.addWidget(self.m1_input)
         motor_layout.addWidget(self.m2_input)

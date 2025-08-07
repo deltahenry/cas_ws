@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'esp32_motor_control = motor_control_module.esp32_motor_control:main',
+            'set_home = motor_control_module.set_home:main',
         ],
     },
 )

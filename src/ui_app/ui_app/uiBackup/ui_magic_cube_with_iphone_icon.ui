@@ -379,9 +379,9 @@ Record</string>
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>10</y>
+           <y>0</y>
            <width>701</width>
-           <height>481</height>
+           <height>491</height>
           </rect>
          </property>
          <property name="styleSheet">
@@ -1210,7 +1210,7 @@ QPushButton:pressed {
           </layout>
          </widget>
         </widget>
-        <widget class="QWidget" name="AutoAndManualWidget" native="true">
+        <widget class="QStackedWidget" name="AutoAndManualStackedWidget">
          <property name="geometry">
           <rect>
            <x>720</x>
@@ -1219,217 +1219,235 @@ QPushButton:pressed {
            <height>681</height>
           </rect>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_24">
-          <item>
-           <widget class="QWidget" name="AutoManualButtons" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <property name="spacing">
-              <number>25</number>
+         <property name="frameShape">
+          <enum>QFrame::Shape::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Shadow::Raised</enum>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="BeforeAutoAndManualPage">
+          <layout class="QVBoxLayout" name="verticalLayout_25">
+           <item>
+            <widget class="QPushButton" name="INITBefore">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
-             <item>
-              <widget class="QPushButton" name="AutoButton">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>74</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true"/>
-               </property>
-               <property name="text">
-                <string>Auto</string>
-               </property>
-               <property name="checkable">
-                <bool>true</bool>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">AutoAndManualButtonGroup</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="ManualButton">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>74</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true"/>
-               </property>
-               <property name="text">
-                <string>Manual</string>
-               </property>
-               <property name="checkable">
-                <bool>true</bool>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">AutoAndManualButtonGroup</string>
-               </attribute>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QStackedWidget" name="ActionButtons">
-            <property name="styleSheet">
-             <string notr="true"/>
-            </property>
-            <property name="currentIndex">
-             <number>0</number>
-            </property>
-            <widget class="QWidget" name="ActionButtonsPage">
-             <layout class="QVBoxLayout" name="verticalLayout_12">
-              <item>
-               <widget class="QPushButton" name="INITButton">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>12</pointsize>
-                 </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
-                <property name="text">
-                 <string>INIT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="RunButton">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>12</pointsize>
-                 </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
-                <property name="text">
-                 <string>RUN</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayoutAutoPauseAndStop">
-                <property name="spacing">
-                 <number>6</number>
-                </property>
-                <property name="topMargin">
-                 <number>37</number>
-                </property>
-                <item>
-                 <widget class="QPushButton" name="AutoPauseButton">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true"/>
-                  </property>
-                  <property name="text">
-                   <string>Pause</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="AutoStopButton">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true"/>
-                  </property>
-                  <property name="text">
-                   <string>STOP</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="ManualButtonsPage">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>271</width>
+               <height>150</height>
+              </size>
+             </property>
+             <property name="sizeIncrement">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="baseSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
              <property name="styleSheet">
               <string notr="true"/>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_20">
+             <property name="text">
+              <string>INIT</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="StopBefore">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>271</width>
+               <height>150</height>
+              </size>
+             </property>
+             <property name="sizeIncrement">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="baseSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>STOP</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="ChooseAutoOrManualPage">
+          <layout class="QVBoxLayout" name="verticalLayout_26">
+           <item>
+            <widget class="QPushButton" name="ChooseAutoButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>271</width>
+               <height>150</height>
+              </size>
+             </property>
+             <property name="sizeIncrement">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="baseSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>Auto</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="ChooseManualButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>271</width>
+               <height>150</height>
+              </size>
+             </property>
+             <property name="sizeIncrement">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="baseSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>Manual</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="ActionButtonsMainPage">
+          <layout class="QVBoxLayout" name="verticalLayout_24">
+           <item>
+            <widget class="QWidget" name="AutoManualButtons" native="true">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <property name="spacing">
+               <number>25</number>
+              </property>
               <item>
-               <widget class="QPushButton" name="RoughAlignButton">
+               <widget class="QPushButton" name="AutoButton">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="maximumSize">
+                <property name="minimumSize">
                  <size>
-                  <width>16777215</width>
-                  <height>90</height>
+                  <width>0</width>
+                  <height>74</height>
                  </size>
                 </property>
                 <property name="font">
@@ -1441,28 +1459,31 @@ QPushButton:pressed {
                  <string notr="true"/>
                 </property>
                 <property name="text">
-                 <string>Rough Align</string>
+                 <string>Auto</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
                 </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
                 <attribute name="buttonGroup">
-                 <string notr="true">ManualButtons</string>
+                 <string notr="true">AutoAndManualButtonGroup</string>
                 </attribute>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="PreciseAlignButton">
+               <widget class="QPushButton" name="ManualButton">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="maximumSize">
+                <property name="minimumSize">
                  <size>
-                  <width>16777215</width>
-                  <height>90</height>
+                  <width>0</width>
+                  <height>74</height>
                  </size>
                 </property>
                 <property name="font">
@@ -1474,154 +1495,216 @@ QPushButton:pressed {
                  <string notr="true"/>
                 </property>
                 <property name="text">
-                 <string>Precise Align</string>
+                 <string>Manual</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
                 </property>
-                <attribute name="buttonGroup">
-                 <string notr="true">ManualButtons</string>
-                </attribute>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="PickButton">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>90</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>12</pointsize>
-                 </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
-                <property name="text">
-                 <string>Pick</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
+                <property name="checked">
+                 <bool>false</bool>
                 </property>
                 <attribute name="buttonGroup">
-                 <string notr="true">ManualButtons</string>
+                 <string notr="true">AutoAndManualButtonGroup</string>
                 </attribute>
                </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="AssemblyButton">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>90</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>12</pointsize>
-                 </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
-                <property name="text">
-                 <string>Assembly</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <attribute name="buttonGroup">
-                 <string notr="true">ManualButtons</string>
-                </attribute>
-               </widget>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayoutManualButtons">
-                <property name="topMargin">
-                 <number>22</number>
-                </property>
-                <item>
-                 <widget class="QPushButton" name="ManualPauseButton">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>16777215</width>
-                    <height>90</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true"/>
-                  </property>
-                  <property name="text">
-                   <string>Pause</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="ManualStopButton">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>16777215</width>
-                    <height>90</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true"/>
-                  </property>
-                  <property name="text">
-                   <string>STOP</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
               </item>
              </layout>
             </widget>
-           </widget>
-          </item>
-         </layout>
+           </item>
+           <item>
+            <widget class="QStackedWidget" name="ActionButtons">
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="currentIndex">
+              <number>0</number>
+             </property>
+             <widget class="QWidget" name="ActionButtonsPage">
+              <layout class="QVBoxLayout" name="verticalLayout_12">
+               <item>
+                <widget class="QPushButton" name="INITButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true"/>
+                 </property>
+                 <property name="text">
+                  <string>INIT</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="RunButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true"/>
+                 </property>
+                 <property name="text">
+                  <string>RUN</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="PauseButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true"/>
+                 </property>
+                 <property name="text">
+                  <string>PAUSE</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="StopButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true"/>
+                 </property>
+                 <property name="text">
+                  <string>STOP</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="ManualButtonsPage">
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_20">
+               <item>
+                <widget class="QPushButton" name="RoughAlignButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true"/>
+                 </property>
+                 <property name="text">
+                  <string>Rough Align</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="PreciseAlignButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true"/>
+                 </property>
+                 <property name="text">
+                  <string>Precise Align</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="PickButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true"/>
+                 </property>
+                 <property name="text">
+                  <string>Pick</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="AssemblyButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true"/>
+                 </property>
+                 <property name="text">
+                  <string>Assembly</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </widget>
        <widget class="QWidget" name="ComponentControlPage">
@@ -1641,7 +1724,7 @@ QPushButton:pressed {
           <enum>QFrame::Shadow::Raised</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="BeforeComponentControl">
           <layout class="QVBoxLayout" name="verticalLayout_28">
@@ -1718,22 +1801,6 @@ QPushButton:pressed {
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QPushButton" name="ChooseDIDO">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
-                <property name="text">
-                 <string>DI/DO</string>
-                </property>
-               </widget>
-              </item>
              </layout>
             </widget>
            </item>
@@ -1743,8 +1810,8 @@ QPushButton:pressed {
           <widget class="QWidget" name="ComponentControlOptionsWidget" native="true">
            <property name="geometry">
             <rect>
-             <x>10</x>
-             <y>0</y>
+             <x>-10</x>
+             <y>-10</y>
              <width>291</width>
              <height>101</height>
             </rect>
@@ -1752,9 +1819,6 @@ QPushButton:pressed {
            <layout class="QHBoxLayout" name="horizontalLayout_16">
             <property name="spacing">
              <number>25</number>
-            </property>
-            <property name="leftMargin">
-             <number>9</number>
             </property>
             <item>
              <widget class="QPushButton" name="MotorStartedButton">
@@ -1812,14 +1876,14 @@ QPushButton:pressed {
              <x>-10</x>
              <y>90</y>
              <width>321</width>
-             <height>591</height>
+             <height>581</height>
             </rect>
            </property>
            <property name="styleSheet">
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="MotorPage">
             <widget class="QPushButton" name="ControlUpCP">
@@ -2120,8 +2184,8 @@ QPushButton:pressed {
             <widget class="QPushButton" name="VisionOne">
              <property name="geometry">
               <rect>
-               <x>50</x>
-               <y>90</y>
+               <x>40</x>
+               <y>150</y>
                <width>233</width>
                <height>79</height>
               </rect>
@@ -2142,14 +2206,14 @@ QPushButton:pressed {
               <bool>true</bool>
              </property>
              <attribute name="buttonGroup">
-              <string notr="true">VisionButtonGroup</string>
+              <string notr="true">dete</string>
              </attribute>
             </widget>
             <widget class="QPushButton" name="VisionTwo">
              <property name="geometry">
               <rect>
-               <x>50</x>
-               <y>200</y>
+               <x>40</x>
+               <y>260</y>
                <width>233</width>
                <height>79</height>
               </rect>
@@ -2170,14 +2234,14 @@ QPushButton:pressed {
               <bool>true</bool>
              </property>
              <attribute name="buttonGroup">
-              <string notr="true">VisionButtonGroup</string>
+              <string notr="true">dete</string>
              </attribute>
             </widget>
             <widget class="QPushButton" name="VisionThree">
              <property name="geometry">
               <rect>
-               <x>50</x>
-               <y>300</y>
+               <x>40</x>
+               <y>360</y>
                <width>233</width>
                <height>79</height>
               </rect>
@@ -2198,7 +2262,7 @@ QPushButton:pressed {
               <bool>true</bool>
              </property>
              <attribute name="buttonGroup">
-              <string notr="true">VisionButtonGroup</string>
+              <string notr="true">dete</string>
              </attribute>
             </widget>
            </widget>
@@ -2222,7 +2286,7 @@ QPushButton:pressed {
              <property name="geometry">
               <rect>
                <x>30</x>
-               <y>480</y>
+               <y>490</y>
                <width>101</width>
                <height>91</height>
               </rect>
@@ -2251,7 +2315,7 @@ border: none;</string>
               </size>
              </property>
              <property name="checkable">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <attribute name="buttonGroup">
               <string notr="true">buttonGroup_2</string>
@@ -2261,7 +2325,7 @@ border: none;</string>
              <property name="geometry">
               <rect>
                <x>190</x>
-               <y>480</y>
+               <y>490</y>
                <width>101</width>
                <height>91</height>
               </rect>
@@ -2290,7 +2354,7 @@ border: none;</string>
               </size>
              </property>
              <property name="checkable">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <attribute name="buttonGroup">
               <string notr="true">buttonGroup_2</string>
@@ -2299,8 +2363,8 @@ border: none;</string>
             <widget class="QSlider" name="SliderLift">
              <property name="geometry">
               <rect>
-               <x>40</x>
-               <y>300</y>
+               <x>50</x>
+               <y>320</y>
                <width>231</width>
                <height>41</height>
               </rect>
@@ -2342,7 +2406,7 @@ QSlider::handle:horizontal {
              <property name="geometry">
               <rect>
                <x>20</x>
-               <y>170</y>
+               <y>190</y>
                <width>88</width>
                <height>71</height>
               </rect>
@@ -2361,7 +2425,7 @@ QSlider::handle:horizontal {
              <property name="geometry">
               <rect>
                <x>220</x>
-               <y>170</y>
+               <y>190</y>
                <width>88</width>
                <height>71</height>
               </rect>
@@ -2376,12 +2440,28 @@ QSlider::handle:horizontal {
               <string notr="true">buttonGroup</string>
              </attribute>
             </widget>
-            <widget class="QPushButton" name="StopForkliftButton">
+            <widget class="QPushButton" name="RunForkliftButton">
              <property name="geometry">
               <rect>
                <x>30</x>
-               <y>30</y>
-               <width>261</width>
+               <y>60</y>
+               <width>111</width>
+               <height>71</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Run</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="StopForkliftButton">
+             <property name="geometry">
+              <rect>
+               <x>170</x>
+               <y>60</y>
+               <width>121</width>
                <height>81</height>
               </rect>
              </property>
@@ -2392,11 +2472,27 @@ QSlider::handle:horizontal {
               <bool>false</bool>
              </property>
             </widget>
+            <widget class="QLabel" name="label_2">
+             <property name="geometry">
+              <rect>
+               <x>130</x>
+               <y>30</y>
+               <width>67</width>
+               <height>17</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Mode</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
             <widget class="QLabel" name="label_4">
              <property name="geometry">
               <rect>
                <x>130</x>
-               <y>140</y>
+               <y>150</y>
                <width>67</width>
                <height>17</height>
               </rect>
@@ -2412,13 +2508,13 @@ QSlider::handle:horizontal {
              <property name="geometry">
               <rect>
                <x>40</x>
-               <y>360</y>
+               <y>380</y>
                <width>241</width>
                <height>81</height>
               </rect>
              </property>
              <property name="text">
-              <string>Go to distance</string>
+              <string>Send Cmd</string>
              </property>
              <property name="checkable">
               <bool>false</bool>
@@ -2428,7 +2524,7 @@ QSlider::handle:horizontal {
              <property name="geometry">
               <rect>
                <x>120</x>
-               <y>170</y>
+               <y>190</y>
                <width>88</width>
                <height>71</height>
               </rect>
@@ -2447,7 +2543,7 @@ QSlider::handle:horizontal {
              <property name="geometry">
               <rect>
                <x>90</x>
-               <y>270</y>
+               <y>280</y>
                <width>141</width>
                <height>20</height>
               </rect>
@@ -2459,48 +2555,16 @@ QSlider::handle:horizontal {
               <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
             </widget>
-            <widget class="QLabel" name="label_2">
-             <property name="geometry">
-              <rect>
-               <x>50</x>
-               <y>570</y>
-               <width>67</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>10mm</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_9">
-             <property name="geometry">
-              <rect>
-               <x>210</x>
-               <y>570</y>
-               <width>67</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>10mm</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
            </widget>
            <widget class="QWidget" name="DIDOPage"/>
           </widget>
           <widget class="QWidget" name="ListOptionsWidget" native="true">
            <property name="geometry">
             <rect>
-             <x>10</x>
+             <x>20</x>
              <y>100</y>
-             <width>291</width>
-             <height>471</height>
+             <width>251</width>
+             <height>281</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -2604,7 +2668,7 @@ QSlider::handle:horizontal {
           </rect>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="VisionAndInfoPage">
           <widget class="QWidget" name="CameraWidgetInComponentControl" native="true">
@@ -3085,2436 +3149,1125 @@ border-radius: 6px;</string>
           </widget>
          </widget>
          <widget class="QWidget" name="DIDOContainerPage">
-          <widget class="QScrollArea" name="ScrollAreaDIDO">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>350</y>
-             <width>701</width>
-             <height>331</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <strikeout>false</strikeout>
-             <kerning>true</kerning>
-            </font>
-           </property>
-           <property name="tabletTracking">
-            <bool>true</bool>
-           </property>
-           <property name="focusPolicy">
-            <enum>Qt::FocusPolicy::StrongFocus</enum>
-           </property>
-           <property name="widgetResizable">
-            <bool>true</bool>
-           </property>
-           <widget class="QWidget" name="scrollAreaWidgetContents_2">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>685</width>
-              <height>648</height>
-             </rect>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_34" stretch="0">
-             <property name="spacing">
-              <number>9</number>
-             </property>
-             <item>
-              <widget class="QWidget" name="widget_2" native="true">
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_7">
-                <property name="leftMargin">
-                 <number>0</number>
-                </property>
-                <property name="topMargin">
-                 <number>0</number>
-                </property>
-                <property name="rightMargin">
-                 <number>0</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>0</number>
-                </property>
-                <property name="horizontalSpacing">
-                 <number>0</number>
-                </property>
-                <property name="verticalSpacing">
-                 <number>10</number>
-                </property>
-                <item row="3" column="4">
-                 <widget class="QPushButton" name="DO23">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>23</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="4">
-                 <widget class="QPushButton" name="DO5">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>5</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QPushButton" name="DO14">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>14</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="2">
-                 <widget class="QPushButton" name="DO9">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>9</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="6" column="1">
-                 <widget class="QPushButton" name="DO38">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>38</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="3">
-                 <widget class="QPushButton" name="DO22">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>22</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="7" column="5">
-                 <widget class="QPushButton" name="DO48">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>48</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="7" column="3">
-                 <widget class="QPushButton" name="DO46">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>46</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="3">
-                 <widget class="QPushButton" name="DO28">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>28</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QPushButton" name="DO2">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>2</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="6" column="4">
-                 <widget class="QPushButton" name="DO41">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>41</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="0">
-                 <widget class="QPushButton" name="DO31">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>31</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="4">
-                 <widget class="QPushButton" name="DO11">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>11</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="4">
-                 <widget class="QPushButton" name="DO17">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>17</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="3">
-                 <widget class="QPushButton" name="DO4">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>4</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="1">
-                 <widget class="QPushButton" name="DO20">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>20</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="2">
-                 <widget class="QPushButton" name="DO15">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>15</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="0">
-                 <widget class="QPushButton" name="DO19">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>19</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="2">
-                 <widget class="QPushButton" name="DO21">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>21</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="5">
-                 <widget class="QPushButton" name="DO18">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>18</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="5">
-                 <widget class="QPushButton" name="DO36">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>36</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QPushButton" name="DO8">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>8</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="6" column="5">
-                 <widget class="QPushButton" name="DO42">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>42</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="1">
-                 <widget class="QPushButton" name="DO26">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>26</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="0">
-                 <widget class="QPushButton" name="DO1">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>1</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="7" column="1">
-                 <widget class="QPushButton" name="DO44">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>44</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="3">
-                 <widget class="QPushButton" name="DO16">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>16</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="1">
-                 <widget class="QPushButton" name="DO32">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>32</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="3">
-                 <widget class="QPushButton" name="DO34">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>34</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="3">
-                 <widget class="QPushButton" name="DO10">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>10</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="4">
-                 <widget class="QPushButton" name="DO29">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>29</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="4">
-                 <widget class="QPushButton" name="DO35">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>35</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="6" column="0">
-                 <widget class="QPushButton" name="DO37">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>37</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="5">
-                 <widget class="QPushButton" name="DO12">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>12</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="7" column="0">
-                 <widget class="QPushButton" name="DO43">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>43</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="7" column="4">
-                 <widget class="QPushButton" name="DO47">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>47</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="5">
-                 <widget class="QPushButton" name="DO30">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>30</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="5">
-                 <widget class="QPushButton" name="DO24">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>24</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="0">
-                 <widget class="QPushButton" name="DO25">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>25</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="5">
-                 <widget class="QPushButton" name="DO6">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>6</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QPushButton" name="DO13">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>13</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QPushButton" name="DO7">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>7</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="2">
-                 <widget class="QPushButton" name="DO33">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>33</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="2">
-                 <widget class="QPushButton" name="DO3">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>3</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="2">
-                 <widget class="QPushButton" name="DO27">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>27</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="6" column="3">
-                 <widget class="QPushButton" name="DO40">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>40</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="6" column="2">
-                 <widget class="QPushButton" name="DO39">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>39</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="7" column="2">
-                 <widget class="QPushButton" name="DO45">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>95</width>
-                    <height>70</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>100</width>
-                    <height>100</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-                  </property>
-                  <property name="text">
-                   <string>45</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </widget>
-          <widget class="QWidget" name="gridLayoutWidget">
+          <widget class="QWidget" name="widget_2" native="true">
            <property name="geometry">
             <rect>
              <x>20</x>
-             <y>20</y>
-             <width>661</width>
-             <height>301</height>
+             <y>0</y>
+             <width>336</width>
+             <height>671</height>
             </rect>
            </property>
-           <layout class="QGridLayout" name="gridLayout_8">
-            <property name="bottomMargin">
-             <number>1</number>
-            </property>
-            <item row="1" column="3">
-             <widget class="QPushButton" name="DI8">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>8</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
+           <layout class="QGridLayout" name="gridLayout_7">
+            <item row="6" column="2">
+             <widget class="QWidget" name="widget_17" native="true">
+              <widget class="QLabel" name="label_24">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y13</string>
+               </property>
+              </widget>
              </widget>
             </item>
-            <item row="0" column="2">
-             <widget class="QPushButton" name="DI3">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>3</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="3">
-             <widget class="QPushButton" name="DI12">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>12</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
+            <item row="7" column="0">
+             <widget class="QWidget" name="widget_10" native="true">
+              <widget class="QLabel" name="label_15">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y6</string>
+               </property>
+              </widget>
              </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QPushButton" name="DI7">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
+             <widget class="QWidget" name="widget_12" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_31">
+               <item>
+                <widget class="QLabel" name="label_17">
+                 <property name="text">
+                  <string>Y8</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="y0_3" native="true">
+                 <property name="styleSheet">
+                  <string notr="true">    border: none;
     border-radius: 24px;
+    background-color: #000000;
 </string>
-              </property>
-              <property name="text">
-               <string>7</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_37">
+                  <item>
+                   <widget class="QPushButton" name="CircleOff_5">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: white;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+                   <widget class="QPushButton" name="CircleOn_5">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: #000000;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
-            <item row="2" column="2">
-             <widget class="QPushButton" name="DI11">
+            <item row="0" column="0" colspan="3">
+             <widget class="QLabel" name="label_8">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
               <property name="text">
-               <string>11</string>
+               <string>DO</string>
               </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="3">
-             <widget class="QPushButton" name="DI16">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>16</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QPushButton" name="DI9">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>9</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <widget class="QPushButton" name="DI4">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>4</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QPushButton" name="DI2">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>2</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QPushButton" name="DI14">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>14</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
             <item row="3" column="2">
-             <widget class="QPushButton" name="DI15">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
+             <widget class="QWidget" name="widget_14" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_32">
+               <item>
+                <widget class="QLabel" name="label_21">
+                 <property name="text">
+                  <string>Y10</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="y1Widget_3" native="true">
+                 <property name="styleSheet">
+                  <string notr="true">    border: none;
     border-radius: 24px;
+    background-color: #000000;
 </string>
-              </property>
-              <property name="text">
-               <string>15</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_40">
+                  <item>
+                   <widget class="QPushButton" name="pushButton_4">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: white;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+                   <widget class="QPushButton" name="CircleOn_8">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: #000000;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QPushButton" name="DI6">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>6</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
+            <item row="7" column="2">
+             <widget class="QWidget" name="widget_18" native="true">
+              <widget class="QLabel" name="label_25">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y14</string>
+               </property>
+              </widget>
              </widget>
             </item>
-            <item row="0" column="0">
-             <widget class="QPushButton" name="DI1">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>1</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
+            <item row="5" column="2">
+             <widget class="QWidget" name="widget_16" native="true">
+              <widget class="QLabel" name="label_23">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y12</string>
+               </property>
+              </widget>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QPushButton" name="DI10">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>10</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
+            <item row="8" column="0">
+             <widget class="QWidget" name="widget_11" native="true">
+              <widget class="QLabel" name="label_16">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y7</string>
+               </property>
+              </widget>
              </widget>
             </item>
-            <item row="3" column="0">
-             <widget class="QPushButton" name="DI13">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
-    border-radius: 24px;
-</string>
-              </property>
-              <property name="text">
-               <string>13</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
+            <item row="8" column="2">
+             <widget class="QWidget" name="widget_19" native="true">
+              <widget class="QLabel" name="label_26">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y15</string>
+               </property>
+              </widget>
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QPushButton" name="DI5">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>95</width>
-                <height>70</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">    border: none;
+             <widget class="QWidget" name="widget_4" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_17">
+               <item>
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>Y0</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="y0" native="true">
+                 <property name="styleSheet">
+                  <string notr="true">    border: none;
     border-radius: 24px;
+    background-color: #000000;
 </string>
-              </property>
-              <property name="text">
-               <string>5</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_33">
+                  <item>
+                   <widget class="QPushButton" name="CircleOff">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: white;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+                   <widget class="QPushButton" name="CircleOn">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: #000000;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QWidget" name="widget_13" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_29">
+               <item>
+                <widget class="QLabel" name="label_20">
+                 <property name="text">
+                  <string>Y9</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="y0_4" native="true">
+                 <property name="styleSheet">
+                  <string notr="true">    border: none;
+    border-radius: 24px;
+    background-color: #000000;
+</string>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_35">
+                  <item>
+                   <widget class="QPushButton" name="CircleOff_3">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: white;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+                   <widget class="QPushButton" name="CircleOn_3">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: #000000;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QWidget" name="Y1Container" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_23">
+               <item>
+                <widget class="QLabel" name="label_10">
+                 <property name="text">
+                  <string>Y1</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="y1Widget" native="true">
+                 <property name="styleSheet">
+                  <string notr="true">    border: none;
+    border-radius: 24px;
+    background-color: #000000;
+</string>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_34">
+                  <item>
+                   <widget class="QPushButton" name="pushButton">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: white;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+                   <widget class="QPushButton" name="CircleOn_2">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: #000000;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QWidget" name="widget_6" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_30">
+               <item>
+                <widget class="QLabel" name="label_11">
+                 <property name="text">
+                  <string>Y2</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="y1Widget_2" native="true">
+                 <property name="styleSheet">
+                  <string notr="true">    border: none;
+    border-radius: 24px;
+    background-color: #000000;
+</string>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_36">
+                  <item>
+                   <widget class="QPushButton" name="pushButton_2">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: white;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+                   <widget class="QPushButton" name="CircleOn_4">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: #000000;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QWidget" name="widget_7" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_33">
+               <item>
+                <widget class="QLabel" name="label_12">
+                 <property name="text">
+                  <string>Y3</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="y1Widget_4" native="true">
+                 <property name="styleSheet">
+                  <string notr="true">    border: none;
+    border-radius: 24px;
+    background-color: #000000;
+</string>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_42">
+                  <item>
+                   <widget class="QPushButton" name="pushButton_6">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: white;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+                   <widget class="QPushButton" name="CircleOn_10">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: #000000;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QWidget" name="widget_8" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_35">
+               <item>
+                <widget class="QLabel" name="label_13">
+                 <property name="text">
+                  <string>Y4</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="y1Widget_6" native="true">
+                 <property name="styleSheet">
+                  <string notr="true">    border: none;
+    border-radius: 24px;
+    background-color: #000000;
+</string>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_45">
+                  <item>
+                   <widget class="QPushButton" name="pushButton_9">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: white;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+                   <widget class="QPushButton" name="CircleOn_13">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: #000000;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QWidget" name="widget_15" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_34">
+               <item>
+                <widget class="QLabel" name="label_22">
+                 <property name="text">
+                  <string>Y11</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="y1Widget_5" native="true">
+                 <property name="styleSheet">
+                  <string notr="true">    border: none;
+    border-radius: 24px;
+    background-color: #000000;
+</string>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_44">
+                  <item>
+                   <widget class="QPushButton" name="pushButton_8">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: white;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+                   <widget class="QPushButton" name="CircleOn_12">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: #000000;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QWidget" name="widget_9" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_47">
+               <item>
+                <widget class="QLabel" name="label_14">
+                 <property name="text">
+                  <string>Y5</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="y1Widget_13" native="true">
+                 <property name="styleSheet">
+                  <string notr="true">    border: none;
+    border-radius: 24px;
+    background-color: #000000;
+</string>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_65">
+                  <item>
+                   <widget class="QPushButton" name="pushButton_16">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: white;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop">
+                   <widget class="QPushButton" name="CircleOn_23">
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: none;
+    border-radius: 15px;
+    background-color: #000000;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
            </layout>
           </widget>
-          <widget class="QLabel" name="label_5">
+          <widget class="QWidget" name="widget_3" native="true">
            <property name="geometry">
             <rect>
-             <x>320</x>
-             <y>0</y>
-             <width>67</width>
-             <height>17</height>
+             <x>530</x>
+             <y>460</y>
+             <width>49</width>
+             <height>163</height>
             </rect>
            </property>
-           <property name="font">
-            <font>
-             <pointsize>16</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>DI</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignCenter</set>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_8">
-           <property name="geometry">
-            <rect>
-             <x>320</x>
-             <y>330</y>
-             <width>67</width>
-             <height>17</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>16</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>DO</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignCenter</set>
-           </property>
+           <layout class="QGridLayout" name="gridLayout_8">
+            <item row="2" column="0">
+             <widget class="QWidget" name="widget_38" native="true">
+              <widget class="QLabel" name="label_46">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y1</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <widget class="QWidget" name="widget_48" native="true">
+              <widget class="QLabel" name="label_56">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y6</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QWidget" name="widget_40" native="true">
+              <widget class="QLabel" name="label_48">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y2</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QWidget" name="widget_39" native="true">
+              <widget class="QLabel" name="label_47">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y9</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QWidget" name="widget_41" native="true">
+              <widget class="QLabel" name="label_49">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y10</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QWidget" name="widget_44" native="true">
+              <widget class="QLabel" name="label_52">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y4</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="8" column="0">
+             <widget class="QWidget" name="widget_50" native="true">
+              <widget class="QLabel" name="label_58">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y7</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QWidget" name="widget_42" native="true">
+              <widget class="QLabel" name="label_50">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y3</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QWidget" name="widget_45" native="true">
+              <widget class="QLabel" name="label_53">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y12</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QWidget" name="widget_43" native="true">
+              <widget class="QLabel" name="label_51">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y11</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="0" column="0" colspan="2">
+             <widget class="QLabel" name="label_60">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>DI</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QWidget" name="widget_36" native="true">
+              <widget class="QLabel" name="label_44">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y0</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="7" column="1">
+             <widget class="QWidget" name="widget_49" native="true">
+              <widget class="QLabel" name="label_57">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y14</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QWidget" name="widget_46" native="true">
+              <widget class="QLabel" name="label_54">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y5</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QWidget" name="widget_47" native="true">
+              <widget class="QLabel" name="label_55">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y13</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="8" column="1">
+             <widget class="QWidget" name="widget_51" native="true">
+              <widget class="QLabel" name="label_59">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y15</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QWidget" name="widget_37" native="true">
+              <widget class="QLabel" name="label_45">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Y8</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </widget>
         </widget>
@@ -6070,6 +4823,7 @@ border-radius: 6px;</string>
       <zorder>Line</zorder>
       <zorder>SystemSettingsButton</zorder>
       <zorder>SignalLightsWidget</zorder>
+      <zorder>DeltaLogo</zorder>
       <zorder>MenuButtons</zorder>
       <zorder>WorkOrderWidget</zorder>
       <zorder>RecipeWidget</zorder>
@@ -6078,7 +4832,6 @@ border-radius: 6px;</string>
       <zorder>CartHeightWidget</zorder>
       <zorder>CartDepthWidget</zorder>
       <zorder>DateWidget</zorder>
-      <zorder>DeltaLogo</zorder>
      </widget>
     </item>
    </layout>
@@ -6087,22 +4840,13 @@ border-radius: 6px;</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
-  <buttongroup name="VisionButtonGroup">
-   <property name="exclusive">
-    <bool>false</bool>
-   </property>
-  </buttongroup>
+  <buttongroup name="FontSizeButtonGroup"/>
+  <buttongroup name="dete"/>
+  <buttongroup name="AutoAndManualButtonGroup"/>
   <buttongroup name="buttonGroup_2"/>
   <buttongroup name="LanguageButtonGroup"/>
-  <buttongroup name="AutoAndManualButtonGroup"/>
-  <buttongroup name="FontSizeButtonGroup"/>
-  <buttongroup name="ManualButtons">
-   <property name="exclusive">
-    <bool>false</bool>
-   </property>
-  </buttongroup>
-  <buttongroup name="ThemeButtonGroup"/>
   <buttongroup name="MenuButtonGroup"/>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="ThemeButtonGroup"/>
  </buttongroups>
 </ui>

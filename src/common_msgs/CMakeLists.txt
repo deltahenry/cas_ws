@@ -25,6 +25,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/RunCmd.msg"
     "msg/TaskCmd.msg"
     "msg/TaskState.msg"
+    "msg/DIDOCmd.msg"
     
 )
 

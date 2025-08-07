@@ -17,8 +17,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QButtonGroup, QFrame, QGridLayout,
     QHBoxLayout, QLabel, QMainWindow, QPushButton,
-    QSizePolicy, QSlider, QStackedWidget, QVBoxLayout,
-    QWidget)
+    QScrollArea, QSizePolicy, QSlider, QStackedWidget,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -191,7 +191,7 @@ class Ui_MainWindow(object):
         self.MainPagePage.setObjectName(u"MainPagePage")
         self.CameraWidget = QWidget(self.MainPagePage)
         self.CameraWidget.setObjectName(u"CameraWidget")
-        self.CameraWidget.setGeometry(QRect(0, 0, 701, 491))
+        self.CameraWidget.setGeometry(QRect(0, 10, 701, 481))
         self.CameraWidget.setStyleSheet(u"background-color: #000000;")
         self.horizontalLayout_2 = QHBoxLayout(self.CameraWidget)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
@@ -702,85 +702,12 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7.addWidget(self.Info)
 
         self.ProcessAndInfoStackedWidget.addWidget(self.InformationPage)
-        self.AutoAndManualStackedWidget = QStackedWidget(self.MainPagePage)
-        self.AutoAndManualStackedWidget.setObjectName(u"AutoAndManualStackedWidget")
-        self.AutoAndManualStackedWidget.setGeometry(QRect(720, 10, 291, 681))
-        self.AutoAndManualStackedWidget.setFrameShape(QFrame.Shape.StyledPanel)
-        self.AutoAndManualStackedWidget.setFrameShadow(QFrame.Shadow.Raised)
-        self.BeforeAutoAndManualPage = QWidget()
-        self.BeforeAutoAndManualPage.setObjectName(u"BeforeAutoAndManualPage")
-        self.verticalLayout_25 = QVBoxLayout(self.BeforeAutoAndManualPage)
-        self.verticalLayout_25.setObjectName(u"verticalLayout_25")
-        self.INITBefore = QPushButton(self.BeforeAutoAndManualPage)
-        self.INITBefore.setObjectName(u"INITBefore")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.INITBefore.sizePolicy().hasHeightForWidth())
-        self.INITBefore.setSizePolicy(sizePolicy3)
-        self.INITBefore.setMinimumSize(QSize(0, 0))
-        self.INITBefore.setMaximumSize(QSize(271, 150))
-        self.INITBefore.setSizeIncrement(QSize(0, 0))
-        self.INITBefore.setBaseSize(QSize(0, 0))
-        self.INITBefore.setFont(font)
-        self.INITBefore.setStyleSheet(u"")
-        self.INITBefore.setCheckable(False)
-
-        self.verticalLayout_25.addWidget(self.INITBefore)
-
-        self.StopBefore = QPushButton(self.BeforeAutoAndManualPage)
-        self.StopBefore.setObjectName(u"StopBefore")
-        sizePolicy3.setHeightForWidth(self.StopBefore.sizePolicy().hasHeightForWidth())
-        self.StopBefore.setSizePolicy(sizePolicy3)
-        self.StopBefore.setMinimumSize(QSize(0, 0))
-        self.StopBefore.setMaximumSize(QSize(271, 150))
-        self.StopBefore.setSizeIncrement(QSize(0, 0))
-        self.StopBefore.setBaseSize(QSize(0, 0))
-        self.StopBefore.setFont(font)
-        self.StopBefore.setStyleSheet(u"")
-        self.StopBefore.setCheckable(False)
-
-        self.verticalLayout_25.addWidget(self.StopBefore)
-
-        self.AutoAndManualStackedWidget.addWidget(self.BeforeAutoAndManualPage)
-        self.ChooseAutoOrManualPage = QWidget()
-        self.ChooseAutoOrManualPage.setObjectName(u"ChooseAutoOrManualPage")
-        self.verticalLayout_26 = QVBoxLayout(self.ChooseAutoOrManualPage)
-        self.verticalLayout_26.setObjectName(u"verticalLayout_26")
-        self.ChooseAutoButton = QPushButton(self.ChooseAutoOrManualPage)
-        self.ChooseAutoButton.setObjectName(u"ChooseAutoButton")
-        sizePolicy3.setHeightForWidth(self.ChooseAutoButton.sizePolicy().hasHeightForWidth())
-        self.ChooseAutoButton.setSizePolicy(sizePolicy3)
-        self.ChooseAutoButton.setMinimumSize(QSize(0, 0))
-        self.ChooseAutoButton.setMaximumSize(QSize(271, 150))
-        self.ChooseAutoButton.setSizeIncrement(QSize(0, 0))
-        self.ChooseAutoButton.setBaseSize(QSize(0, 0))
-        self.ChooseAutoButton.setFont(font)
-        self.ChooseAutoButton.setStyleSheet(u"")
-        self.ChooseAutoButton.setCheckable(False)
-
-        self.verticalLayout_26.addWidget(self.ChooseAutoButton)
-
-        self.ChooseManualButton = QPushButton(self.ChooseAutoOrManualPage)
-        self.ChooseManualButton.setObjectName(u"ChooseManualButton")
-        sizePolicy3.setHeightForWidth(self.ChooseManualButton.sizePolicy().hasHeightForWidth())
-        self.ChooseManualButton.setSizePolicy(sizePolicy3)
-        self.ChooseManualButton.setMinimumSize(QSize(0, 0))
-        self.ChooseManualButton.setMaximumSize(QSize(271, 150))
-        self.ChooseManualButton.setSizeIncrement(QSize(0, 0))
-        self.ChooseManualButton.setBaseSize(QSize(0, 0))
-        self.ChooseManualButton.setFont(font)
-        self.ChooseManualButton.setStyleSheet(u"")
-        self.ChooseManualButton.setCheckable(False)
-
-        self.verticalLayout_26.addWidget(self.ChooseManualButton)
-
-        self.AutoAndManualStackedWidget.addWidget(self.ChooseAutoOrManualPage)
-        self.ActionButtonsMainPage = QWidget()
-        self.ActionButtonsMainPage.setObjectName(u"ActionButtonsMainPage")
-        self.verticalLayout_24 = QVBoxLayout(self.ActionButtonsMainPage)
+        self.AutoAndManualWidget = QWidget(self.MainPagePage)
+        self.AutoAndManualWidget.setObjectName(u"AutoAndManualWidget")
+        self.AutoAndManualWidget.setGeometry(QRect(720, 10, 291, 681))
+        self.verticalLayout_24 = QVBoxLayout(self.AutoAndManualWidget)
         self.verticalLayout_24.setObjectName(u"verticalLayout_24")
-        self.AutoManualButtons = QWidget(self.ActionButtonsMainPage)
+        self.AutoManualButtons = QWidget(self.AutoAndManualWidget)
         self.AutoManualButtons.setObjectName(u"AutoManualButtons")
         self.horizontalLayout_5 = QHBoxLayout(self.AutoManualButtons)
         self.horizontalLayout_5.setSpacing(25)
@@ -816,13 +743,22 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_24.addWidget(self.AutoManualButtons)
 
-        self.ActionButtons = QStackedWidget(self.ActionButtonsMainPage)
+        self.ActionButtons = QStackedWidget(self.AutoAndManualWidget)
         self.ActionButtons.setObjectName(u"ActionButtons")
         self.ActionButtons.setStyleSheet(u"")
         self.ActionButtonsPage = QWidget()
         self.ActionButtonsPage.setObjectName(u"ActionButtonsPage")
         self.verticalLayout_12 = QVBoxLayout(self.ActionButtonsPage)
         self.verticalLayout_12.setObjectName(u"verticalLayout_12")
+        self.INITButton = QPushButton(self.ActionButtonsPage)
+        self.INITButton.setObjectName(u"INITButton")
+        sizePolicy.setHeightForWidth(self.INITButton.sizePolicy().hasHeightForWidth())
+        self.INITButton.setSizePolicy(sizePolicy)
+        self.INITButton.setFont(font)
+        self.INITButton.setStyleSheet(u"")
+
+        self.verticalLayout_12.addWidget(self.INITButton)
+
         self.RunButton = QPushButton(self.ActionButtonsPage)
         self.RunButton.setObjectName(u"RunButton")
         sizePolicy.setHeightForWidth(self.RunButton.sizePolicy().hasHeightForWidth())
@@ -832,23 +768,32 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_12.addWidget(self.RunButton)
 
-        self.StopButton = QPushButton(self.ActionButtonsPage)
-        self.StopButton.setObjectName(u"StopButton")
-        sizePolicy.setHeightForWidth(self.StopButton.sizePolicy().hasHeightForWidth())
-        self.StopButton.setSizePolicy(sizePolicy)
-        self.StopButton.setFont(font)
-        self.StopButton.setStyleSheet(u"")
+        self.verticalLayoutAutoPauseAndStop = QVBoxLayout()
+        self.verticalLayoutAutoPauseAndStop.setSpacing(6)
+        self.verticalLayoutAutoPauseAndStop.setObjectName(u"verticalLayoutAutoPauseAndStop")
+        self.verticalLayoutAutoPauseAndStop.setContentsMargins(-1, 37, -1, -1)
+        self.AutoPauseButton = QPushButton(self.ActionButtonsPage)
+        self.AutoPauseButton.setObjectName(u"AutoPauseButton")
+        sizePolicy.setHeightForWidth(self.AutoPauseButton.sizePolicy().hasHeightForWidth())
+        self.AutoPauseButton.setSizePolicy(sizePolicy)
+        self.AutoPauseButton.setFont(font)
+        self.AutoPauseButton.setStyleSheet(u"")
+        self.AutoPauseButton.setCheckable(True)
 
-        self.verticalLayout_12.addWidget(self.StopButton)
+        self.verticalLayoutAutoPauseAndStop.addWidget(self.AutoPauseButton)
 
-        self.AutoResetButton = QPushButton(self.ActionButtonsPage)
-        self.AutoResetButton.setObjectName(u"AutoResetButton")
-        sizePolicy.setHeightForWidth(self.AutoResetButton.sizePolicy().hasHeightForWidth())
-        self.AutoResetButton.setSizePolicy(sizePolicy)
-        self.AutoResetButton.setFont(font)
-        self.AutoResetButton.setStyleSheet(u"")
+        self.AutoStopButton = QPushButton(self.ActionButtonsPage)
+        self.AutoStopButton.setObjectName(u"AutoStopButton")
+        sizePolicy.setHeightForWidth(self.AutoStopButton.sizePolicy().hasHeightForWidth())
+        self.AutoStopButton.setSizePolicy(sizePolicy)
+        self.AutoStopButton.setFont(font)
+        self.AutoStopButton.setStyleSheet(u"")
+        self.AutoStopButton.setCheckable(False)
 
-        self.verticalLayout_12.addWidget(self.AutoResetButton)
+        self.verticalLayoutAutoPauseAndStop.addWidget(self.AutoStopButton)
+
+
+        self.verticalLayout_12.addLayout(self.verticalLayoutAutoPauseAndStop)
 
         self.ActionButtons.addWidget(self.ActionButtonsPage)
         self.ManualButtonsPage = QWidget()
@@ -857,53 +802,515 @@ class Ui_MainWindow(object):
         self.verticalLayout_20 = QVBoxLayout(self.ManualButtonsPage)
         self.verticalLayout_20.setObjectName(u"verticalLayout_20")
         self.RoughAlignButton = QPushButton(self.ManualButtonsPage)
+        self.ManualButtons = QButtonGroup(MainWindow)
+        self.ManualButtons.setObjectName(u"ManualButtons")
+        self.ManualButtons.setExclusive(False)
+        self.ManualButtons.addButton(self.RoughAlignButton)
         self.RoughAlignButton.setObjectName(u"RoughAlignButton")
         sizePolicy.setHeightForWidth(self.RoughAlignButton.sizePolicy().hasHeightForWidth())
         self.RoughAlignButton.setSizePolicy(sizePolicy)
+        self.RoughAlignButton.setMaximumSize(QSize(16777215, 90))
         self.RoughAlignButton.setFont(font)
         self.RoughAlignButton.setStyleSheet(u"")
-        self.RoughAlignButton.setCheckable(False)
+        self.RoughAlignButton.setCheckable(True)
 
         self.verticalLayout_20.addWidget(self.RoughAlignButton)
 
         self.PreciseAlignButton = QPushButton(self.ManualButtonsPage)
+        self.ManualButtons.addButton(self.PreciseAlignButton)
         self.PreciseAlignButton.setObjectName(u"PreciseAlignButton")
         sizePolicy.setHeightForWidth(self.PreciseAlignButton.sizePolicy().hasHeightForWidth())
         self.PreciseAlignButton.setSizePolicy(sizePolicy)
+        self.PreciseAlignButton.setMaximumSize(QSize(16777215, 90))
         self.PreciseAlignButton.setFont(font)
         self.PreciseAlignButton.setStyleSheet(u"")
+        self.PreciseAlignButton.setCheckable(True)
 
         self.verticalLayout_20.addWidget(self.PreciseAlignButton)
 
         self.PickButton = QPushButton(self.ManualButtonsPage)
+        self.ManualButtons.addButton(self.PickButton)
         self.PickButton.setObjectName(u"PickButton")
         sizePolicy.setHeightForWidth(self.PickButton.sizePolicy().hasHeightForWidth())
         self.PickButton.setSizePolicy(sizePolicy)
+        self.PickButton.setMaximumSize(QSize(16777215, 90))
         self.PickButton.setFont(font)
         self.PickButton.setStyleSheet(u"")
+        self.PickButton.setCheckable(True)
 
         self.verticalLayout_20.addWidget(self.PickButton)
 
         self.AssemblyButton = QPushButton(self.ManualButtonsPage)
+        self.ManualButtons.addButton(self.AssemblyButton)
         self.AssemblyButton.setObjectName(u"AssemblyButton")
         sizePolicy.setHeightForWidth(self.AssemblyButton.sizePolicy().hasHeightForWidth())
         self.AssemblyButton.setSizePolicy(sizePolicy)
+        self.AssemblyButton.setMaximumSize(QSize(16777215, 90))
         self.AssemblyButton.setFont(font)
         self.AssemblyButton.setStyleSheet(u"")
+        self.AssemblyButton.setCheckable(True)
 
         self.verticalLayout_20.addWidget(self.AssemblyButton)
+
+        self.verticalLayoutManualButtons = QVBoxLayout()
+        self.verticalLayoutManualButtons.setObjectName(u"verticalLayoutManualButtons")
+        self.verticalLayoutManualButtons.setContentsMargins(-1, 22, -1, -1)
+        self.ManualPauseButton = QPushButton(self.ManualButtonsPage)
+        self.ManualPauseButton.setObjectName(u"ManualPauseButton")
+        sizePolicy.setHeightForWidth(self.ManualPauseButton.sizePolicy().hasHeightForWidth())
+        self.ManualPauseButton.setSizePolicy(sizePolicy)
+        self.ManualPauseButton.setMaximumSize(QSize(16777215, 90))
+        self.ManualPauseButton.setFont(font)
+        self.ManualPauseButton.setStyleSheet(u"")
+        self.ManualPauseButton.setCheckable(True)
+
+        self.verticalLayoutManualButtons.addWidget(self.ManualPauseButton)
+
+        self.ManualStopButton = QPushButton(self.ManualButtonsPage)
+        self.ManualStopButton.setObjectName(u"ManualStopButton")
+        sizePolicy.setHeightForWidth(self.ManualStopButton.sizePolicy().hasHeightForWidth())
+        self.ManualStopButton.setSizePolicy(sizePolicy)
+        self.ManualStopButton.setMaximumSize(QSize(16777215, 90))
+        self.ManualStopButton.setFont(font)
+        self.ManualStopButton.setStyleSheet(u"")
+        self.ManualStopButton.setCheckable(False)
+
+        self.verticalLayoutManualButtons.addWidget(self.ManualStopButton)
+
+
+        self.verticalLayout_20.addLayout(self.verticalLayoutManualButtons)
 
         self.ActionButtons.addWidget(self.ManualButtonsPage)
 
         self.verticalLayout_24.addWidget(self.ActionButtons)
 
-        self.AutoAndManualStackedWidget.addWidget(self.ActionButtonsMainPage)
         self.ParentStackedWidgetToChangeMenuOptions.addWidget(self.MainPagePage)
         self.ComponentControlPage = QWidget()
         self.ComponentControlPage.setObjectName(u"ComponentControlPage")
-        self.CameraWidgetInComponentControl = QWidget(self.ComponentControlPage)
+        self.ComponentControlStackedWidget = QStackedWidget(self.ComponentControlPage)
+        self.ComponentControlStackedWidget.setObjectName(u"ComponentControlStackedWidget")
+        self.ComponentControlStackedWidget.setGeometry(QRect(710, 10, 311, 681))
+        self.ComponentControlStackedWidget.setFrameShape(QFrame.Shape.StyledPanel)
+        self.ComponentControlStackedWidget.setFrameShadow(QFrame.Shadow.Raised)
+        self.BeforeComponentControl = QWidget()
+        self.BeforeComponentControl.setObjectName(u"BeforeComponentControl")
+        self.verticalLayout_28 = QVBoxLayout(self.BeforeComponentControl)
+        self.verticalLayout_28.setObjectName(u"verticalLayout_28")
+        self.ChooseListOptionsWidget = QWidget(self.BeforeComponentControl)
+        self.ChooseListOptionsWidget.setObjectName(u"ChooseListOptionsWidget")
+        sizePolicy1.setHeightForWidth(self.ChooseListOptionsWidget.sizePolicy().hasHeightForWidth())
+        self.ChooseListOptionsWidget.setSizePolicy(sizePolicy1)
+        self.verticalLayout_27 = QVBoxLayout(self.ChooseListOptionsWidget)
+        self.verticalLayout_27.setObjectName(u"verticalLayout_27")
+        self.ChooseMotor = QPushButton(self.ChooseListOptionsWidget)
+        self.ChooseMotor.setObjectName(u"ChooseMotor")
+        sizePolicy.setHeightForWidth(self.ChooseMotor.sizePolicy().hasHeightForWidth())
+        self.ChooseMotor.setSizePolicy(sizePolicy)
+        self.ChooseMotor.setStyleSheet(u"")
+
+        self.verticalLayout_27.addWidget(self.ChooseMotor)
+
+        self.ChooseVision = QPushButton(self.ChooseListOptionsWidget)
+        self.ChooseVision.setObjectName(u"ChooseVision")
+        sizePolicy.setHeightForWidth(self.ChooseVision.sizePolicy().hasHeightForWidth())
+        self.ChooseVision.setSizePolicy(sizePolicy)
+        self.ChooseVision.setStyleSheet(u"background-color: #000000;")
+
+        self.verticalLayout_27.addWidget(self.ChooseVision)
+
+        self.ChooseClipper = QPushButton(self.ChooseListOptionsWidget)
+        self.ChooseClipper.setObjectName(u"ChooseClipper")
+        sizePolicy.setHeightForWidth(self.ChooseClipper.sizePolicy().hasHeightForWidth())
+        self.ChooseClipper.setSizePolicy(sizePolicy)
+        self.ChooseClipper.setStyleSheet(u"")
+
+        self.verticalLayout_27.addWidget(self.ChooseClipper)
+
+        self.ChooseForklift = QPushButton(self.ChooseListOptionsWidget)
+        self.ChooseForklift.setObjectName(u"ChooseForklift")
+        sizePolicy.setHeightForWidth(self.ChooseForklift.sizePolicy().hasHeightForWidth())
+        self.ChooseForklift.setSizePolicy(sizePolicy)
+        self.ChooseForklift.setStyleSheet(u"")
+
+        self.verticalLayout_27.addWidget(self.ChooseForklift)
+
+        self.ChooseDIDO = QPushButton(self.ChooseListOptionsWidget)
+        self.ChooseDIDO.setObjectName(u"ChooseDIDO")
+        sizePolicy.setHeightForWidth(self.ChooseDIDO.sizePolicy().hasHeightForWidth())
+        self.ChooseDIDO.setSizePolicy(sizePolicy)
+        self.ChooseDIDO.setStyleSheet(u"")
+
+        self.verticalLayout_27.addWidget(self.ChooseDIDO)
+
+
+        self.verticalLayout_28.addWidget(self.ChooseListOptionsWidget)
+
+        self.ComponentControlStackedWidget.addWidget(self.BeforeComponentControl)
+        self.ComponentControlMain = QWidget()
+        self.ComponentControlMain.setObjectName(u"ComponentControlMain")
+        self.ComponentControlOptionsWidget = QWidget(self.ComponentControlMain)
+        self.ComponentControlOptionsWidget.setObjectName(u"ComponentControlOptionsWidget")
+        self.ComponentControlOptionsWidget.setGeometry(QRect(10, 0, 291, 101))
+        self.horizontalLayout_16 = QHBoxLayout(self.ComponentControlOptionsWidget)
+        self.horizontalLayout_16.setSpacing(25)
+        self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
+        self.horizontalLayout_16.setContentsMargins(9, -1, -1, -1)
+        self.MotorStartedButton = QPushButton(self.ComponentControlOptionsWidget)
+        self.MotorStartedButton.setObjectName(u"MotorStartedButton")
+        sizePolicy1.setHeightForWidth(self.MotorStartedButton.sizePolicy().hasHeightForWidth())
+        self.MotorStartedButton.setSizePolicy(sizePolicy1)
+        self.MotorStartedButton.setStyleSheet(u"background-color: #0B76A0;")
+        self.MotorStartedButton.setCheckable(False)
+        self.MotorStartedButton.setChecked(False)
+
+        self.horizontalLayout_16.addWidget(self.MotorStartedButton)
+
+        self.HamburgerMenu = QPushButton(self.ComponentControlOptionsWidget)
+        self.HamburgerMenu.setObjectName(u"HamburgerMenu")
+        sizePolicy.setHeightForWidth(self.HamburgerMenu.sizePolicy().hasHeightForWidth())
+        self.HamburgerMenu.setSizePolicy(sizePolicy)
+        self.HamburgerMenu.setStyleSheet(u"")
+        icon5 = QIcon()
+        icon5.addFile(u":/icons/white/menu.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.HamburgerMenu.setIcon(icon5)
+        self.HamburgerMenu.setIconSize(QSize(30, 30))
+
+        self.horizontalLayout_16.addWidget(self.HamburgerMenu)
+
+        self.ChangeComponentControlStackedWidget = QStackedWidget(self.ComponentControlMain)
+        self.ChangeComponentControlStackedWidget.setObjectName(u"ChangeComponentControlStackedWidget")
+        self.ChangeComponentControlStackedWidget.setGeometry(QRect(-10, 90, 321, 591))
+        self.ChangeComponentControlStackedWidget.setStyleSheet(u"")
+        self.MotorPage = QWidget()
+        self.MotorPage.setObjectName(u"MotorPage")
+        self.ControlUpCP = QPushButton(self.MotorPage)
+        self.ControlUpCP.setObjectName(u"ControlUpCP")
+        self.ControlUpCP.setGeometry(QRect(120, 40, 101, 91))
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.ControlUpCP.sizePolicy().hasHeightForWidth())
+        self.ControlUpCP.setSizePolicy(sizePolicy3)
+        self.ControlUpCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon6 = QIcon()
+        icon6.addFile(u":/controlArrows/cartesian/up.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.ControlUpCP.setIcon(icon6)
+        self.ControlUpCP.setIconSize(QSize(80, 80))
+        self.ControlLeftCP = QPushButton(self.MotorPage)
+        self.ControlLeftCP.setObjectName(u"ControlLeftCP")
+        self.ControlLeftCP.setGeometry(QRect(20, 130, 101, 91))
+        self.ControlLeftCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon7 = QIcon()
+        icon7.addFile(u":/controlArrows/cartesian/left.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.ControlLeftCP.setIcon(icon7)
+        self.ControlLeftCP.setIconSize(QSize(80, 80))
+        self.ControlDownCP = QPushButton(self.MotorPage)
+        self.ControlDownCP.setObjectName(u"ControlDownCP")
+        self.ControlDownCP.setGeometry(QRect(120, 220, 101, 91))
+        self.ControlDownCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon8 = QIcon()
+        icon8.addFile(u":/controlArrows/cartesian/down.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.ControlDownCP.setIcon(icon8)
+        self.ControlDownCP.setIconSize(QSize(80, 80))
+        self.ControlRightCP = QPushButton(self.MotorPage)
+        self.ControlRightCP.setObjectName(u"ControlRightCP")
+        self.ControlRightCP.setGeometry(QRect(220, 130, 101, 91))
+        self.ControlRightCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon9 = QIcon()
+        icon9.addFile(u":/controlArrows/cartesian/right.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.ControlRightCP.setIcon(icon9)
+        self.ControlRightCP.setIconSize(QSize(80, 80))
+        self.YawPlusCP = QPushButton(self.MotorPage)
+        self.YawPlusCP.setObjectName(u"YawPlusCP")
+        self.YawPlusCP.setGeometry(QRect(220, 20, 101, 91))
+        sizePolicy3.setHeightForWidth(self.YawPlusCP.sizePolicy().hasHeightForWidth())
+        self.YawPlusCP.setSizePolicy(sizePolicy3)
+        self.YawPlusCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon10 = QIcon()
+        icon10.addFile(u":/controlArrows/cartesian/yawPlus.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.YawPlusCP.setIcon(icon10)
+        self.YawPlusCP.setIconSize(QSize(80, 80))
+        self.YawMinusCP = QPushButton(self.MotorPage)
+        self.YawMinusCP.setObjectName(u"YawMinusCP")
+        self.YawMinusCP.setGeometry(QRect(10, 240, 101, 91))
+        sizePolicy3.setHeightForWidth(self.YawMinusCP.sizePolicy().hasHeightForWidth())
+        self.YawMinusCP.setSizePolicy(sizePolicy3)
+        self.YawMinusCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon11 = QIcon()
+        icon11.addFile(u":/controlArrows/cartesian/yawMinus.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.YawMinusCP.setIcon(icon11)
+        self.YawMinusCP.setIconSize(QSize(80, 80))
+        self.YawMinusCP.setCheckable(False)
+        self.ClipperAndResetWidget_3 = QWidget(self.MotorPage)
+        self.ClipperAndResetWidget_3.setObjectName(u"ClipperAndResetWidget_3")
+        self.ClipperAndResetWidget_3.setGeometry(QRect(0, 440, 311, 151))
+        self.verticalLayout_10 = QVBoxLayout(self.ClipperAndResetWidget_3)
+        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
+        self.ClipperButtonOnOff = QPushButton(self.ClipperAndResetWidget_3)
+        self.ClipperButtonOnOff.setObjectName(u"ClipperButtonOnOff")
+        self.ClipperButtonOnOff.setEnabled(True)
+        sizePolicy.setHeightForWidth(self.ClipperButtonOnOff.sizePolicy().hasHeightForWidth())
+        self.ClipperButtonOnOff.setSizePolicy(sizePolicy)
+        self.ClipperButtonOnOff.setFont(font)
+        self.ClipperButtonOnOff.setStyleSheet(u"QPushButton {\n"
+"    padding: 6px 12px;\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #1a1a1a, stop:1 #000000\n"
+"    );\n"
+"    color: white;\n"
+"    border: 1px solid #444;\n"
+"    border-radius: 4px;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #2a2a2a, stop:1 #111111\n"
+"    );\n"
+"}\n"
+"\n"
+"QPushButton:checked {\n"
+"    background-color: #0B76A0;\n"
+"    border: 1px solid #0B76A0;\n"
+"}\n"
+"\n"
+"")
+        self.ClipperButtonOnOff.setCheckable(True)
+
+        self.verticalLayout_10.addWidget(self.ClipperButtonOnOff)
+
+        self.MotorResetButton = QPushButton(self.ClipperAndResetWidget_3)
+        self.MotorResetButton.setObjectName(u"MotorResetButton")
+        sizePolicy.setHeightForWidth(self.MotorResetButton.sizePolicy().hasHeightForWidth())
+        self.MotorResetButton.setSizePolicy(sizePolicy)
+        self.MotorResetButton.setFont(font)
+        self.MotorResetButton.setStyleSheet(u"QPushButton {\n"
+"    padding: 6px 12px;\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #1a1a1a, stop:1 #000000\n"
+"    );\n"
+"    color: white;\n"
+"    border: 1px solid #444;\n"
+"    border-radius: 4px;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #2a2a2a, stop:1 #111111\n"
+"    );\n"
+"}\n"
+"\n"
+"QPushButton:pressed {\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #0f0f0f, stop:1 #000000\n"
+"    );\n"
+"    border-style: inset;\n"
+"	background-color: #0B76A0;\n"
+"}\n"
+"\n"
+"")
+
+        self.verticalLayout_10.addWidget(self.MotorResetButton)
+
+        self.ChangeComponentControlStackedWidget.addWidget(self.MotorPage)
+        self.VisionPage = QWidget()
+        self.VisionPage.setObjectName(u"VisionPage")
+        self.VisionOne = QPushButton(self.VisionPage)
+        self.VisionButtonGroup = QButtonGroup(MainWindow)
+        self.VisionButtonGroup.setObjectName(u"VisionButtonGroup")
+        self.VisionButtonGroup.setExclusive(False)
+        self.VisionButtonGroup.addButton(self.VisionOne)
+        self.VisionOne.setObjectName(u"VisionOne")
+        self.VisionOne.setGeometry(QRect(50, 90, 233, 79))
+        sizePolicy.setHeightForWidth(self.VisionOne.sizePolicy().hasHeightForWidth())
+        self.VisionOne.setSizePolicy(sizePolicy)
+        self.VisionOne.setStyleSheet(u"")
+        self.VisionOne.setCheckable(True)
+        self.VisionTwo = QPushButton(self.VisionPage)
+        self.VisionButtonGroup.addButton(self.VisionTwo)
+        self.VisionTwo.setObjectName(u"VisionTwo")
+        self.VisionTwo.setGeometry(QRect(50, 200, 233, 79))
+        sizePolicy.setHeightForWidth(self.VisionTwo.sizePolicy().hasHeightForWidth())
+        self.VisionTwo.setSizePolicy(sizePolicy)
+        self.VisionTwo.setStyleSheet(u"")
+        self.VisionTwo.setCheckable(True)
+        self.VisionThree = QPushButton(self.VisionPage)
+        self.VisionButtonGroup.addButton(self.VisionThree)
+        self.VisionThree.setObjectName(u"VisionThree")
+        self.VisionThree.setGeometry(QRect(50, 300, 233, 79))
+        sizePolicy.setHeightForWidth(self.VisionThree.sizePolicy().hasHeightForWidth())
+        self.VisionThree.setSizePolicy(sizePolicy)
+        self.VisionThree.setStyleSheet(u"")
+        self.VisionThree.setCheckable(True)
+        self.ChangeComponentControlStackedWidget.addWidget(self.VisionPage)
+        self.ClipperPage = QWidget()
+        self.ClipperPage.setObjectName(u"ClipperPage")
+        self.label_6 = QLabel(self.ClipperPage)
+        self.label_6.setObjectName(u"label_6")
+        self.label_6.setGeometry(QRect(130, 320, 67, 17))
+        self.ChangeComponentControlStackedWidget.addWidget(self.ClipperPage)
+        self.ForkliftPage = QWidget()
+        self.ForkliftPage.setObjectName(u"ForkliftPage")
+        self.LiftUp = QPushButton(self.ForkliftPage)
+        self.buttonGroup_2 = QButtonGroup(MainWindow)
+        self.buttonGroup_2.setObjectName(u"buttonGroup_2")
+        self.buttonGroup_2.addButton(self.LiftUp)
+        self.LiftUp.setObjectName(u"LiftUp")
+        self.LiftUp.setGeometry(QRect(30, 480, 101, 91))
+        sizePolicy3.setHeightForWidth(self.LiftUp.sizePolicy().hasHeightForWidth())
+        self.LiftUp.setSizePolicy(sizePolicy3)
+        self.LiftUp.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon12 = QIcon()
+        icon12.addFile(u":/controlArrows/lift.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.LiftUp.setIcon(icon12)
+        self.LiftUp.setIconSize(QSize(80, 80))
+        self.LiftUp.setCheckable(False)
+        self.LowerDown = QPushButton(self.ForkliftPage)
+        self.buttonGroup_2.addButton(self.LowerDown)
+        self.LowerDown.setObjectName(u"LowerDown")
+        self.LowerDown.setGeometry(QRect(190, 480, 101, 91))
+        sizePolicy3.setHeightForWidth(self.LowerDown.sizePolicy().hasHeightForWidth())
+        self.LowerDown.setSizePolicy(sizePolicy3)
+        self.LowerDown.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon13 = QIcon()
+        icon13.addFile(u":/controlArrows/lower.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.LowerDown.setIcon(icon13)
+        self.LowerDown.setIconSize(QSize(80, 80))
+        self.LowerDown.setCheckable(False)
+        self.SliderLift = QSlider(self.ForkliftPage)
+        self.SliderLift.setObjectName(u"SliderLift")
+        self.SliderLift.setGeometry(QRect(40, 300, 231, 41))
+        self.SliderLift.setStyleSheet(u"QSlider::groove:horizontal {\n"
+"    height: 20px;\n"
+"    background: #ccc;\n"
+"    border-radius: 10px;\n"
+"}\n"
+"QSlider::handle:horizontal {\n"
+"    background: #000000;\n"
+"    border: 2px solid white;\n"
+"    width: 40px;\n"
+"    margin: -10px 0; /* center handle */\n"
+"    border-radius: 10px;\n"
+"}")
+        self.SliderLift.setMinimum(80)
+        self.SliderLift.setMaximum(1500)
+        self.SliderLift.setSingleStep(10)
+        self.SliderLift.setValue(123)
+        self.SliderLift.setSliderPosition(123)
+        self.SliderLift.setOrientation(Qt.Orientation.Horizontal)
+        self.FastForktLiftButton = QPushButton(self.ForkliftPage)
+        self.buttonGroup = QButtonGroup(MainWindow)
+        self.buttonGroup.setObjectName(u"buttonGroup")
+        self.buttonGroup.addButton(self.FastForktLiftButton)
+        self.FastForktLiftButton.setObjectName(u"FastForktLiftButton")
+        self.FastForktLiftButton.setGeometry(QRect(20, 170, 88, 71))
+        self.FastForktLiftButton.setCheckable(True)
+        self.SlowLiftButton = QPushButton(self.ForkliftPage)
+        self.buttonGroup.addButton(self.SlowLiftButton)
+        self.SlowLiftButton.setObjectName(u"SlowLiftButton")
+        self.SlowLiftButton.setGeometry(QRect(220, 170, 88, 71))
+        self.SlowLiftButton.setCheckable(True)
+        self.StopForkliftButton = QPushButton(self.ForkliftPage)
+        self.StopForkliftButton.setObjectName(u"StopForkliftButton")
+        self.StopForkliftButton.setGeometry(QRect(30, 30, 261, 81))
+        self.StopForkliftButton.setCheckable(False)
+        self.label_4 = QLabel(self.ForkliftPage)
+        self.label_4.setObjectName(u"label_4")
+        self.label_4.setGeometry(QRect(130, 140, 67, 17))
+        self.label_4.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.SendForkliftCommand = QPushButton(self.ForkliftPage)
+        self.SendForkliftCommand.setObjectName(u"SendForkliftCommand")
+        self.SendForkliftCommand.setGeometry(QRect(40, 360, 241, 81))
+        self.SendForkliftCommand.setCheckable(False)
+        self.MediumLiftButton = QPushButton(self.ForkliftPage)
+        self.buttonGroup.addButton(self.MediumLiftButton)
+        self.MediumLiftButton.setObjectName(u"MediumLiftButton")
+        self.MediumLiftButton.setGeometry(QRect(120, 170, 88, 71))
+        self.MediumLiftButton.setCheckable(True)
+        self.label_7 = QLabel(self.ForkliftPage)
+        self.label_7.setObjectName(u"label_7")
+        self.label_7.setGeometry(QRect(90, 270, 141, 20))
+        self.label_7.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_2 = QLabel(self.ForkliftPage)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setGeometry(QRect(50, 570, 67, 17))
+        self.label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_9 = QLabel(self.ForkliftPage)
+        self.label_9.setObjectName(u"label_9")
+        self.label_9.setGeometry(QRect(210, 570, 67, 17))
+        self.label_9.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.ChangeComponentControlStackedWidget.addWidget(self.ForkliftPage)
+        self.DIDOPage = QWidget()
+        self.DIDOPage.setObjectName(u"DIDOPage")
+        self.ChangeComponentControlStackedWidget.addWidget(self.DIDOPage)
+        self.ListOptionsWidget = QWidget(self.ComponentControlMain)
+        self.ListOptionsWidget.setObjectName(u"ListOptionsWidget")
+        self.ListOptionsWidget.setGeometry(QRect(10, 100, 291, 471))
+        sizePolicy1.setHeightForWidth(self.ListOptionsWidget.sizePolicy().hasHeightForWidth())
+        self.ListOptionsWidget.setSizePolicy(sizePolicy1)
+        self.verticalLayout_5 = QVBoxLayout(self.ListOptionsWidget)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.MotorOption = QPushButton(self.ListOptionsWidget)
+        self.MotorOption.setObjectName(u"MotorOption")
+        sizePolicy.setHeightForWidth(self.MotorOption.sizePolicy().hasHeightForWidth())
+        self.MotorOption.setSizePolicy(sizePolicy)
+        self.MotorOption.setStyleSheet(u"")
+
+        self.verticalLayout_5.addWidget(self.MotorOption)
+
+        self.VisionOption = QPushButton(self.ListOptionsWidget)
+        self.VisionOption.setObjectName(u"VisionOption")
+        sizePolicy.setHeightForWidth(self.VisionOption.sizePolicy().hasHeightForWidth())
+        self.VisionOption.setSizePolicy(sizePolicy)
+        self.VisionOption.setStyleSheet(u"background-color: #000000;")
+
+        self.verticalLayout_5.addWidget(self.VisionOption)
+
+        self.ClipperOption = QPushButton(self.ListOptionsWidget)
+        self.ClipperOption.setObjectName(u"ClipperOption")
+        sizePolicy.setHeightForWidth(self.ClipperOption.sizePolicy().hasHeightForWidth())
+        self.ClipperOption.setSizePolicy(sizePolicy)
+        self.ClipperOption.setStyleSheet(u"")
+
+        self.verticalLayout_5.addWidget(self.ClipperOption)
+
+        self.ForkliftOption = QPushButton(self.ListOptionsWidget)
+        self.ForkliftOption.setObjectName(u"ForkliftOption")
+        sizePolicy.setHeightForWidth(self.ForkliftOption.sizePolicy().hasHeightForWidth())
+        self.ForkliftOption.setSizePolicy(sizePolicy)
+        self.ForkliftOption.setStyleSheet(u"")
+
+        self.verticalLayout_5.addWidget(self.ForkliftOption)
+
+        self.DIDOOption = QPushButton(self.ListOptionsWidget)
+        self.DIDOOption.setObjectName(u"DIDOOption")
+        sizePolicy.setHeightForWidth(self.DIDOOption.sizePolicy().hasHeightForWidth())
+        self.DIDOOption.setSizePolicy(sizePolicy)
+        self.DIDOOption.setStyleSheet(u"")
+
+        self.verticalLayout_5.addWidget(self.DIDOOption)
+
+        self.ComponentControlStackedWidget.addWidget(self.ComponentControlMain)
+        self.MiddleStackedWidget = QStackedWidget(self.ComponentControlPage)
+        self.MiddleStackedWidget.setObjectName(u"MiddleStackedWidget")
+        self.MiddleStackedWidget.setGeometry(QRect(0, 10, 701, 681))
+        self.VisionAndInfoPage = QWidget()
+        self.VisionAndInfoPage.setObjectName(u"VisionAndInfoPage")
+        self.CameraWidgetInComponentControl = QWidget(self.VisionAndInfoPage)
         self.CameraWidgetInComponentControl.setObjectName(u"CameraWidgetInComponentControl")
-        self.CameraWidgetInComponentControl.setGeometry(QRect(0, 10, 701, 481))
+        self.CameraWidgetInComponentControl.setGeometry(QRect(0, 0, 701, 491))
         self.CameraWidgetInComponentControl.setStyleSheet(u"background-color: #000000;")
         self.horizontalLayout_15 = QHBoxLayout(self.CameraWidgetInComponentControl)
         self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
@@ -912,9 +1319,9 @@ class Ui_MainWindow(object):
         self.VisionTextInComponentControl.setStyleSheet(u"color:white;")
         self.VisionTextInComponentControl.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.horizontalLayout_15.addWidget(self.VisionTextInComponentControl, 0, Qt.AlignmentFlag.AlignHCenter|Qt.AlignmentFlag.AlignVCenter)
+        self.horizontalLayout_15.addWidget(self.VisionTextInComponentControl)
 
-        self.Info_2 = QFrame(self.ComponentControlPage)
+        self.Info_2 = QFrame(self.VisionAndInfoPage)
         self.Info_2.setObjectName(u"Info_2")
         self.Info_2.setGeometry(QRect(0, 500, 701, 191))
         self.Info_2.setStyleSheet(u" background-color: #000000; color: white;")
@@ -1176,401 +1583,952 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_19.addWidget(self.RecordDataButtonContainer_2)
 
-        self.ComponentControlStackedWidget = QStackedWidget(self.ComponentControlPage)
-        self.ComponentControlStackedWidget.setObjectName(u"ComponentControlStackedWidget")
-        self.ComponentControlStackedWidget.setGeometry(QRect(710, 10, 311, 681))
-        self.ComponentControlStackedWidget.setFrameShape(QFrame.Shape.StyledPanel)
-        self.ComponentControlStackedWidget.setFrameShadow(QFrame.Shadow.Raised)
-        self.BeforeComponentControl = QWidget()
-        self.BeforeComponentControl.setObjectName(u"BeforeComponentControl")
-        self.verticalLayout_28 = QVBoxLayout(self.BeforeComponentControl)
-        self.verticalLayout_28.setObjectName(u"verticalLayout_28")
-        self.ChooseListOptionsWidget = QWidget(self.BeforeComponentControl)
-        self.ChooseListOptionsWidget.setObjectName(u"ChooseListOptionsWidget")
-        sizePolicy1.setHeightForWidth(self.ChooseListOptionsWidget.sizePolicy().hasHeightForWidth())
-        self.ChooseListOptionsWidget.setSizePolicy(sizePolicy1)
-        self.verticalLayout_27 = QVBoxLayout(self.ChooseListOptionsWidget)
-        self.verticalLayout_27.setObjectName(u"verticalLayout_27")
-        self.ChooseMotor = QPushButton(self.ChooseListOptionsWidget)
-        self.ChooseMotor.setObjectName(u"ChooseMotor")
-        sizePolicy.setHeightForWidth(self.ChooseMotor.sizePolicy().hasHeightForWidth())
-        self.ChooseMotor.setSizePolicy(sizePolicy)
-        self.ChooseMotor.setStyleSheet(u"")
-
-        self.verticalLayout_27.addWidget(self.ChooseMotor)
-
-        self.ChooseVision = QPushButton(self.ChooseListOptionsWidget)
-        self.ChooseVision.setObjectName(u"ChooseVision")
-        sizePolicy.setHeightForWidth(self.ChooseVision.sizePolicy().hasHeightForWidth())
-        self.ChooseVision.setSizePolicy(sizePolicy)
-        self.ChooseVision.setStyleSheet(u"background-color: #000000;")
-
-        self.verticalLayout_27.addWidget(self.ChooseVision)
-
-        self.ChooseClipper = QPushButton(self.ChooseListOptionsWidget)
-        self.ChooseClipper.setObjectName(u"ChooseClipper")
-        sizePolicy.setHeightForWidth(self.ChooseClipper.sizePolicy().hasHeightForWidth())
-        self.ChooseClipper.setSizePolicy(sizePolicy)
-        self.ChooseClipper.setStyleSheet(u"")
-
-        self.verticalLayout_27.addWidget(self.ChooseClipper)
-
-        self.ChooseForklift = QPushButton(self.ChooseListOptionsWidget)
-        self.ChooseForklift.setObjectName(u"ChooseForklift")
-        sizePolicy.setHeightForWidth(self.ChooseForklift.sizePolicy().hasHeightForWidth())
-        self.ChooseForklift.setSizePolicy(sizePolicy)
-        self.ChooseForklift.setStyleSheet(u"")
-
-        self.verticalLayout_27.addWidget(self.ChooseForklift)
-
-
-        self.verticalLayout_28.addWidget(self.ChooseListOptionsWidget)
-
-        self.ComponentControlStackedWidget.addWidget(self.BeforeComponentControl)
-        self.ComponentControlMain = QWidget()
-        self.ComponentControlMain.setObjectName(u"ComponentControlMain")
-        self.ComponentControlOptionsWidget = QWidget(self.ComponentControlMain)
-        self.ComponentControlOptionsWidget.setObjectName(u"ComponentControlOptionsWidget")
-        self.ComponentControlOptionsWidget.setGeometry(QRect(-10, -10, 291, 101))
-        self.horizontalLayout_16 = QHBoxLayout(self.ComponentControlOptionsWidget)
-        self.horizontalLayout_16.setSpacing(25)
-        self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
-        self.MotorStartedButton = QPushButton(self.ComponentControlOptionsWidget)
-        self.MotorStartedButton.setObjectName(u"MotorStartedButton")
-        sizePolicy1.setHeightForWidth(self.MotorStartedButton.sizePolicy().hasHeightForWidth())
-        self.MotorStartedButton.setSizePolicy(sizePolicy1)
-        self.MotorStartedButton.setStyleSheet(u"background-color: #0B76A0;")
-        self.MotorStartedButton.setCheckable(False)
-        self.MotorStartedButton.setChecked(False)
-
-        self.horizontalLayout_16.addWidget(self.MotorStartedButton)
-
-        self.HamburgerMenu = QPushButton(self.ComponentControlOptionsWidget)
-        self.HamburgerMenu.setObjectName(u"HamburgerMenu")
-        sizePolicy.setHeightForWidth(self.HamburgerMenu.sizePolicy().hasHeightForWidth())
-        self.HamburgerMenu.setSizePolicy(sizePolicy)
-        self.HamburgerMenu.setStyleSheet(u"")
-        icon5 = QIcon()
-        icon5.addFile(u":/icons/white/menu.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.HamburgerMenu.setIcon(icon5)
-        self.HamburgerMenu.setIconSize(QSize(30, 30))
-
-        self.horizontalLayout_16.addWidget(self.HamburgerMenu)
-
-        self.ChangeComponentControlStackedWidget = QStackedWidget(self.ComponentControlMain)
-        self.ChangeComponentControlStackedWidget.setObjectName(u"ChangeComponentControlStackedWidget")
-        self.ChangeComponentControlStackedWidget.setGeometry(QRect(-10, 90, 321, 581))
-        self.ChangeComponentControlStackedWidget.setStyleSheet(u"")
-        self.MotorPage = QWidget()
-        self.MotorPage.setObjectName(u"MotorPage")
-        self.ControlUpCP = QPushButton(self.MotorPage)
-        self.ControlUpCP.setObjectName(u"ControlUpCP")
-        self.ControlUpCP.setGeometry(QRect(120, 40, 101, 91))
-        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.ControlUpCP.sizePolicy().hasHeightForWidth())
-        self.ControlUpCP.setSizePolicy(sizePolicy4)
-        self.ControlUpCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon6 = QIcon()
-        icon6.addFile(u":/controlArrows/cartesian/up.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.ControlUpCP.setIcon(icon6)
-        self.ControlUpCP.setIconSize(QSize(80, 80))
-        self.ControlLeftCP = QPushButton(self.MotorPage)
-        self.ControlLeftCP.setObjectName(u"ControlLeftCP")
-        self.ControlLeftCP.setGeometry(QRect(20, 130, 101, 91))
-        self.ControlLeftCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon7 = QIcon()
-        icon7.addFile(u":/controlArrows/cartesian/left.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.ControlLeftCP.setIcon(icon7)
-        self.ControlLeftCP.setIconSize(QSize(80, 80))
-        self.ControlDownCP = QPushButton(self.MotorPage)
-        self.ControlDownCP.setObjectName(u"ControlDownCP")
-        self.ControlDownCP.setGeometry(QRect(120, 220, 101, 91))
-        self.ControlDownCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon8 = QIcon()
-        icon8.addFile(u":/controlArrows/cartesian/down.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.ControlDownCP.setIcon(icon8)
-        self.ControlDownCP.setIconSize(QSize(80, 80))
-        self.ControlRightCP = QPushButton(self.MotorPage)
-        self.ControlRightCP.setObjectName(u"ControlRightCP")
-        self.ControlRightCP.setGeometry(QRect(220, 130, 101, 91))
-        self.ControlRightCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon9 = QIcon()
-        icon9.addFile(u":/controlArrows/cartesian/right.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.ControlRightCP.setIcon(icon9)
-        self.ControlRightCP.setIconSize(QSize(80, 80))
-        self.YawPlusCP = QPushButton(self.MotorPage)
-        self.YawPlusCP.setObjectName(u"YawPlusCP")
-        self.YawPlusCP.setGeometry(QRect(220, 20, 101, 91))
-        sizePolicy4.setHeightForWidth(self.YawPlusCP.sizePolicy().hasHeightForWidth())
-        self.YawPlusCP.setSizePolicy(sizePolicy4)
-        self.YawPlusCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon10 = QIcon()
-        icon10.addFile(u":/controlArrows/cartesian/yawPlus.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.YawPlusCP.setIcon(icon10)
-        self.YawPlusCP.setIconSize(QSize(80, 80))
-        self.YawMinusCP = QPushButton(self.MotorPage)
-        self.YawMinusCP.setObjectName(u"YawMinusCP")
-        self.YawMinusCP.setGeometry(QRect(10, 240, 101, 91))
-        sizePolicy4.setHeightForWidth(self.YawMinusCP.sizePolicy().hasHeightForWidth())
-        self.YawMinusCP.setSizePolicy(sizePolicy4)
-        self.YawMinusCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon11 = QIcon()
-        icon11.addFile(u":/controlArrows/cartesian/yawMinus.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.YawMinusCP.setIcon(icon11)
-        self.YawMinusCP.setIconSize(QSize(80, 80))
-        self.YawMinusCP.setCheckable(False)
-        self.ClipperAndResetWidget_3 = QWidget(self.MotorPage)
-        self.ClipperAndResetWidget_3.setObjectName(u"ClipperAndResetWidget_3")
-        self.ClipperAndResetWidget_3.setGeometry(QRect(0, 440, 311, 151))
-        self.verticalLayout_10 = QVBoxLayout(self.ClipperAndResetWidget_3)
-        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
-        self.ClipperButtonOnOff = QPushButton(self.ClipperAndResetWidget_3)
-        self.ClipperButtonOnOff.setObjectName(u"ClipperButtonOnOff")
-        self.ClipperButtonOnOff.setEnabled(True)
-        sizePolicy.setHeightForWidth(self.ClipperButtonOnOff.sizePolicy().hasHeightForWidth())
-        self.ClipperButtonOnOff.setSizePolicy(sizePolicy)
-        self.ClipperButtonOnOff.setFont(font)
-        self.ClipperButtonOnOff.setStyleSheet(u"QPushButton {\n"
-"    padding: 6px 12px;\n"
-"    background-color: qlineargradient(\n"
-"        x1:0, y1:0, x2:0, y2:1,\n"
-"        stop:0 #1a1a1a, stop:1 #000000\n"
-"    );\n"
-"    color: white;\n"
-"    border: 1px solid #444;\n"
-"    border-radius: 4px;\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: qlineargradient(\n"
-"        x1:0, y1:0, x2:0, y2:1,\n"
-"        stop:0 #2a2a2a, stop:1 #111111\n"
-"    );\n"
-"}\n"
-"\n"
-"QPushButton:checked {\n"
-"    background-color: #0B76A0;\n"
-"    border: 1px solid #0B76A0;\n"
-"}\n"
-"\n"
+        self.MiddleStackedWidget.addWidget(self.VisionAndInfoPage)
+        self.DIDOContainerPage = QWidget()
+        self.DIDOContainerPage.setObjectName(u"DIDOContainerPage")
+        self.ScrollAreaDIDO = QScrollArea(self.DIDOContainerPage)
+        self.ScrollAreaDIDO.setObjectName(u"ScrollAreaDIDO")
+        self.ScrollAreaDIDO.setGeometry(QRect(0, 350, 701, 331))
+        font4 = QFont()
+        font4.setStrikeOut(False)
+        font4.setKerning(True)
+        self.ScrollAreaDIDO.setFont(font4)
+        self.ScrollAreaDIDO.setTabletTracking(True)
+        self.ScrollAreaDIDO.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.ScrollAreaDIDO.setWidgetResizable(True)
+        self.scrollAreaWidgetContents_2 = QWidget()
+        self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 685, 648))
+        self.horizontalLayout_34 = QHBoxLayout(self.scrollAreaWidgetContents_2)
+        self.horizontalLayout_34.setSpacing(9)
+        self.horizontalLayout_34.setObjectName(u"horizontalLayout_34")
+        self.widget_2 = QWidget(self.scrollAreaWidgetContents_2)
+        self.widget_2.setObjectName(u"widget_2")
+        self.widget_2.setMaximumSize(QSize(16777215, 16777215))
+        self.gridLayout_7 = QGridLayout(self.widget_2)
+        self.gridLayout_7.setObjectName(u"gridLayout_7")
+        self.gridLayout_7.setHorizontalSpacing(0)
+        self.gridLayout_7.setVerticalSpacing(10)
+        self.gridLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.DO23 = QPushButton(self.widget_2)
+        self.DO23.setObjectName(u"DO23")
+        sizePolicy1.setHeightForWidth(self.DO23.sizePolicy().hasHeightForWidth())
+        self.DO23.setSizePolicy(sizePolicy1)
+        self.DO23.setMinimumSize(QSize(95, 70))
+        self.DO23.setMaximumSize(QSize(100, 100))
+        self.DO23.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
 "")
-        self.ClipperButtonOnOff.setCheckable(True)
+        self.DO23.setCheckable(True)
+        self.DO23.setChecked(False)
 
-        self.verticalLayout_10.addWidget(self.ClipperButtonOnOff)
+        self.gridLayout_7.addWidget(self.DO23, 3, 4, 1, 1)
 
-        self.MotorResetButton = QPushButton(self.ClipperAndResetWidget_3)
-        self.MotorResetButton.setObjectName(u"MotorResetButton")
-        sizePolicy.setHeightForWidth(self.MotorResetButton.sizePolicy().hasHeightForWidth())
-        self.MotorResetButton.setSizePolicy(sizePolicy)
-        self.MotorResetButton.setFont(font)
-        self.MotorResetButton.setStyleSheet(u"QPushButton {\n"
-"    padding: 6px 12px;\n"
-"    background-color: qlineargradient(\n"
-"        x1:0, y1:0, x2:0, y2:1,\n"
-"        stop:0 #1a1a1a, stop:1 #000000\n"
-"    );\n"
-"    color: white;\n"
-"    border: 1px solid #444;\n"
-"    border-radius: 4px;\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: qlineargradient(\n"
-"        x1:0, y1:0, x2:0, y2:1,\n"
-"        stop:0 #2a2a2a, stop:1 #111111\n"
-"    );\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(\n"
-"        x1:0, y1:0, x2:0, y2:1,\n"
-"        stop:0 #0f0f0f, stop:1 #000000\n"
-"    );\n"
-"    border-style: inset;\n"
-"	background-color: #0B76A0;\n"
-"}\n"
-"\n"
+        self.DO5 = QPushButton(self.widget_2)
+        self.DO5.setObjectName(u"DO5")
+        sizePolicy1.setHeightForWidth(self.DO5.sizePolicy().hasHeightForWidth())
+        self.DO5.setSizePolicy(sizePolicy1)
+        self.DO5.setMinimumSize(QSize(95, 70))
+        self.DO5.setMaximumSize(QSize(100, 100))
+        self.DO5.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
 "")
+        self.DO5.setCheckable(True)
+        self.DO5.setChecked(False)
 
-        self.verticalLayout_10.addWidget(self.MotorResetButton)
+        self.gridLayout_7.addWidget(self.DO5, 0, 4, 1, 1)
 
-        self.ChangeComponentControlStackedWidget.addWidget(self.MotorPage)
-        self.VisionPage = QWidget()
-        self.VisionPage.setObjectName(u"VisionPage")
-        self.VisionOne = QPushButton(self.VisionPage)
-        self.dete = QButtonGroup(MainWindow)
-        self.dete.setObjectName(u"dete")
-        self.dete.addButton(self.VisionOne)
-        self.VisionOne.setObjectName(u"VisionOne")
-        self.VisionOne.setGeometry(QRect(40, 150, 233, 79))
-        sizePolicy.setHeightForWidth(self.VisionOne.sizePolicy().hasHeightForWidth())
-        self.VisionOne.setSizePolicy(sizePolicy)
-        self.VisionOne.setStyleSheet(u"")
-        self.VisionOne.setCheckable(True)
-        self.VisionTwo = QPushButton(self.VisionPage)
-        self.dete.addButton(self.VisionTwo)
-        self.VisionTwo.setObjectName(u"VisionTwo")
-        self.VisionTwo.setGeometry(QRect(40, 260, 233, 79))
-        sizePolicy.setHeightForWidth(self.VisionTwo.sizePolicy().hasHeightForWidth())
-        self.VisionTwo.setSizePolicy(sizePolicy)
-        self.VisionTwo.setStyleSheet(u"")
-        self.VisionTwo.setCheckable(True)
-        self.VisionThree = QPushButton(self.VisionPage)
-        self.dete.addButton(self.VisionThree)
-        self.VisionThree.setObjectName(u"VisionThree")
-        self.VisionThree.setGeometry(QRect(40, 360, 233, 79))
-        sizePolicy.setHeightForWidth(self.VisionThree.sizePolicy().hasHeightForWidth())
-        self.VisionThree.setSizePolicy(sizePolicy)
-        self.VisionThree.setStyleSheet(u"")
-        self.VisionThree.setCheckable(True)
-        self.ChangeComponentControlStackedWidget.addWidget(self.VisionPage)
-        self.ClipperPage = QWidget()
-        self.ClipperPage.setObjectName(u"ClipperPage")
-        self.label_6 = QLabel(self.ClipperPage)
-        self.label_6.setObjectName(u"label_6")
-        self.label_6.setGeometry(QRect(130, 320, 67, 17))
-        self.ChangeComponentControlStackedWidget.addWidget(self.ClipperPage)
-        self.ForkliftPage = QWidget()
-        self.ForkliftPage.setObjectName(u"ForkliftPage")
-        self.LiftUp = QPushButton(self.ForkliftPage)
-        self.buttonGroup_2 = QButtonGroup(MainWindow)
-        self.buttonGroup_2.setObjectName(u"buttonGroup_2")
-        self.buttonGroup_2.addButton(self.LiftUp)
-        self.LiftUp.setObjectName(u"LiftUp")
-        self.LiftUp.setGeometry(QRect(30, 490, 101, 91))
-        sizePolicy4.setHeightForWidth(self.LiftUp.sizePolicy().hasHeightForWidth())
-        self.LiftUp.setSizePolicy(sizePolicy4)
-        self.LiftUp.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon12 = QIcon()
-        icon12.addFile(u":/controlArrows/lift.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.LiftUp.setIcon(icon12)
-        self.LiftUp.setIconSize(QSize(80, 80))
-        self.LiftUp.setCheckable(True)
-        self.LowerDown = QPushButton(self.ForkliftPage)
-        self.buttonGroup_2.addButton(self.LowerDown)
-        self.LowerDown.setObjectName(u"LowerDown")
-        self.LowerDown.setGeometry(QRect(190, 490, 101, 91))
-        sizePolicy4.setHeightForWidth(self.LowerDown.sizePolicy().hasHeightForWidth())
-        self.LowerDown.setSizePolicy(sizePolicy4)
-        self.LowerDown.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon13 = QIcon()
-        icon13.addFile(u":/controlArrows/lower.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.LowerDown.setIcon(icon13)
-        self.LowerDown.setIconSize(QSize(80, 80))
-        self.LowerDown.setCheckable(True)
-        self.SliderLift = QSlider(self.ForkliftPage)
-        self.SliderLift.setObjectName(u"SliderLift")
-        self.SliderLift.setGeometry(QRect(50, 320, 231, 41))
-        self.SliderLift.setStyleSheet(u"QSlider::groove:horizontal {\n"
-"    height: 20px;\n"
-"    background: #ccc;\n"
-"    border-radius: 10px;\n"
-"}\n"
-"QSlider::handle:horizontal {\n"
-"    background: #000000;\n"
-"    border: 2px solid white;\n"
-"    width: 40px;\n"
-"    margin: -10px 0; /* center handle */\n"
-"    border-radius: 10px;\n"
-"}")
-        self.SliderLift.setMinimum(80)
-        self.SliderLift.setMaximum(1500)
-        self.SliderLift.setSingleStep(10)
-        self.SliderLift.setValue(123)
-        self.SliderLift.setSliderPosition(123)
-        self.SliderLift.setOrientation(Qt.Orientation.Horizontal)
-        self.FastForktLiftButton = QPushButton(self.ForkliftPage)
-        self.buttonGroup = QButtonGroup(MainWindow)
-        self.buttonGroup.setObjectName(u"buttonGroup")
-        self.buttonGroup.addButton(self.FastForktLiftButton)
-        self.FastForktLiftButton.setObjectName(u"FastForktLiftButton")
-        self.FastForktLiftButton.setGeometry(QRect(20, 190, 88, 71))
-        self.FastForktLiftButton.setCheckable(True)
-        self.SlowLiftButton = QPushButton(self.ForkliftPage)
-        self.buttonGroup.addButton(self.SlowLiftButton)
-        self.SlowLiftButton.setObjectName(u"SlowLiftButton")
-        self.SlowLiftButton.setGeometry(QRect(220, 190, 88, 71))
-        self.SlowLiftButton.setCheckable(True)
-        self.RunForkliftButton = QPushButton(self.ForkliftPage)
-        self.RunForkliftButton.setObjectName(u"RunForkliftButton")
-        self.RunForkliftButton.setGeometry(QRect(30, 60, 111, 71))
-        self.RunForkliftButton.setCheckable(True)
-        self.StopForkliftButton = QPushButton(self.ForkliftPage)
-        self.StopForkliftButton.setObjectName(u"StopForkliftButton")
-        self.StopForkliftButton.setGeometry(QRect(170, 60, 121, 81))
-        self.StopForkliftButton.setCheckable(False)
-        self.label_2 = QLabel(self.ForkliftPage)
-        self.label_2.setObjectName(u"label_2")
-        self.label_2.setGeometry(QRect(130, 30, 67, 17))
-        self.label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label_4 = QLabel(self.ForkliftPage)
-        self.label_4.setObjectName(u"label_4")
-        self.label_4.setGeometry(QRect(130, 150, 67, 17))
-        self.label_4.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.SendForkliftCommand = QPushButton(self.ForkliftPage)
-        self.SendForkliftCommand.setObjectName(u"SendForkliftCommand")
-        self.SendForkliftCommand.setGeometry(QRect(40, 380, 241, 81))
-        self.SendForkliftCommand.setCheckable(False)
-        self.MediumLiftButton = QPushButton(self.ForkliftPage)
-        self.buttonGroup.addButton(self.MediumLiftButton)
-        self.MediumLiftButton.setObjectName(u"MediumLiftButton")
-        self.MediumLiftButton.setGeometry(QRect(120, 190, 88, 71))
-        self.MediumLiftButton.setCheckable(True)
-        self.label_7 = QLabel(self.ForkliftPage)
-        self.label_7.setObjectName(u"label_7")
-        self.label_7.setGeometry(QRect(90, 280, 141, 20))
-        self.label_7.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.ChangeComponentControlStackedWidget.addWidget(self.ForkliftPage)
-        self.ListOptionsWidget = QWidget(self.ComponentControlMain)
-        self.ListOptionsWidget.setObjectName(u"ListOptionsWidget")
-        self.ListOptionsWidget.setGeometry(QRect(20, 100, 251, 331))
-        sizePolicy1.setHeightForWidth(self.ListOptionsWidget.sizePolicy().hasHeightForWidth())
-        self.ListOptionsWidget.setSizePolicy(sizePolicy1)
-        self.verticalLayout_5 = QVBoxLayout(self.ListOptionsWidget)
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.MotorOption = QPushButton(self.ListOptionsWidget)
-        self.MotorOption.setObjectName(u"MotorOption")
-        sizePolicy.setHeightForWidth(self.MotorOption.sizePolicy().hasHeightForWidth())
-        self.MotorOption.setSizePolicy(sizePolicy)
-        self.MotorOption.setStyleSheet(u"")
+        self.DO14 = QPushButton(self.widget_2)
+        self.DO14.setObjectName(u"DO14")
+        sizePolicy1.setHeightForWidth(self.DO14.sizePolicy().hasHeightForWidth())
+        self.DO14.setSizePolicy(sizePolicy1)
+        self.DO14.setMinimumSize(QSize(95, 70))
+        self.DO14.setMaximumSize(QSize(100, 100))
+        self.DO14.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO14.setCheckable(True)
+        self.DO14.setChecked(False)
 
-        self.verticalLayout_5.addWidget(self.MotorOption)
+        self.gridLayout_7.addWidget(self.DO14, 2, 1, 1, 1)
 
-        self.VisionOption = QPushButton(self.ListOptionsWidget)
-        self.VisionOption.setObjectName(u"VisionOption")
-        sizePolicy.setHeightForWidth(self.VisionOption.sizePolicy().hasHeightForWidth())
-        self.VisionOption.setSizePolicy(sizePolicy)
-        self.VisionOption.setStyleSheet(u"background-color: #000000;")
+        self.DO9 = QPushButton(self.widget_2)
+        self.DO9.setObjectName(u"DO9")
+        sizePolicy1.setHeightForWidth(self.DO9.sizePolicy().hasHeightForWidth())
+        self.DO9.setSizePolicy(sizePolicy1)
+        self.DO9.setMinimumSize(QSize(95, 70))
+        self.DO9.setMaximumSize(QSize(100, 100))
+        self.DO9.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO9.setCheckable(True)
+        self.DO9.setChecked(False)
 
-        self.verticalLayout_5.addWidget(self.VisionOption)
+        self.gridLayout_7.addWidget(self.DO9, 1, 2, 1, 1)
 
-        self.ClipperOption = QPushButton(self.ListOptionsWidget)
-        self.ClipperOption.setObjectName(u"ClipperOption")
-        sizePolicy.setHeightForWidth(self.ClipperOption.sizePolicy().hasHeightForWidth())
-        self.ClipperOption.setSizePolicy(sizePolicy)
-        self.ClipperOption.setStyleSheet(u"")
+        self.DO38 = QPushButton(self.widget_2)
+        self.DO38.setObjectName(u"DO38")
+        sizePolicy1.setHeightForWidth(self.DO38.sizePolicy().hasHeightForWidth())
+        self.DO38.setSizePolicy(sizePolicy1)
+        self.DO38.setMinimumSize(QSize(95, 70))
+        self.DO38.setMaximumSize(QSize(100, 100))
+        self.DO38.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO38.setCheckable(True)
+        self.DO38.setChecked(False)
 
-        self.verticalLayout_5.addWidget(self.ClipperOption)
+        self.gridLayout_7.addWidget(self.DO38, 6, 1, 1, 1)
 
-        self.ForkliftOption = QPushButton(self.ListOptionsWidget)
-        self.ForkliftOption.setObjectName(u"ForkliftOption")
-        sizePolicy.setHeightForWidth(self.ForkliftOption.sizePolicy().hasHeightForWidth())
-        self.ForkliftOption.setSizePolicy(sizePolicy)
-        self.ForkliftOption.setStyleSheet(u"")
+        self.DO22 = QPushButton(self.widget_2)
+        self.DO22.setObjectName(u"DO22")
+        sizePolicy1.setHeightForWidth(self.DO22.sizePolicy().hasHeightForWidth())
+        self.DO22.setSizePolicy(sizePolicy1)
+        self.DO22.setMinimumSize(QSize(95, 70))
+        self.DO22.setMaximumSize(QSize(100, 100))
+        self.DO22.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO22.setCheckable(True)
+        self.DO22.setChecked(False)
 
-        self.verticalLayout_5.addWidget(self.ForkliftOption)
+        self.gridLayout_7.addWidget(self.DO22, 3, 3, 1, 1)
 
-        self.ComponentControlStackedWidget.addWidget(self.ComponentControlMain)
+        self.DO48 = QPushButton(self.widget_2)
+        self.DO48.setObjectName(u"DO48")
+        sizePolicy1.setHeightForWidth(self.DO48.sizePolicy().hasHeightForWidth())
+        self.DO48.setSizePolicy(sizePolicy1)
+        self.DO48.setMinimumSize(QSize(95, 70))
+        self.DO48.setMaximumSize(QSize(100, 100))
+        self.DO48.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO48.setCheckable(True)
+        self.DO48.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO48, 7, 5, 1, 1)
+
+        self.DO46 = QPushButton(self.widget_2)
+        self.DO46.setObjectName(u"DO46")
+        sizePolicy1.setHeightForWidth(self.DO46.sizePolicy().hasHeightForWidth())
+        self.DO46.setSizePolicy(sizePolicy1)
+        self.DO46.setMinimumSize(QSize(95, 70))
+        self.DO46.setMaximumSize(QSize(100, 100))
+        self.DO46.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO46.setCheckable(True)
+        self.DO46.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO46, 7, 3, 1, 1)
+
+        self.DO28 = QPushButton(self.widget_2)
+        self.DO28.setObjectName(u"DO28")
+        sizePolicy1.setHeightForWidth(self.DO28.sizePolicy().hasHeightForWidth())
+        self.DO28.setSizePolicy(sizePolicy1)
+        self.DO28.setMinimumSize(QSize(95, 70))
+        self.DO28.setMaximumSize(QSize(100, 100))
+        self.DO28.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO28.setCheckable(True)
+        self.DO28.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO28, 4, 3, 1, 1)
+
+        self.DO2 = QPushButton(self.widget_2)
+        self.DO2.setObjectName(u"DO2")
+        sizePolicy1.setHeightForWidth(self.DO2.sizePolicy().hasHeightForWidth())
+        self.DO2.setSizePolicy(sizePolicy1)
+        self.DO2.setMinimumSize(QSize(95, 70))
+        self.DO2.setMaximumSize(QSize(100, 100))
+        self.DO2.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO2.setCheckable(True)
+        self.DO2.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO2, 0, 1, 1, 1)
+
+        self.DO41 = QPushButton(self.widget_2)
+        self.DO41.setObjectName(u"DO41")
+        sizePolicy1.setHeightForWidth(self.DO41.sizePolicy().hasHeightForWidth())
+        self.DO41.setSizePolicy(sizePolicy1)
+        self.DO41.setMinimumSize(QSize(95, 70))
+        self.DO41.setMaximumSize(QSize(100, 100))
+        self.DO41.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO41.setCheckable(True)
+        self.DO41.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO41, 6, 4, 1, 1)
+
+        self.DO31 = QPushButton(self.widget_2)
+        self.DO31.setObjectName(u"DO31")
+        sizePolicy1.setHeightForWidth(self.DO31.sizePolicy().hasHeightForWidth())
+        self.DO31.setSizePolicy(sizePolicy1)
+        self.DO31.setMinimumSize(QSize(95, 70))
+        self.DO31.setMaximumSize(QSize(100, 100))
+        self.DO31.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO31.setCheckable(True)
+        self.DO31.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO31, 5, 0, 1, 1)
+
+        self.DO11 = QPushButton(self.widget_2)
+        self.DO11.setObjectName(u"DO11")
+        sizePolicy1.setHeightForWidth(self.DO11.sizePolicy().hasHeightForWidth())
+        self.DO11.setSizePolicy(sizePolicy1)
+        self.DO11.setMinimumSize(QSize(95, 70))
+        self.DO11.setMaximumSize(QSize(100, 100))
+        self.DO11.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO11.setCheckable(True)
+        self.DO11.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO11, 1, 4, 1, 1)
+
+        self.DO17 = QPushButton(self.widget_2)
+        self.DO17.setObjectName(u"DO17")
+        sizePolicy1.setHeightForWidth(self.DO17.sizePolicy().hasHeightForWidth())
+        self.DO17.setSizePolicy(sizePolicy1)
+        self.DO17.setMinimumSize(QSize(95, 70))
+        self.DO17.setMaximumSize(QSize(100, 100))
+        self.DO17.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO17.setCheckable(True)
+        self.DO17.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO17, 2, 4, 1, 1)
+
+        self.DO4 = QPushButton(self.widget_2)
+        self.DO4.setObjectName(u"DO4")
+        sizePolicy1.setHeightForWidth(self.DO4.sizePolicy().hasHeightForWidth())
+        self.DO4.setSizePolicy(sizePolicy1)
+        self.DO4.setMinimumSize(QSize(95, 70))
+        self.DO4.setMaximumSize(QSize(100, 100))
+        self.DO4.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO4.setCheckable(True)
+        self.DO4.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO4, 0, 3, 1, 1)
+
+        self.DO20 = QPushButton(self.widget_2)
+        self.DO20.setObjectName(u"DO20")
+        sizePolicy1.setHeightForWidth(self.DO20.sizePolicy().hasHeightForWidth())
+        self.DO20.setSizePolicy(sizePolicy1)
+        self.DO20.setMinimumSize(QSize(95, 70))
+        self.DO20.setMaximumSize(QSize(100, 100))
+        self.DO20.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO20.setCheckable(True)
+        self.DO20.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO20, 3, 1, 1, 1)
+
+        self.DO15 = QPushButton(self.widget_2)
+        self.DO15.setObjectName(u"DO15")
+        sizePolicy1.setHeightForWidth(self.DO15.sizePolicy().hasHeightForWidth())
+        self.DO15.setSizePolicy(sizePolicy1)
+        self.DO15.setMinimumSize(QSize(95, 70))
+        self.DO15.setMaximumSize(QSize(100, 100))
+        self.DO15.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO15.setCheckable(True)
+        self.DO15.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO15, 2, 2, 1, 1)
+
+        self.DO19 = QPushButton(self.widget_2)
+        self.DO19.setObjectName(u"DO19")
+        sizePolicy1.setHeightForWidth(self.DO19.sizePolicy().hasHeightForWidth())
+        self.DO19.setSizePolicy(sizePolicy1)
+        self.DO19.setMinimumSize(QSize(95, 70))
+        self.DO19.setMaximumSize(QSize(100, 100))
+        self.DO19.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO19.setCheckable(True)
+        self.DO19.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO19, 3, 0, 1, 1)
+
+        self.DO21 = QPushButton(self.widget_2)
+        self.DO21.setObjectName(u"DO21")
+        sizePolicy1.setHeightForWidth(self.DO21.sizePolicy().hasHeightForWidth())
+        self.DO21.setSizePolicy(sizePolicy1)
+        self.DO21.setMinimumSize(QSize(95, 70))
+        self.DO21.setMaximumSize(QSize(100, 100))
+        self.DO21.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO21.setCheckable(True)
+        self.DO21.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO21, 3, 2, 1, 1)
+
+        self.DO18 = QPushButton(self.widget_2)
+        self.DO18.setObjectName(u"DO18")
+        sizePolicy1.setHeightForWidth(self.DO18.sizePolicy().hasHeightForWidth())
+        self.DO18.setSizePolicy(sizePolicy1)
+        self.DO18.setMinimumSize(QSize(95, 70))
+        self.DO18.setMaximumSize(QSize(100, 100))
+        self.DO18.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO18.setCheckable(True)
+        self.DO18.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO18, 2, 5, 1, 1)
+
+        self.DO36 = QPushButton(self.widget_2)
+        self.DO36.setObjectName(u"DO36")
+        sizePolicy1.setHeightForWidth(self.DO36.sizePolicy().hasHeightForWidth())
+        self.DO36.setSizePolicy(sizePolicy1)
+        self.DO36.setMinimumSize(QSize(95, 70))
+        self.DO36.setMaximumSize(QSize(100, 100))
+        self.DO36.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO36.setCheckable(True)
+        self.DO36.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO36, 5, 5, 1, 1)
+
+        self.DO8 = QPushButton(self.widget_2)
+        self.DO8.setObjectName(u"DO8")
+        sizePolicy1.setHeightForWidth(self.DO8.sizePolicy().hasHeightForWidth())
+        self.DO8.setSizePolicy(sizePolicy1)
+        self.DO8.setMinimumSize(QSize(95, 70))
+        self.DO8.setMaximumSize(QSize(100, 100))
+        self.DO8.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO8.setCheckable(True)
+        self.DO8.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO8, 1, 1, 1, 1)
+
+        self.DO42 = QPushButton(self.widget_2)
+        self.DO42.setObjectName(u"DO42")
+        sizePolicy1.setHeightForWidth(self.DO42.sizePolicy().hasHeightForWidth())
+        self.DO42.setSizePolicy(sizePolicy1)
+        self.DO42.setMinimumSize(QSize(95, 70))
+        self.DO42.setMaximumSize(QSize(100, 100))
+        self.DO42.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO42.setCheckable(True)
+        self.DO42.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO42, 6, 5, 1, 1)
+
+        self.DO26 = QPushButton(self.widget_2)
+        self.DO26.setObjectName(u"DO26")
+        sizePolicy1.setHeightForWidth(self.DO26.sizePolicy().hasHeightForWidth())
+        self.DO26.setSizePolicy(sizePolicy1)
+        self.DO26.setMinimumSize(QSize(95, 70))
+        self.DO26.setMaximumSize(QSize(100, 100))
+        self.DO26.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO26.setCheckable(True)
+        self.DO26.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO26, 4, 1, 1, 1)
+
+        self.DO1 = QPushButton(self.widget_2)
+        self.DO1.setObjectName(u"DO1")
+        sizePolicy1.setHeightForWidth(self.DO1.sizePolicy().hasHeightForWidth())
+        self.DO1.setSizePolicy(sizePolicy1)
+        self.DO1.setMinimumSize(QSize(95, 70))
+        self.DO1.setMaximumSize(QSize(100, 100))
+        self.DO1.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO1.setCheckable(True)
+        self.DO1.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO1, 0, 0, 1, 1)
+
+        self.DO44 = QPushButton(self.widget_2)
+        self.DO44.setObjectName(u"DO44")
+        sizePolicy1.setHeightForWidth(self.DO44.sizePolicy().hasHeightForWidth())
+        self.DO44.setSizePolicy(sizePolicy1)
+        self.DO44.setMinimumSize(QSize(95, 70))
+        self.DO44.setMaximumSize(QSize(100, 100))
+        self.DO44.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO44.setCheckable(True)
+        self.DO44.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO44, 7, 1, 1, 1)
+
+        self.DO16 = QPushButton(self.widget_2)
+        self.DO16.setObjectName(u"DO16")
+        sizePolicy1.setHeightForWidth(self.DO16.sizePolicy().hasHeightForWidth())
+        self.DO16.setSizePolicy(sizePolicy1)
+        self.DO16.setMinimumSize(QSize(95, 70))
+        self.DO16.setMaximumSize(QSize(100, 100))
+        self.DO16.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO16.setCheckable(True)
+        self.DO16.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO16, 2, 3, 1, 1)
+
+        self.DO32 = QPushButton(self.widget_2)
+        self.DO32.setObjectName(u"DO32")
+        sizePolicy1.setHeightForWidth(self.DO32.sizePolicy().hasHeightForWidth())
+        self.DO32.setSizePolicy(sizePolicy1)
+        self.DO32.setMinimumSize(QSize(95, 70))
+        self.DO32.setMaximumSize(QSize(100, 100))
+        self.DO32.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO32.setCheckable(True)
+        self.DO32.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO32, 5, 1, 1, 1)
+
+        self.DO34 = QPushButton(self.widget_2)
+        self.DO34.setObjectName(u"DO34")
+        sizePolicy1.setHeightForWidth(self.DO34.sizePolicy().hasHeightForWidth())
+        self.DO34.setSizePolicy(sizePolicy1)
+        self.DO34.setMinimumSize(QSize(95, 70))
+        self.DO34.setMaximumSize(QSize(100, 100))
+        self.DO34.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO34.setCheckable(True)
+        self.DO34.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO34, 5, 3, 1, 1)
+
+        self.DO10 = QPushButton(self.widget_2)
+        self.DO10.setObjectName(u"DO10")
+        sizePolicy1.setHeightForWidth(self.DO10.sizePolicy().hasHeightForWidth())
+        self.DO10.setSizePolicy(sizePolicy1)
+        self.DO10.setMinimumSize(QSize(95, 70))
+        self.DO10.setMaximumSize(QSize(100, 100))
+        self.DO10.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO10.setCheckable(True)
+        self.DO10.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO10, 1, 3, 1, 1)
+
+        self.DO29 = QPushButton(self.widget_2)
+        self.DO29.setObjectName(u"DO29")
+        sizePolicy1.setHeightForWidth(self.DO29.sizePolicy().hasHeightForWidth())
+        self.DO29.setSizePolicy(sizePolicy1)
+        self.DO29.setMinimumSize(QSize(95, 70))
+        self.DO29.setMaximumSize(QSize(100, 100))
+        self.DO29.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO29.setCheckable(True)
+        self.DO29.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO29, 4, 4, 1, 1)
+
+        self.DO35 = QPushButton(self.widget_2)
+        self.DO35.setObjectName(u"DO35")
+        sizePolicy1.setHeightForWidth(self.DO35.sizePolicy().hasHeightForWidth())
+        self.DO35.setSizePolicy(sizePolicy1)
+        self.DO35.setMinimumSize(QSize(95, 70))
+        self.DO35.setMaximumSize(QSize(100, 100))
+        self.DO35.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO35.setCheckable(True)
+        self.DO35.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO35, 5, 4, 1, 1)
+
+        self.DO37 = QPushButton(self.widget_2)
+        self.DO37.setObjectName(u"DO37")
+        sizePolicy1.setHeightForWidth(self.DO37.sizePolicy().hasHeightForWidth())
+        self.DO37.setSizePolicy(sizePolicy1)
+        self.DO37.setMinimumSize(QSize(95, 70))
+        self.DO37.setMaximumSize(QSize(100, 100))
+        self.DO37.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO37.setCheckable(True)
+        self.DO37.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO37, 6, 0, 1, 1)
+
+        self.DO12 = QPushButton(self.widget_2)
+        self.DO12.setObjectName(u"DO12")
+        sizePolicy1.setHeightForWidth(self.DO12.sizePolicy().hasHeightForWidth())
+        self.DO12.setSizePolicy(sizePolicy1)
+        self.DO12.setMinimumSize(QSize(95, 70))
+        self.DO12.setMaximumSize(QSize(100, 100))
+        self.DO12.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO12.setCheckable(True)
+        self.DO12.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO12, 1, 5, 1, 1)
+
+        self.DO43 = QPushButton(self.widget_2)
+        self.DO43.setObjectName(u"DO43")
+        sizePolicy1.setHeightForWidth(self.DO43.sizePolicy().hasHeightForWidth())
+        self.DO43.setSizePolicy(sizePolicy1)
+        self.DO43.setMinimumSize(QSize(95, 70))
+        self.DO43.setMaximumSize(QSize(100, 100))
+        self.DO43.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO43.setCheckable(True)
+        self.DO43.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO43, 7, 0, 1, 1)
+
+        self.DO47 = QPushButton(self.widget_2)
+        self.DO47.setObjectName(u"DO47")
+        sizePolicy1.setHeightForWidth(self.DO47.sizePolicy().hasHeightForWidth())
+        self.DO47.setSizePolicy(sizePolicy1)
+        self.DO47.setMinimumSize(QSize(95, 70))
+        self.DO47.setMaximumSize(QSize(100, 100))
+        self.DO47.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO47.setCheckable(True)
+        self.DO47.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO47, 7, 4, 1, 1)
+
+        self.DO30 = QPushButton(self.widget_2)
+        self.DO30.setObjectName(u"DO30")
+        sizePolicy1.setHeightForWidth(self.DO30.sizePolicy().hasHeightForWidth())
+        self.DO30.setSizePolicy(sizePolicy1)
+        self.DO30.setMinimumSize(QSize(95, 70))
+        self.DO30.setMaximumSize(QSize(100, 100))
+        self.DO30.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO30.setCheckable(True)
+        self.DO30.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO30, 4, 5, 1, 1)
+
+        self.DO24 = QPushButton(self.widget_2)
+        self.DO24.setObjectName(u"DO24")
+        sizePolicy1.setHeightForWidth(self.DO24.sizePolicy().hasHeightForWidth())
+        self.DO24.setSizePolicy(sizePolicy1)
+        self.DO24.setMinimumSize(QSize(95, 70))
+        self.DO24.setMaximumSize(QSize(100, 100))
+        self.DO24.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO24.setCheckable(True)
+        self.DO24.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO24, 3, 5, 1, 1)
+
+        self.DO25 = QPushButton(self.widget_2)
+        self.DO25.setObjectName(u"DO25")
+        sizePolicy1.setHeightForWidth(self.DO25.sizePolicy().hasHeightForWidth())
+        self.DO25.setSizePolicy(sizePolicy1)
+        self.DO25.setMinimumSize(QSize(95, 70))
+        self.DO25.setMaximumSize(QSize(100, 100))
+        self.DO25.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO25.setCheckable(True)
+        self.DO25.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO25, 4, 0, 1, 1)
+
+        self.DO6 = QPushButton(self.widget_2)
+        self.DO6.setObjectName(u"DO6")
+        sizePolicy1.setHeightForWidth(self.DO6.sizePolicy().hasHeightForWidth())
+        self.DO6.setSizePolicy(sizePolicy1)
+        self.DO6.setMinimumSize(QSize(95, 70))
+        self.DO6.setMaximumSize(QSize(100, 100))
+        self.DO6.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO6.setCheckable(True)
+        self.DO6.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO6, 0, 5, 1, 1)
+
+        self.DO13 = QPushButton(self.widget_2)
+        self.DO13.setObjectName(u"DO13")
+        sizePolicy1.setHeightForWidth(self.DO13.sizePolicy().hasHeightForWidth())
+        self.DO13.setSizePolicy(sizePolicy1)
+        self.DO13.setMinimumSize(QSize(95, 70))
+        self.DO13.setMaximumSize(QSize(100, 100))
+        self.DO13.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO13.setCheckable(True)
+        self.DO13.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO13, 2, 0, 1, 1)
+
+        self.DO7 = QPushButton(self.widget_2)
+        self.DO7.setObjectName(u"DO7")
+        sizePolicy1.setHeightForWidth(self.DO7.sizePolicy().hasHeightForWidth())
+        self.DO7.setSizePolicy(sizePolicy1)
+        self.DO7.setMinimumSize(QSize(95, 70))
+        self.DO7.setMaximumSize(QSize(100, 100))
+        self.DO7.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO7.setCheckable(True)
+        self.DO7.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO7, 1, 0, 1, 1)
+
+        self.DO33 = QPushButton(self.widget_2)
+        self.DO33.setObjectName(u"DO33")
+        sizePolicy1.setHeightForWidth(self.DO33.sizePolicy().hasHeightForWidth())
+        self.DO33.setSizePolicy(sizePolicy1)
+        self.DO33.setMinimumSize(QSize(95, 70))
+        self.DO33.setMaximumSize(QSize(100, 100))
+        self.DO33.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO33.setCheckable(True)
+        self.DO33.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO33, 5, 2, 1, 1)
+
+        self.DO3 = QPushButton(self.widget_2)
+        self.DO3.setObjectName(u"DO3")
+        sizePolicy1.setHeightForWidth(self.DO3.sizePolicy().hasHeightForWidth())
+        self.DO3.setSizePolicy(sizePolicy1)
+        self.DO3.setMinimumSize(QSize(95, 70))
+        self.DO3.setMaximumSize(QSize(100, 100))
+        self.DO3.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO3.setCheckable(True)
+        self.DO3.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO3, 0, 2, 1, 1)
+
+        self.DO27 = QPushButton(self.widget_2)
+        self.DO27.setObjectName(u"DO27")
+        sizePolicy1.setHeightForWidth(self.DO27.sizePolicy().hasHeightForWidth())
+        self.DO27.setSizePolicy(sizePolicy1)
+        self.DO27.setMinimumSize(QSize(95, 70))
+        self.DO27.setMaximumSize(QSize(100, 100))
+        self.DO27.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO27.setCheckable(True)
+        self.DO27.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO27, 4, 2, 1, 1)
+
+        self.DO40 = QPushButton(self.widget_2)
+        self.DO40.setObjectName(u"DO40")
+        sizePolicy1.setHeightForWidth(self.DO40.sizePolicy().hasHeightForWidth())
+        self.DO40.setSizePolicy(sizePolicy1)
+        self.DO40.setMinimumSize(QSize(95, 70))
+        self.DO40.setMaximumSize(QSize(100, 100))
+        self.DO40.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO40.setCheckable(True)
+        self.DO40.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO40, 6, 3, 1, 1)
+
+        self.DO39 = QPushButton(self.widget_2)
+        self.DO39.setObjectName(u"DO39")
+        sizePolicy1.setHeightForWidth(self.DO39.sizePolicy().hasHeightForWidth())
+        self.DO39.setSizePolicy(sizePolicy1)
+        self.DO39.setMinimumSize(QSize(95, 70))
+        self.DO39.setMaximumSize(QSize(100, 100))
+        self.DO39.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO39.setCheckable(True)
+        self.DO39.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO39, 6, 2, 1, 1)
+
+        self.DO45 = QPushButton(self.widget_2)
+        self.DO45.setObjectName(u"DO45")
+        sizePolicy1.setHeightForWidth(self.DO45.sizePolicy().hasHeightForWidth())
+        self.DO45.setSizePolicy(sizePolicy1)
+        self.DO45.setMinimumSize(QSize(95, 70))
+        self.DO45.setMaximumSize(QSize(100, 100))
+        self.DO45.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DO45.setCheckable(True)
+        self.DO45.setChecked(False)
+
+        self.gridLayout_7.addWidget(self.DO45, 7, 2, 1, 1)
+
+
+        self.horizontalLayout_34.addWidget(self.widget_2)
+
+        self.ScrollAreaDIDO.setWidget(self.scrollAreaWidgetContents_2)
+        self.gridLayoutWidget = QWidget(self.DIDOContainerPage)
+        self.gridLayoutWidget.setObjectName(u"gridLayoutWidget")
+        self.gridLayoutWidget.setGeometry(QRect(20, 20, 661, 301))
+        self.gridLayout_8 = QGridLayout(self.gridLayoutWidget)
+        self.gridLayout_8.setObjectName(u"gridLayout_8")
+        self.gridLayout_8.setContentsMargins(0, 0, 0, 1)
+        self.DI8 = QPushButton(self.gridLayoutWidget)
+        self.DI8.setObjectName(u"DI8")
+        sizePolicy1.setHeightForWidth(self.DI8.sizePolicy().hasHeightForWidth())
+        self.DI8.setSizePolicy(sizePolicy1)
+        self.DI8.setMinimumSize(QSize(95, 70))
+        self.DI8.setMaximumSize(QSize(100, 100))
+        self.DI8.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI8.setCheckable(True)
+        self.DI8.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI8, 1, 3, 1, 1)
+
+        self.DI3 = QPushButton(self.gridLayoutWidget)
+        self.DI3.setObjectName(u"DI3")
+        sizePolicy1.setHeightForWidth(self.DI3.sizePolicy().hasHeightForWidth())
+        self.DI3.setSizePolicy(sizePolicy1)
+        self.DI3.setMinimumSize(QSize(95, 70))
+        self.DI3.setMaximumSize(QSize(100, 100))
+        self.DI3.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI3.setCheckable(True)
+        self.DI3.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI3, 0, 2, 1, 1)
+
+        self.DI12 = QPushButton(self.gridLayoutWidget)
+        self.DI12.setObjectName(u"DI12")
+        sizePolicy1.setHeightForWidth(self.DI12.sizePolicy().hasHeightForWidth())
+        self.DI12.setSizePolicy(sizePolicy1)
+        self.DI12.setMinimumSize(QSize(95, 70))
+        self.DI12.setMaximumSize(QSize(100, 100))
+        self.DI12.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI12.setCheckable(True)
+        self.DI12.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI12, 2, 3, 1, 1)
+
+        self.DI7 = QPushButton(self.gridLayoutWidget)
+        self.DI7.setObjectName(u"DI7")
+        sizePolicy1.setHeightForWidth(self.DI7.sizePolicy().hasHeightForWidth())
+        self.DI7.setSizePolicy(sizePolicy1)
+        self.DI7.setMinimumSize(QSize(95, 70))
+        self.DI7.setMaximumSize(QSize(100, 100))
+        self.DI7.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI7.setCheckable(True)
+        self.DI7.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI7, 1, 2, 1, 1)
+
+        self.DI11 = QPushButton(self.gridLayoutWidget)
+        self.DI11.setObjectName(u"DI11")
+        sizePolicy1.setHeightForWidth(self.DI11.sizePolicy().hasHeightForWidth())
+        self.DI11.setSizePolicy(sizePolicy1)
+        self.DI11.setMinimumSize(QSize(95, 70))
+        self.DI11.setMaximumSize(QSize(100, 100))
+        self.DI11.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI11.setCheckable(True)
+        self.DI11.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI11, 2, 2, 1, 1)
+
+        self.DI16 = QPushButton(self.gridLayoutWidget)
+        self.DI16.setObjectName(u"DI16")
+        sizePolicy1.setHeightForWidth(self.DI16.sizePolicy().hasHeightForWidth())
+        self.DI16.setSizePolicy(sizePolicy1)
+        self.DI16.setMinimumSize(QSize(95, 70))
+        self.DI16.setMaximumSize(QSize(100, 100))
+        self.DI16.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI16.setCheckable(True)
+        self.DI16.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI16, 3, 3, 1, 1)
+
+        self.DI9 = QPushButton(self.gridLayoutWidget)
+        self.DI9.setObjectName(u"DI9")
+        sizePolicy1.setHeightForWidth(self.DI9.sizePolicy().hasHeightForWidth())
+        self.DI9.setSizePolicy(sizePolicy1)
+        self.DI9.setMinimumSize(QSize(95, 70))
+        self.DI9.setMaximumSize(QSize(100, 100))
+        self.DI9.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI9.setCheckable(True)
+        self.DI9.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI9, 2, 0, 1, 1)
+
+        self.DI4 = QPushButton(self.gridLayoutWidget)
+        self.DI4.setObjectName(u"DI4")
+        sizePolicy1.setHeightForWidth(self.DI4.sizePolicy().hasHeightForWidth())
+        self.DI4.setSizePolicy(sizePolicy1)
+        self.DI4.setMinimumSize(QSize(95, 70))
+        self.DI4.setMaximumSize(QSize(100, 100))
+        self.DI4.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI4.setCheckable(True)
+        self.DI4.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI4, 0, 3, 1, 1)
+
+        self.DI2 = QPushButton(self.gridLayoutWidget)
+        self.DI2.setObjectName(u"DI2")
+        sizePolicy1.setHeightForWidth(self.DI2.sizePolicy().hasHeightForWidth())
+        self.DI2.setSizePolicy(sizePolicy1)
+        self.DI2.setMinimumSize(QSize(95, 70))
+        self.DI2.setMaximumSize(QSize(100, 100))
+        self.DI2.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI2.setCheckable(True)
+        self.DI2.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI2, 0, 1, 1, 1)
+
+        self.DI14 = QPushButton(self.gridLayoutWidget)
+        self.DI14.setObjectName(u"DI14")
+        sizePolicy1.setHeightForWidth(self.DI14.sizePolicy().hasHeightForWidth())
+        self.DI14.setSizePolicy(sizePolicy1)
+        self.DI14.setMinimumSize(QSize(95, 70))
+        self.DI14.setMaximumSize(QSize(100, 100))
+        self.DI14.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI14.setCheckable(True)
+        self.DI14.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI14, 3, 1, 1, 1)
+
+        self.DI15 = QPushButton(self.gridLayoutWidget)
+        self.DI15.setObjectName(u"DI15")
+        sizePolicy1.setHeightForWidth(self.DI15.sizePolicy().hasHeightForWidth())
+        self.DI15.setSizePolicy(sizePolicy1)
+        self.DI15.setMinimumSize(QSize(95, 70))
+        self.DI15.setMaximumSize(QSize(100, 100))
+        self.DI15.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI15.setCheckable(True)
+        self.DI15.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI15, 3, 2, 1, 1)
+
+        self.DI6 = QPushButton(self.gridLayoutWidget)
+        self.DI6.setObjectName(u"DI6")
+        sizePolicy1.setHeightForWidth(self.DI6.sizePolicy().hasHeightForWidth())
+        self.DI6.setSizePolicy(sizePolicy1)
+        self.DI6.setMinimumSize(QSize(95, 70))
+        self.DI6.setMaximumSize(QSize(100, 100))
+        self.DI6.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI6.setCheckable(True)
+        self.DI6.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI6, 1, 1, 1, 1)
+
+        self.DI1 = QPushButton(self.gridLayoutWidget)
+        self.DI1.setObjectName(u"DI1")
+        sizePolicy1.setHeightForWidth(self.DI1.sizePolicy().hasHeightForWidth())
+        self.DI1.setSizePolicy(sizePolicy1)
+        self.DI1.setMinimumSize(QSize(95, 70))
+        self.DI1.setMaximumSize(QSize(100, 100))
+        self.DI1.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI1.setCheckable(True)
+        self.DI1.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI1, 0, 0, 1, 1)
+
+        self.DI10 = QPushButton(self.gridLayoutWidget)
+        self.DI10.setObjectName(u"DI10")
+        sizePolicy1.setHeightForWidth(self.DI10.sizePolicy().hasHeightForWidth())
+        self.DI10.setSizePolicy(sizePolicy1)
+        self.DI10.setMinimumSize(QSize(95, 70))
+        self.DI10.setMaximumSize(QSize(100, 100))
+        self.DI10.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI10.setCheckable(True)
+        self.DI10.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI10, 2, 1, 1, 1)
+
+        self.DI13 = QPushButton(self.gridLayoutWidget)
+        self.DI13.setObjectName(u"DI13")
+        sizePolicy1.setHeightForWidth(self.DI13.sizePolicy().hasHeightForWidth())
+        self.DI13.setSizePolicy(sizePolicy1)
+        self.DI13.setMinimumSize(QSize(95, 70))
+        self.DI13.setMaximumSize(QSize(100, 100))
+        self.DI13.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI13.setCheckable(True)
+        self.DI13.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI13, 3, 0, 1, 1)
+
+        self.DI5 = QPushButton(self.gridLayoutWidget)
+        self.DI5.setObjectName(u"DI5")
+        sizePolicy1.setHeightForWidth(self.DI5.sizePolicy().hasHeightForWidth())
+        self.DI5.setSizePolicy(sizePolicy1)
+        self.DI5.setMinimumSize(QSize(95, 70))
+        self.DI5.setMaximumSize(QSize(100, 100))
+        self.DI5.setStyleSheet(u"    border: none;\n"
+"    border-radius: 24px;\n"
+"")
+        self.DI5.setCheckable(True)
+        self.DI5.setChecked(False)
+
+        self.gridLayout_8.addWidget(self.DI5, 1, 0, 1, 1)
+
+        self.label_5 = QLabel(self.DIDOContainerPage)
+        self.label_5.setObjectName(u"label_5")
+        self.label_5.setGeometry(QRect(320, 0, 67, 17))
+        font5 = QFont()
+        font5.setPointSize(16)
+        self.label_5.setFont(font5)
+        self.label_5.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_8 = QLabel(self.DIDOContainerPage)
+        self.label_8.setObjectName(u"label_8")
+        self.label_8.setGeometry(QRect(320, 330, 67, 17))
+        self.label_8.setFont(font5)
+        self.label_8.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.MiddleStackedWidget.addWidget(self.DIDOContainerPage)
         self.ParentStackedWidgetToChangeMenuOptions.addWidget(self.ComponentControlPage)
         self.ProductionRecordPage = QWidget()
         self.ProductionRecordPage.setObjectName(u"ProductionRecordPage")
@@ -1685,9 +2643,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_17.setObjectName(u"horizontalLayout_17")
         self.WorkOrderText = QLabel(self.WorkOrderWidget)
         self.WorkOrderText.setObjectName(u"WorkOrderText")
-        font4 = QFont()
-        font4.setBold(True)
-        self.WorkOrderText.setFont(font4)
+        font6 = QFont()
+        font6.setBold(True)
+        self.WorkOrderText.setFont(font6)
 
         self.horizontalLayout_17.addWidget(self.WorkOrderText)
 
@@ -1704,7 +2662,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_18.setObjectName(u"horizontalLayout_18")
         self.RecipeText = QLabel(self.RecipeWidget)
         self.RecipeText.setObjectName(u"RecipeText")
-        self.RecipeText.setFont(font4)
+        self.RecipeText.setFont(font6)
 
         self.horizontalLayout_18.addWidget(self.RecipeText)
 
@@ -1721,7 +2679,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_20.setObjectName(u"horizontalLayout_20")
         self.QuantityText = QLabel(self.QuantityWidget)
         self.QuantityText.setObjectName(u"QuantityText")
-        self.QuantityText.setFont(font4)
+        self.QuantityText.setFont(font6)
 
         self.horizontalLayout_20.addWidget(self.QuantityText)
 
@@ -1738,7 +2696,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_21.setObjectName(u"horizontalLayout_21")
         self.WorkerNameText = QLabel(self.WorkerNameWidget)
         self.WorkerNameText.setObjectName(u"WorkerNameText")
-        self.WorkerNameText.setFont(font4)
+        self.WorkerNameText.setFont(font6)
 
         self.horizontalLayout_21.addWidget(self.WorkerNameText)
 
@@ -1755,7 +2713,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_23.setObjectName(u"horizontalLayout_23")
         self.CartHeightText = QLabel(self.CartHeightWidget)
         self.CartHeightText.setObjectName(u"CartHeightText")
-        self.CartHeightText.setFont(font4)
+        self.CartHeightText.setFont(font6)
 
         self.horizontalLayout_23.addWidget(self.CartHeightText)
 
@@ -1772,7 +2730,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_24.setObjectName(u"horizontalLayout_24")
         self.CartDepthText = QLabel(self.CartDepthWidget)
         self.CartDepthText.setObjectName(u"CartDepthText")
-        self.CartDepthText.setFont(font4)
+        self.CartDepthText.setFont(font6)
 
         self.horizontalLayout_24.addWidget(self.CartDepthText)
 
@@ -1789,7 +2747,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_26.setObjectName(u"horizontalLayout_26")
         self.DateText = QLabel(self.DateWidget)
         self.DateText.setObjectName(u"DateText")
-        self.DateText.setFont(font4)
+        self.DateText.setFont(font6)
 
         self.horizontalLayout_26.addWidget(self.DateText)
 
@@ -1802,7 +2760,6 @@ class Ui_MainWindow(object):
         self.Line.raise_()
         self.SystemSettingsButton.raise_()
         self.SignalLightsWidget.raise_()
-        self.DeltaLogo.raise_()
         self.MenuButtons.raise_()
         self.WorkOrderWidget.raise_()
         self.RecipeWidget.raise_()
@@ -1811,6 +2768,7 @@ class Ui_MainWindow(object):
         self.CartHeightWidget.raise_()
         self.CartDepthWidget.raise_()
         self.DateWidget.raise_()
+        self.DeltaLogo.raise_()
 
         self.horizontalLayout_4.addWidget(self.BackgroundWidget)
 
@@ -1820,10 +2778,10 @@ class Ui_MainWindow(object):
 
         self.ParentStackedWidgetToChangeMenuOptions.setCurrentIndex(0)
         self.ProcessAndInfoStackedWidget.setCurrentIndex(0)
-        self.AutoAndManualStackedWidget.setCurrentIndex(0)
         self.ActionButtons.setCurrentIndex(0)
         self.ComponentControlStackedWidget.setCurrentIndex(0)
         self.ChangeComponentControlStackedWidget.setCurrentIndex(0)
+        self.MiddleStackedWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -1879,19 +2837,53 @@ class Ui_MainWindow(object):
         self.d2.setText(QCoreApplication.translate("MainWindow", u"D2: ", None))
         self.h1.setText(QCoreApplication.translate("MainWindow", u"H1: ", None))
         self.RecordDataButton.setText(QCoreApplication.translate("MainWindow", u"Record Data", None))
-        self.INITBefore.setText(QCoreApplication.translate("MainWindow", u"INIT", None))
-        self.StopBefore.setText(QCoreApplication.translate("MainWindow", u"STOP", None))
-        self.ChooseAutoButton.setText(QCoreApplication.translate("MainWindow", u"Auto", None))
-        self.ChooseManualButton.setText(QCoreApplication.translate("MainWindow", u"Manual", None))
         self.AutoButton.setText(QCoreApplication.translate("MainWindow", u"Auto", None))
         self.ManualButton.setText(QCoreApplication.translate("MainWindow", u"Manual", None))
+        self.INITButton.setText(QCoreApplication.translate("MainWindow", u"INIT", None))
         self.RunButton.setText(QCoreApplication.translate("MainWindow", u"RUN", None))
-        self.StopButton.setText(QCoreApplication.translate("MainWindow", u"STOP", None))
-        self.AutoResetButton.setText(QCoreApplication.translate("MainWindow", u"RESET", None))
+        self.AutoPauseButton.setText(QCoreApplication.translate("MainWindow", u"Pause", None))
+        self.AutoStopButton.setText(QCoreApplication.translate("MainWindow", u"STOP", None))
         self.RoughAlignButton.setText(QCoreApplication.translate("MainWindow", u"Rough Align", None))
         self.PreciseAlignButton.setText(QCoreApplication.translate("MainWindow", u"Precise Align", None))
         self.PickButton.setText(QCoreApplication.translate("MainWindow", u"Pick", None))
         self.AssemblyButton.setText(QCoreApplication.translate("MainWindow", u"Assembly", None))
+        self.ManualPauseButton.setText(QCoreApplication.translate("MainWindow", u"Pause", None))
+        self.ManualStopButton.setText(QCoreApplication.translate("MainWindow", u"STOP", None))
+        self.ChooseMotor.setText(QCoreApplication.translate("MainWindow", u"Motor", None))
+        self.ChooseVision.setText(QCoreApplication.translate("MainWindow", u"Vision", None))
+        self.ChooseClipper.setText(QCoreApplication.translate("MainWindow", u"Clipper", None))
+        self.ChooseForklift.setText(QCoreApplication.translate("MainWindow", u"Forklift", None))
+        self.ChooseDIDO.setText(QCoreApplication.translate("MainWindow", u"DI/DO", None))
+        self.MotorStartedButton.setText(QCoreApplication.translate("MainWindow", u"Motor", None))
+        self.HamburgerMenu.setText("")
+        self.ControlUpCP.setText("")
+        self.ControlLeftCP.setText("")
+        self.ControlDownCP.setText("")
+        self.ControlRightCP.setText("")
+        self.YawPlusCP.setText("")
+        self.YawMinusCP.setText("")
+        self.ClipperButtonOnOff.setText(QCoreApplication.translate("MainWindow", u"Clipper  Off", None))
+        self.MotorResetButton.setText(QCoreApplication.translate("MainWindow", u"RESET", None))
+        self.VisionOne.setText(QCoreApplication.translate("MainWindow", u"Screw", None))
+        self.VisionTwo.setText(QCoreApplication.translate("MainWindow", u"LShape", None))
+        self.VisionThree.setText(QCoreApplication.translate("MainWindow", u"ICP Fit", None))
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Clipper Page", None))
+        self.LiftUp.setText("")
+        self.LowerDown.setText("")
+        self.FastForktLiftButton.setText(QCoreApplication.translate("MainWindow", u"Fast", None))
+        self.SlowLiftButton.setText(QCoreApplication.translate("MainWindow", u"Slow", None))
+        self.StopForkliftButton.setText(QCoreApplication.translate("MainWindow", u"Stop", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Speed", None))
+        self.SendForkliftCommand.setText(QCoreApplication.translate("MainWindow", u"Go to distance", None))
+        self.MediumLiftButton.setText(QCoreApplication.translate("MainWindow", u"Medium", None))
+        self.label_7.setText(QCoreApplication.translate("MainWindow", u"Distance (manual)", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"10mm", None))
+        self.label_9.setText(QCoreApplication.translate("MainWindow", u"10mm", None))
+        self.MotorOption.setText(QCoreApplication.translate("MainWindow", u"Motor", None))
+        self.VisionOption.setText(QCoreApplication.translate("MainWindow", u"Vision", None))
+        self.ClipperOption.setText(QCoreApplication.translate("MainWindow", u"Clipper", None))
+        self.ForkliftOption.setText(QCoreApplication.translate("MainWindow", u"Forklift", None))
+        self.DIDOOption.setText(QCoreApplication.translate("MainWindow", u"DI/DO", None))
         self.VisionTextInComponentControl.setText(QCoreApplication.translate("MainWindow", u"Vision", None))
         self.y_2.setText(QCoreApplication.translate("MainWindow", u"y:", None))
         self.yText_2.setText(QCoreApplication.translate("MainWindow", u"pos", None))
@@ -1914,39 +2906,72 @@ class Ui_MainWindow(object):
         self.h1_2.setText(QCoreApplication.translate("MainWindow", u"Height Cmd: ", None))
         self.HeightCommand.setText(QCoreApplication.translate("MainWindow", u"0", None))
         self.RecordDataButton_2.setText(QCoreApplication.translate("MainWindow", u"Record Data", None))
-        self.ChooseMotor.setText(QCoreApplication.translate("MainWindow", u"Motor", None))
-        self.ChooseVision.setText(QCoreApplication.translate("MainWindow", u"Vision", None))
-        self.ChooseClipper.setText(QCoreApplication.translate("MainWindow", u"Clipper", None))
-        self.ChooseForklift.setText(QCoreApplication.translate("MainWindow", u"Forklift", None))
-        self.MotorStartedButton.setText(QCoreApplication.translate("MainWindow", u"Motor", None))
-        self.HamburgerMenu.setText("")
-        self.ControlUpCP.setText("")
-        self.ControlLeftCP.setText("")
-        self.ControlDownCP.setText("")
-        self.ControlRightCP.setText("")
-        self.YawPlusCP.setText("")
-        self.YawMinusCP.setText("")
-        self.ClipperButtonOnOff.setText(QCoreApplication.translate("MainWindow", u"Clipper  Off", None))
-        self.MotorResetButton.setText(QCoreApplication.translate("MainWindow", u"RESET", None))
-        self.VisionOne.setText(QCoreApplication.translate("MainWindow", u"Screw", None))
-        self.VisionTwo.setText(QCoreApplication.translate("MainWindow", u"LShape", None))
-        self.VisionThree.setText(QCoreApplication.translate("MainWindow", u"ICP Fit", None))
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Clipper Page", None))
-        self.LiftUp.setText("")
-        self.LowerDown.setText("")
-        self.FastForktLiftButton.setText(QCoreApplication.translate("MainWindow", u"Fast", None))
-        self.SlowLiftButton.setText(QCoreApplication.translate("MainWindow", u"Slow", None))
-        self.RunForkliftButton.setText(QCoreApplication.translate("MainWindow", u"Run", None))
-        self.StopForkliftButton.setText(QCoreApplication.translate("MainWindow", u"Stop", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Mode", None))
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Speed", None))
-        self.SendForkliftCommand.setText(QCoreApplication.translate("MainWindow", u"Send Cmd", None))
-        self.MediumLiftButton.setText(QCoreApplication.translate("MainWindow", u"Medium", None))
-        self.label_7.setText(QCoreApplication.translate("MainWindow", u"Distance (manual)", None))
-        self.MotorOption.setText(QCoreApplication.translate("MainWindow", u"Motor", None))
-        self.VisionOption.setText(QCoreApplication.translate("MainWindow", u"Vision", None))
-        self.ClipperOption.setText(QCoreApplication.translate("MainWindow", u"Clipper", None))
-        self.ForkliftOption.setText(QCoreApplication.translate("MainWindow", u"Forklift", None))
+        self.DO23.setText(QCoreApplication.translate("MainWindow", u"23", None))
+        self.DO5.setText(QCoreApplication.translate("MainWindow", u"5", None))
+        self.DO14.setText(QCoreApplication.translate("MainWindow", u"14", None))
+        self.DO9.setText(QCoreApplication.translate("MainWindow", u"9", None))
+        self.DO38.setText(QCoreApplication.translate("MainWindow", u"38", None))
+        self.DO22.setText(QCoreApplication.translate("MainWindow", u"22", None))
+        self.DO48.setText(QCoreApplication.translate("MainWindow", u"48", None))
+        self.DO46.setText(QCoreApplication.translate("MainWindow", u"46", None))
+        self.DO28.setText(QCoreApplication.translate("MainWindow", u"28", None))
+        self.DO2.setText(QCoreApplication.translate("MainWindow", u"2", None))
+        self.DO41.setText(QCoreApplication.translate("MainWindow", u"41", None))
+        self.DO31.setText(QCoreApplication.translate("MainWindow", u"31", None))
+        self.DO11.setText(QCoreApplication.translate("MainWindow", u"11", None))
+        self.DO17.setText(QCoreApplication.translate("MainWindow", u"17", None))
+        self.DO4.setText(QCoreApplication.translate("MainWindow", u"4", None))
+        self.DO20.setText(QCoreApplication.translate("MainWindow", u"20", None))
+        self.DO15.setText(QCoreApplication.translate("MainWindow", u"15", None))
+        self.DO19.setText(QCoreApplication.translate("MainWindow", u"19", None))
+        self.DO21.setText(QCoreApplication.translate("MainWindow", u"21", None))
+        self.DO18.setText(QCoreApplication.translate("MainWindow", u"18", None))
+        self.DO36.setText(QCoreApplication.translate("MainWindow", u"36", None))
+        self.DO8.setText(QCoreApplication.translate("MainWindow", u"8", None))
+        self.DO42.setText(QCoreApplication.translate("MainWindow", u"42", None))
+        self.DO26.setText(QCoreApplication.translate("MainWindow", u"26", None))
+        self.DO1.setText(QCoreApplication.translate("MainWindow", u"1", None))
+        self.DO44.setText(QCoreApplication.translate("MainWindow", u"44", None))
+        self.DO16.setText(QCoreApplication.translate("MainWindow", u"16", None))
+        self.DO32.setText(QCoreApplication.translate("MainWindow", u"32", None))
+        self.DO34.setText(QCoreApplication.translate("MainWindow", u"34", None))
+        self.DO10.setText(QCoreApplication.translate("MainWindow", u"10", None))
+        self.DO29.setText(QCoreApplication.translate("MainWindow", u"29", None))
+        self.DO35.setText(QCoreApplication.translate("MainWindow", u"35", None))
+        self.DO37.setText(QCoreApplication.translate("MainWindow", u"37", None))
+        self.DO12.setText(QCoreApplication.translate("MainWindow", u"12", None))
+        self.DO43.setText(QCoreApplication.translate("MainWindow", u"43", None))
+        self.DO47.setText(QCoreApplication.translate("MainWindow", u"47", None))
+        self.DO30.setText(QCoreApplication.translate("MainWindow", u"30", None))
+        self.DO24.setText(QCoreApplication.translate("MainWindow", u"24", None))
+        self.DO25.setText(QCoreApplication.translate("MainWindow", u"25", None))
+        self.DO6.setText(QCoreApplication.translate("MainWindow", u"6", None))
+        self.DO13.setText(QCoreApplication.translate("MainWindow", u"13", None))
+        self.DO7.setText(QCoreApplication.translate("MainWindow", u"7", None))
+        self.DO33.setText(QCoreApplication.translate("MainWindow", u"33", None))
+        self.DO3.setText(QCoreApplication.translate("MainWindow", u"3", None))
+        self.DO27.setText(QCoreApplication.translate("MainWindow", u"27", None))
+        self.DO40.setText(QCoreApplication.translate("MainWindow", u"40", None))
+        self.DO39.setText(QCoreApplication.translate("MainWindow", u"39", None))
+        self.DO45.setText(QCoreApplication.translate("MainWindow", u"45", None))
+        self.DI8.setText(QCoreApplication.translate("MainWindow", u"8", None))
+        self.DI3.setText(QCoreApplication.translate("MainWindow", u"3", None))
+        self.DI12.setText(QCoreApplication.translate("MainWindow", u"12", None))
+        self.DI7.setText(QCoreApplication.translate("MainWindow", u"7", None))
+        self.DI11.setText(QCoreApplication.translate("MainWindow", u"11", None))
+        self.DI16.setText(QCoreApplication.translate("MainWindow", u"16", None))
+        self.DI9.setText(QCoreApplication.translate("MainWindow", u"9", None))
+        self.DI4.setText(QCoreApplication.translate("MainWindow", u"4", None))
+        self.DI2.setText(QCoreApplication.translate("MainWindow", u"2", None))
+        self.DI14.setText(QCoreApplication.translate("MainWindow", u"14", None))
+        self.DI15.setText(QCoreApplication.translate("MainWindow", u"15", None))
+        self.DI6.setText(QCoreApplication.translate("MainWindow", u"6", None))
+        self.DI1.setText(QCoreApplication.translate("MainWindow", u"1", None))
+        self.DI10.setText(QCoreApplication.translate("MainWindow", u"10", None))
+        self.DI13.setText(QCoreApplication.translate("MainWindow", u"13", None))
+        self.DI5.setText(QCoreApplication.translate("MainWindow", u"5", None))
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"DI", None))
+        self.label_8.setText(QCoreApplication.translate("MainWindow", u"DO", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Production Record", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Logs", None))
         self.ChangeLanguageText.setText(QCoreApplication.translate("MainWindow", u"Change Language", None))

@@ -40,8 +40,8 @@ class MotionController(Node):
         self.check_home = False
         self.check_position = False
         
-        self.current_motor_len = [10.0, 0.0, 0.0]
-        self.current_cartesian_pose = [10.0,0.0,0.0]  # 初始 cartesian pose x y yaw
+        self.current_motor_len = [0.0, 0.0, 0.0]
+        self.current_cartesian_pose = [0.0,0.0,0.0]  # 初始 cartesian pose x y yaw
         self.last_sent_joint_command = [0.0, 0.0, 0.0]  # 上次發送的關節指令
         self.get_logger().info('MotionController ready.')
 
@@ -111,6 +111,7 @@ class MotionController(Node):
             joint_trajectory = []
             for cartesian_point in cartesian_trajectory:
                 joint_point = self.robot_model.inverse_kinematics(cartesian_point)
+                # joint_point = -self.robot_model.inverse_kinematics(cartesian_point)  # 注意: reverse sign
                 joint_trajectory.append(joint_point)
 
             # 3. 載入 joint_trajectory 進隊列（會自動切成 batch）
