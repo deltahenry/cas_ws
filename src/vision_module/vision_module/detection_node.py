@@ -146,6 +146,7 @@ def main():
             depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
 
             if node.screw_active:
+                screw_results = []
                 if node.frame_count % 10 == 0:
                     screw_results = node.screw_detector.detect(color_image, depth_frame)
                     screw_results = remove_duplicate_detections(screw_results)
@@ -166,28 +167,13 @@ def main():
                     yaw_deg = np.degrees(yaw_rad)
                     quat = tf_transformations.quaternion_from_euler(0, 0, yaw_rad)
 
-                    # ✅ 轉換為 Yaw/Pitch/Roll
                     r = R.from_quat(quat)
                     yaw_deg, pitch_deg, roll_deg = r.as_euler('zyx', degrees=True)
-                    
 
-
-                    # ✅ 檢查角度震動過大，則不輸出
-                    yaw_thresh = 1.0
-                    pitch_thresh = 1.0
-                    roll_thresh = 1.0
-
-                    if node.prev_yaw is not None:
-                        if (abs(yaw_deg - node.prev_yaw) > yaw_thresh or
-                            abs(pitch_deg - node.prev_pitch) > pitch_thresh or
-                            abs(roll_deg - node.prev_roll) > roll_thresh):
-                            print("⚠️ Yaw/Pitch/Roll 跳動過大，跳過輸出此幀")
-                            continue  # 🔁 跳過此 frame，不輸出 TF 和 Pose
-
+                    # ✅ 保留顯示，不做跳過
                     for i, r_ in enumerate(screw_results):
                         u, v = r_['u'], r_['v']
                         X, Y, Z = r_['X'], r_['Y'], r_['Z']
-
                         quats.append(quat)
                         node.broadcast_screw_tf(i + 1, X, Y, Z, quat)
                         avg_x += X
@@ -201,6 +187,30 @@ def main():
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 255), 1)
                         print(f"🟢 螺絲 {i+1}: (u={u}, v={v}), X={X:.3f}, Y={Y:.3f}, Z={Z:.3f}")
 
+                    # ✅ 用三點建立平面方向，求出 R 與四元數
+                    v0 = np.array([screw_results[0]['X'], screw_results[0]['Y'], screw_results[0]['Z']])
+                    v1 = np.array([screw_results[1]['X'], screw_results[1]['Y'], screw_results[1]['Z']])
+                    v2 = np.array([screw_results[2]['X'], screw_results[2]['Y'], screw_results[2]['Z']])
+                    v3 = np.array([screw_results[3]['X'], screw_results[3]['Y'], screw_results[3]['Z']])
+                    
+                    x_axis = v3 - v2
+                    x_axis = x_axis / np.linalg.norm(x_axis)
+                    temp_vec = v0 - v2
+                    z_axis = np.cross(x_axis, temp_vec)
+                    z_axis = z_axis / np.linalg.norm(z_axis)
+                    y_axis = np.cross(z_axis, x_axis)  # ✅ 正交右手系
+
+                    R_mat = np.column_stack((x_axis, y_axis, z_axis))
+                    quat = tf_transformations.quaternion_from_matrix(
+                        np.vstack((np.hstack((R_mat, np.array([[0], [0], [0]]))), [0, 0, 0, 1]))
+                    )
+
+                    r = R.from_quat(quat)
+                    yaw_deg, pitch_deg, roll_deg = r.as_euler('zyx', degrees=True)
+
+                    print(f"✅ 四元數: {quat}")
+                    print(f"✅ 尤拉角: Yaw={yaw_deg:.2f}°, Pitch={pitch_deg:.2f}°, Roll={roll_deg:.2f}°")
+
                     avg_x /= 4
                     avg_y /= 4
                     avg_z /= 4
@@ -212,13 +222,13 @@ def main():
                     node.prev_avg_center = (center_u, center_v)
                     node.prev_avg_pose = (avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg)
 
-                    node.publish_avg_pose(avg_x, avg_y, avg_z, quat)
+                    node.publish_avg_pose(avg_x, avg_y, avg_z, quat)  # ✅ 呼叫正確方法
 
-                    # ✅ 更新穩定的角度紀錄
                     node.prev_yaw = yaw_deg
                     node.prev_pitch = pitch_deg
                     node.prev_roll = roll_deg
 
+                # ✅ 顯示上次有效結果（即使目前沒偵測到）
                 if node.prev_avg_center and node.prev_avg_pose:
                     center_u, center_v = node.prev_avg_center
                     avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg = node.prev_avg_pose
