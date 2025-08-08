@@ -34,7 +34,7 @@ class DataNode(Node):
 
         self.dido_cmd_subscriber = self.create_subscription(
             DIDOCmd,
-            'dido_cmd',
+            'test_dido',
             self.handle_dido_cmd,
             10
         )
@@ -60,6 +60,10 @@ class DataNode(Node):
         self.DO_1 = np.zeros(16, dtype=int)  # 初始化16個DO端口
         self.DO_2 = np.zeros(16, dtype=int)  # 初始化16個DO端口
         self.DO_3 = np.zeros(16, dtype=int)  # 初始化16個DO端口
+
+        # self.DO_1[0] = 1  # 初始化DO1.0為1，其他為0
+        # self.DO_2[0] = 1  # 初始化DO2.0為
+        # self.DO_3[0] = 1  # 初始化DO3.0為1，其他為0
 
     def fork_io_cmd_callback(self, msg: Int32MultiArray):
         print(f"接收到叉車IO命令: {msg.data}")

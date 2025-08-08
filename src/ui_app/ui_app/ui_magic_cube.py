@@ -983,82 +983,19 @@ class Ui_MainWindow(object):
         self.ChangeComponentControlStackedWidget.setStyleSheet(u"")
         self.MotorPage = QWidget()
         self.MotorPage.setObjectName(u"MotorPage")
-        self.ControlUpCP = QPushButton(self.MotorPage)
-        self.ControlUpCP.setObjectName(u"ControlUpCP")
-        self.ControlUpCP.setGeometry(QRect(120, 40, 101, 91))
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.ControlUpCP.sizePolicy().hasHeightForWidth())
-        self.ControlUpCP.setSizePolicy(sizePolicy3)
-        self.ControlUpCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon6 = QIcon()
-        icon6.addFile(u":/controlArrows/cartesian/up.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.ControlUpCP.setIcon(icon6)
-        self.ControlUpCP.setIconSize(QSize(80, 80))
-        self.ControlLeftCP = QPushButton(self.MotorPage)
-        self.ControlLeftCP.setObjectName(u"ControlLeftCP")
-        self.ControlLeftCP.setGeometry(QRect(20, 130, 101, 91))
-        self.ControlLeftCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon7 = QIcon()
-        icon7.addFile(u":/controlArrows/cartesian/left.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.ControlLeftCP.setIcon(icon7)
-        self.ControlLeftCP.setIconSize(QSize(80, 80))
-        self.ControlDownCP = QPushButton(self.MotorPage)
-        self.ControlDownCP.setObjectName(u"ControlDownCP")
-        self.ControlDownCP.setGeometry(QRect(120, 220, 101, 91))
-        self.ControlDownCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon8 = QIcon()
-        icon8.addFile(u":/controlArrows/cartesian/down.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.ControlDownCP.setIcon(icon8)
-        self.ControlDownCP.setIconSize(QSize(80, 80))
-        self.ControlRightCP = QPushButton(self.MotorPage)
-        self.ControlRightCP.setObjectName(u"ControlRightCP")
-        self.ControlRightCP.setGeometry(QRect(220, 130, 101, 91))
-        self.ControlRightCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon9 = QIcon()
-        icon9.addFile(u":/controlArrows/cartesian/right.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.ControlRightCP.setIcon(icon9)
-        self.ControlRightCP.setIconSize(QSize(80, 80))
-        self.YawPlusCP = QPushButton(self.MotorPage)
-        self.YawPlusCP.setObjectName(u"YawPlusCP")
-        self.YawPlusCP.setGeometry(QRect(220, 20, 101, 91))
-        sizePolicy3.setHeightForWidth(self.YawPlusCP.sizePolicy().hasHeightForWidth())
-        self.YawPlusCP.setSizePolicy(sizePolicy3)
-        self.YawPlusCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon10 = QIcon()
-        icon10.addFile(u":/controlArrows/cartesian/yawPlus.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.YawPlusCP.setIcon(icon10)
-        self.YawPlusCP.setIconSize(QSize(80, 80))
-        self.YawMinusCP = QPushButton(self.MotorPage)
-        self.YawMinusCP.setObjectName(u"YawMinusCP")
-        self.YawMinusCP.setGeometry(QRect(10, 240, 101, 91))
-        sizePolicy3.setHeightForWidth(self.YawMinusCP.sizePolicy().hasHeightForWidth())
-        self.YawMinusCP.setSizePolicy(sizePolicy3)
-        self.YawMinusCP.setStyleSheet(u"background-color: transparent;\n"
-"border: none;")
-        icon11 = QIcon()
-        icon11.addFile(u":/controlArrows/cartesian/yawMinus.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.YawMinusCP.setIcon(icon11)
-        self.YawMinusCP.setIconSize(QSize(80, 80))
-        self.YawMinusCP.setCheckable(False)
-        self.ClipperAndResetWidget_3 = QWidget(self.MotorPage)
-        self.ClipperAndResetWidget_3.setObjectName(u"ClipperAndResetWidget_3")
-        self.ClipperAndResetWidget_3.setGeometry(QRect(0, 440, 311, 151))
-        self.verticalLayout_10 = QVBoxLayout(self.ClipperAndResetWidget_3)
-        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
-        self.ClipperButtonOnOff = QPushButton(self.ClipperAndResetWidget_3)
-        self.ClipperButtonOnOff.setObjectName(u"ClipperButtonOnOff")
-        self.ClipperButtonOnOff.setEnabled(True)
-        sizePolicy.setHeightForWidth(self.ClipperButtonOnOff.sizePolicy().hasHeightForWidth())
-        self.ClipperButtonOnOff.setSizePolicy(sizePolicy)
-        self.ClipperButtonOnOff.setFont(font)
-        self.ClipperButtonOnOff.setStyleSheet(u"QPushButton {\n"
+        self.MotorStackedWidget = QStackedWidget(self.MotorPage)
+        self.MotorStackedWidget.setObjectName(u"MotorStackedWidget")
+        self.MotorStackedWidget.setGeometry(QRect(10, 30, 301, 561))
+        self.MotorConfigPage = QWidget()
+        self.MotorConfigPage.setObjectName(u"MotorConfigPage")
+        self.ServoON = QPushButton(self.MotorConfigPage)
+        self.ServoON.setObjectName(u"ServoON")
+        self.ServoON.setEnabled(True)
+        self.ServoON.setGeometry(QRect(70, 40, 161, 71))
+        sizePolicy.setHeightForWidth(self.ServoON.sizePolicy().hasHeightForWidth())
+        self.ServoON.setSizePolicy(sizePolicy)
+        self.ServoON.setFont(font)
+        self.ServoON.setStyleSheet(u"QPushButton {\n"
 "    padding: 6px 12px;\n"
 "    background-color: qlineargradient(\n"
 "        x1:0, y1:0, x2:0, y2:1,\n"
@@ -1082,16 +1019,217 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "")
-        self.ClipperButtonOnOff.setCheckable(True)
+        self.ServoON.setCheckable(False)
+        self.ServoON.setChecked(False)
+        self.HomeMotor = QPushButton(self.MotorConfigPage)
+        self.HomeMotor.setObjectName(u"HomeMotor")
+        self.HomeMotor.setEnabled(True)
+        self.HomeMotor.setGeometry(QRect(90, 280, 121, 71))
+        sizePolicy.setHeightForWidth(self.HomeMotor.sizePolicy().hasHeightForWidth())
+        self.HomeMotor.setSizePolicy(sizePolicy)
+        self.HomeMotor.setFont(font)
+        self.HomeMotor.setStyleSheet(u"QPushButton {\n"
+"    padding: 6px 12px;\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #1a1a1a, stop:1 #000000\n"
+"    );\n"
+"    color: white;\n"
+"    border: 1px solid #444;\n"
+"    border-radius: 4px;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #2a2a2a, stop:1 #111111\n"
+"    );\n"
+"}\n"
+"\n"
+"QPushButton:checked {\n"
+"    background-color: #0B76A0;\n"
+"    border: 1px solid #0B76A0;\n"
+"}\n"
+"\n"
+"")
+        self.HomeMotor.setCheckable(False)
+        self.ServoOFF = QPushButton(self.MotorConfigPage)
+        self.ServoOFF.setObjectName(u"ServoOFF")
+        self.ServoOFF.setEnabled(True)
+        self.ServoOFF.setGeometry(QRect(70, 140, 161, 71))
+        sizePolicy.setHeightForWidth(self.ServoOFF.sizePolicy().hasHeightForWidth())
+        self.ServoOFF.setSizePolicy(sizePolicy)
+        self.ServoOFF.setFont(font)
+        self.ServoOFF.setStyleSheet(u"QPushButton {\n"
+"    padding: 6px 12px;\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #1a1a1a, stop:1 #000000\n"
+"    );\n"
+"    color: white;\n"
+"    border: 1px solid #444;\n"
+"    border-radius: 4px;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #2a2a2a, stop:1 #111111\n"
+"    );\n"
+"}\n"
+"\n"
+"QPushButton:checked {\n"
+"    background-color: #0B76A0;\n"
+"    border: 1px solid #0B76A0;\n"
+"}\n"
+"\n"
+"")
+        self.ServoOFF.setCheckable(False)
+        self.ServoOFF.setChecked(False)
+        self.MotorBackPageButton = QPushButton(self.MotorConfigPage)
+        self.MotorBackPageButton.setObjectName(u"MotorBackPageButton")
+        self.MotorBackPageButton.setEnabled(True)
+        self.MotorBackPageButton.setGeometry(QRect(0, 450, 91, 71))
+        sizePolicy.setHeightForWidth(self.MotorBackPageButton.sizePolicy().hasHeightForWidth())
+        self.MotorBackPageButton.setSizePolicy(sizePolicy)
+        self.MotorBackPageButton.setFont(font)
+        self.MotorBackPageButton.setStyleSheet(u"QPushButton {\n"
+"    padding: 6px 12px;\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #1a1a1a, stop:1 #000000\n"
+"    );\n"
+"    color: white;\n"
+"    border: 1px solid #444;\n"
+"    border-radius: 4px;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #2a2a2a, stop:1 #111111\n"
+"    );\n"
+"}\n"
+"\n"
+"QPushButton:checked {\n"
+"    background-color: #0B76A0;\n"
+"    border: 1px solid #0B76A0;\n"
+"}\n"
+"\n"
+"")
+        self.MotorBackPageButton.setCheckable(False)
+        self.MotorStackedWidget.addWidget(self.MotorConfigPage)
+        self.JogPage = QWidget()
+        self.JogPage.setObjectName(u"JogPage")
+        self.YawPlusCP = QPushButton(self.JogPage)
+        self.YawPlusCP.setObjectName(u"YawPlusCP")
+        self.YawPlusCP.setGeometry(QRect(200, 20, 101, 91))
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.YawPlusCP.sizePolicy().hasHeightForWidth())
+        self.YawPlusCP.setSizePolicy(sizePolicy3)
+        self.YawPlusCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon6 = QIcon()
+        icon6.addFile(u":/controlArrows/cartesian/yawPlus.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.YawPlusCP.setIcon(icon6)
+        self.YawPlusCP.setIconSize(QSize(80, 80))
+        self.ControlUpCP = QPushButton(self.JogPage)
+        self.ControlUpCP.setObjectName(u"ControlUpCP")
+        self.ControlUpCP.setGeometry(QRect(100, 50, 101, 91))
+        sizePolicy3.setHeightForWidth(self.ControlUpCP.sizePolicy().hasHeightForWidth())
+        self.ControlUpCP.setSizePolicy(sizePolicy3)
+        self.ControlUpCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon7 = QIcon()
+        icon7.addFile(u":/controlArrows/cartesian/up.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.ControlUpCP.setIcon(icon7)
+        self.ControlUpCP.setIconSize(QSize(80, 80))
+        self.ControlLeftCP = QPushButton(self.JogPage)
+        self.ControlLeftCP.setObjectName(u"ControlLeftCP")
+        self.ControlLeftCP.setGeometry(QRect(0, 140, 101, 91))
+        self.ControlLeftCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon8 = QIcon()
+        icon8.addFile(u":/controlArrows/cartesian/left.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.ControlLeftCP.setIcon(icon8)
+        self.ControlLeftCP.setIconSize(QSize(80, 80))
+        self.ControlDownCP = QPushButton(self.JogPage)
+        self.ControlDownCP.setObjectName(u"ControlDownCP")
+        self.ControlDownCP.setGeometry(QRect(100, 230, 101, 91))
+        self.ControlDownCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon9 = QIcon()
+        icon9.addFile(u":/controlArrows/cartesian/down.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.ControlDownCP.setIcon(icon9)
+        self.ControlDownCP.setIconSize(QSize(80, 80))
+        self.ControlRightCP = QPushButton(self.JogPage)
+        self.ControlRightCP.setObjectName(u"ControlRightCP")
+        self.ControlRightCP.setGeometry(QRect(200, 140, 101, 91))
+        self.ControlRightCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon10 = QIcon()
+        icon10.addFile(u":/controlArrows/cartesian/right.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.ControlRightCP.setIcon(icon10)
+        self.ControlRightCP.setIconSize(QSize(80, 80))
+        self.YawMinusCP = QPushButton(self.JogPage)
+        self.YawMinusCP.setObjectName(u"YawMinusCP")
+        self.YawMinusCP.setGeometry(QRect(0, 270, 101, 91))
+        sizePolicy3.setHeightForWidth(self.YawMinusCP.sizePolicy().hasHeightForWidth())
+        self.YawMinusCP.setSizePolicy(sizePolicy3)
+        self.YawMinusCP.setStyleSheet(u"background-color: transparent;\n"
+"border: none;")
+        icon11 = QIcon()
+        icon11.addFile(u":/controlArrows/cartesian/yawMinus.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.YawMinusCP.setIcon(icon11)
+        self.YawMinusCP.setIconSize(QSize(80, 80))
+        self.YawMinusCP.setCheckable(False)
+        self.ClipperAndResetWidget_3 = QWidget(self.JogPage)
+        self.ClipperAndResetWidget_3.setObjectName(u"ClipperAndResetWidget_3")
+        self.ClipperAndResetWidget_3.setGeometry(QRect(-10, 410, 311, 141))
+        self.verticalLayout_10 = QVBoxLayout(self.ClipperAndResetWidget_3)
+        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
+        self.PauseMotor = QPushButton(self.ClipperAndResetWidget_3)
+        self.PauseMotor.setObjectName(u"PauseMotor")
+        self.PauseMotor.setEnabled(True)
+        sizePolicy.setHeightForWidth(self.PauseMotor.sizePolicy().hasHeightForWidth())
+        self.PauseMotor.setSizePolicy(sizePolicy)
+        self.PauseMotor.setFont(font)
+        self.PauseMotor.setStyleSheet(u"QPushButton {\n"
+"    padding: 6px 12px;\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #1a1a1a, stop:1 #000000\n"
+"    );\n"
+"    color: white;\n"
+"    border: 1px solid #444;\n"
+"    border-radius: 4px;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #2a2a2a, stop:1 #111111\n"
+"    );\n"
+"}\n"
+"\n"
+"QPushButton:checked {\n"
+"    background-color: #0B76A0;\n"
+"    border: 1px solid #0B76A0;\n"
+"}\n"
+"\n"
+"")
+        self.PauseMotor.setCheckable(True)
 
-        self.verticalLayout_10.addWidget(self.ClipperButtonOnOff)
+        self.verticalLayout_10.addWidget(self.PauseMotor)
 
-        self.MotorResetButton = QPushButton(self.ClipperAndResetWidget_3)
-        self.MotorResetButton.setObjectName(u"MotorResetButton")
-        sizePolicy.setHeightForWidth(self.MotorResetButton.sizePolicy().hasHeightForWidth())
-        self.MotorResetButton.setSizePolicy(sizePolicy)
-        self.MotorResetButton.setFont(font)
-        self.MotorResetButton.setStyleSheet(u"QPushButton {\n"
+        self.StopMotor = QPushButton(self.ClipperAndResetWidget_3)
+        self.StopMotor.setObjectName(u"StopMotor")
+        sizePolicy.setHeightForWidth(self.StopMotor.sizePolicy().hasHeightForWidth())
+        self.StopMotor.setSizePolicy(sizePolicy)
+        self.StopMotor.setFont(font)
+        self.StopMotor.setStyleSheet(u"QPushButton {\n"
 "    padding: 6px 12px;\n"
 "    background-color: qlineargradient(\n"
 "        x1:0, y1:0, x2:0, y2:1,\n"
@@ -1120,8 +1258,41 @@ class Ui_MainWindow(object):
 "\n"
 "")
 
-        self.verticalLayout_10.addWidget(self.MotorResetButton)
+        self.verticalLayout_10.addWidget(self.StopMotor)
 
+        self.MotorNextPageButton = QPushButton(self.JogPage)
+        self.MotorNextPageButton.setObjectName(u"MotorNextPageButton")
+        self.MotorNextPageButton.setEnabled(True)
+        self.MotorNextPageButton.setGeometry(QRect(210, 330, 91, 71))
+        sizePolicy.setHeightForWidth(self.MotorNextPageButton.sizePolicy().hasHeightForWidth())
+        self.MotorNextPageButton.setSizePolicy(sizePolicy)
+        self.MotorNextPageButton.setFont(font)
+        self.MotorNextPageButton.setStyleSheet(u"QPushButton {\n"
+"    padding: 6px 12px;\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #1a1a1a, stop:1 #000000\n"
+"    );\n"
+"    color: white;\n"
+"    border: 1px solid #444;\n"
+"    border-radius: 4px;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #2a2a2a, stop:1 #111111\n"
+"    );\n"
+"}\n"
+"\n"
+"QPushButton:checked {\n"
+"    background-color: #0B76A0;\n"
+"    border: 1px solid #0B76A0;\n"
+"}\n"
+"\n"
+"")
+        self.MotorNextPageButton.setCheckable(False)
+        self.MotorStackedWidget.addWidget(self.JogPage)
         self.ChangeComponentControlStackedWidget.addWidget(self.MotorPage)
         self.VisionPage = QWidget()
         self.VisionPage.setObjectName(u"VisionPage")
@@ -1257,7 +1428,7 @@ class Ui_MainWindow(object):
         self.ChangeComponentControlStackedWidget.addWidget(self.DIDOPage)
         self.ListOptionsWidget = QWidget(self.ComponentControlMain)
         self.ListOptionsWidget.setObjectName(u"ListOptionsWidget")
-        self.ListOptionsWidget.setGeometry(QRect(10, 100, 291, 471))
+        self.ListOptionsWidget.setGeometry(QRect(10, 100, 291, 541))
         sizePolicy1.setHeightForWidth(self.ListOptionsWidget.sizePolicy().hasHeightForWidth())
         self.ListOptionsWidget.setSizePolicy(sizePolicy1)
         self.verticalLayout_5 = QVBoxLayout(self.ListOptionsWidget)
@@ -2780,7 +2951,8 @@ class Ui_MainWindow(object):
         self.ProcessAndInfoStackedWidget.setCurrentIndex(0)
         self.ActionButtons.setCurrentIndex(0)
         self.ComponentControlStackedWidget.setCurrentIndex(0)
-        self.ChangeComponentControlStackedWidget.setCurrentIndex(0)
+        self.ChangeComponentControlStackedWidget.setCurrentIndex(4)
+        self.MotorStackedWidget.setCurrentIndex(1)
         self.MiddleStackedWidget.setCurrentIndex(0)
 
 
@@ -2856,14 +3028,19 @@ class Ui_MainWindow(object):
         self.ChooseDIDO.setText(QCoreApplication.translate("MainWindow", u"DI/DO", None))
         self.MotorStartedButton.setText(QCoreApplication.translate("MainWindow", u"Motor", None))
         self.HamburgerMenu.setText("")
+        self.ServoON.setText(QCoreApplication.translate("MainWindow", u"Servo ON", None))
+        self.HomeMotor.setText(QCoreApplication.translate("MainWindow", u"Home", None))
+        self.ServoOFF.setText(QCoreApplication.translate("MainWindow", u"Servo OFF", None))
+        self.MotorBackPageButton.setText(QCoreApplication.translate("MainWindow", u"back", None))
+        self.YawPlusCP.setText("")
         self.ControlUpCP.setText("")
         self.ControlLeftCP.setText("")
         self.ControlDownCP.setText("")
         self.ControlRightCP.setText("")
-        self.YawPlusCP.setText("")
         self.YawMinusCP.setText("")
-        self.ClipperButtonOnOff.setText(QCoreApplication.translate("MainWindow", u"Clipper  Off", None))
-        self.MotorResetButton.setText(QCoreApplication.translate("MainWindow", u"RESET", None))
+        self.PauseMotor.setText(QCoreApplication.translate("MainWindow", u"Pause", None))
+        self.StopMotor.setText(QCoreApplication.translate("MainWindow", u"STOP", None))
+        self.MotorNextPageButton.setText(QCoreApplication.translate("MainWindow", u"next", None))
         self.VisionOne.setText(QCoreApplication.translate("MainWindow", u"Screw", None))
         self.VisionTwo.setText(QCoreApplication.translate("MainWindow", u"LShape", None))
         self.VisionThree.setText(QCoreApplication.translate("MainWindow", u"ICP Fit", None))

@@ -372,7 +372,7 @@ Record</string>
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="MainPagePage">
         <widget class="QWidget" name="CameraWidget" native="true">
@@ -1641,7 +1641,7 @@ QPushButton:pressed {
           <enum>QFrame::Shadow::Raised</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="BeforeComponentControl">
           <layout class="QVBoxLayout" name="verticalLayout_28">
@@ -1819,47 +1819,220 @@ QPushButton:pressed {
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="MotorPage">
-            <widget class="QStackedWidget" name="MotorStackedWidget">
+            <widget class="QPushButton" name="ControlUpCP">
+             <property name="geometry">
+              <rect>
+               <x>120</x>
+               <y>40</y>
+               <width>101</width>
+               <height>91</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: transparent;
+border: none;</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>controlArrows/cartesian/up.png</normaloff>controlArrows/cartesian/up.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>80</width>
+               <height>80</height>
+              </size>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="ControlLeftCP">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>130</y>
+               <width>101</width>
+               <height>91</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: transparent;
+border: none;</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>controlArrows/cartesian/left.png</normaloff>controlArrows/cartesian/left.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>80</width>
+               <height>80</height>
+              </size>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="ControlDownCP">
+             <property name="geometry">
+              <rect>
+               <x>120</x>
+               <y>220</y>
+               <width>101</width>
+               <height>91</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: transparent;
+border: none;</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>controlArrows/cartesian/down.png</normaloff>controlArrows/cartesian/down.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>80</width>
+               <height>80</height>
+              </size>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="ControlRightCP">
+             <property name="geometry">
+              <rect>
+               <x>220</x>
+               <y>130</y>
+               <width>101</width>
+               <height>91</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: transparent;
+border: none;</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>controlArrows/cartesian/right.png</normaloff>controlArrows/cartesian/right.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>80</width>
+               <height>80</height>
+              </size>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="YawPlusCP">
+             <property name="geometry">
+              <rect>
+               <x>220</x>
+               <y>20</y>
+               <width>101</width>
+               <height>91</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: transparent;
+border: none;</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>controlArrows/cartesian/yawPlus.png</normaloff>controlArrows/cartesian/yawPlus.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>80</width>
+               <height>80</height>
+              </size>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="YawMinusCP">
              <property name="geometry">
               <rect>
                <x>10</x>
-               <y>30</y>
-               <width>301</width>
-               <height>561</height>
+               <y>240</y>
+               <width>101</width>
+               <height>91</height>
               </rect>
              </property>
-             <property name="currentIndex">
-              <number>1</number>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
-             <widget class="QWidget" name="MotorConfigPage">
-              <widget class="QPushButton" name="ServoON">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="geometry">
-                <rect>
-                 <x>70</x>
-                 <y>40</y>
-                 <width>161</width>
-                 <height>71</height>
-                </rect>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton {
+             <property name="styleSheet">
+              <string notr="true">background-color: transparent;
+border: none;</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>controlArrows/cartesian/yawMinus.png</normaloff>controlArrows/cartesian/yawMinus.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>80</width>
+               <height>80</height>
+              </size>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QWidget" name="ClipperAndResetWidget_3" native="true">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>440</y>
+               <width>311</width>
+               <height>151</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_10">
+              <item>
+               <widget class="QPushButton" name="PauseMotor">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QPushButton {
     padding: 6px 12px;
     background-color: qlineargradient(
         x1:0, y1:0, x2:0, y2:1,
@@ -1883,448 +2056,30 @@ QPushButton:checked {
 }
 
 </string>
-               </property>
-               <property name="text">
-                <string>Servo ON</string>
-               </property>
-               <property name="checkable">
-                <bool>false</bool>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-              </widget>
-              <widget class="QPushButton" name="HomeMotor">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="geometry">
-                <rect>
-                 <x>90</x>
-                 <y>280</y>
-                 <width>121</width>
-                 <height>71</height>
-                </rect>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton {
-    padding: 6px 12px;
-    background-color: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #1a1a1a, stop:1 #000000
-    );
-    color: white;
-    border: 1px solid #444;
-    border-radius: 4px;
-}
-
-QPushButton:hover {
-    background-color: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #2a2a2a, stop:1 #111111
-    );
-}
-
-QPushButton:checked {
-    background-color: #0B76A0;
-    border: 1px solid #0B76A0;
-}
-
-</string>
-               </property>
-               <property name="text">
-                <string>Home</string>
-               </property>
-               <property name="checkable">
-                <bool>false</bool>
-               </property>
-              </widget>
-              <widget class="QPushButton" name="ServoOFF">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="geometry">
-                <rect>
-                 <x>70</x>
-                 <y>140</y>
-                 <width>161</width>
-                 <height>71</height>
-                </rect>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton {
-    padding: 6px 12px;
-    background-color: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #1a1a1a, stop:1 #000000
-    );
-    color: white;
-    border: 1px solid #444;
-    border-radius: 4px;
-}
-
-QPushButton:hover {
-    background-color: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #2a2a2a, stop:1 #111111
-    );
-}
-
-QPushButton:checked {
-    background-color: #0B76A0;
-    border: 1px solid #0B76A0;
-}
-
-</string>
-               </property>
-               <property name="text">
-                <string>Servo OFF</string>
-               </property>
-               <property name="checkable">
-                <bool>false</bool>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-              </widget>
-              <widget class="QPushButton" name="MotorBackPageButton">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="geometry">
-                <rect>
-                 <x>0</x>
-                 <y>450</y>
-                 <width>91</width>
-                 <height>71</height>
-                </rect>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton {
-    padding: 6px 12px;
-    background-color: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #1a1a1a, stop:1 #000000
-    );
-    color: white;
-    border: 1px solid #444;
-    border-radius: 4px;
-}
-
-QPushButton:hover {
-    background-color: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #2a2a2a, stop:1 #111111
-    );
-}
-
-QPushButton:checked {
-    background-color: #0B76A0;
-    border: 1px solid #0B76A0;
-}
-
-</string>
-               </property>
-               <property name="text">
-                <string>back</string>
-               </property>
-               <property name="checkable">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </widget>
-             <widget class="QWidget" name="JogPage">
-              <widget class="QPushButton" name="YawPlusCP">
-               <property name="geometry">
-                <rect>
-                 <x>200</x>
-                 <y>20</y>
-                 <width>101</width>
-                 <height>91</height>
-                </rect>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: transparent;
-border: none;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>controlArrows/cartesian/yawPlus.png</normaloff>controlArrows/cartesian/yawPlus.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>80</width>
-                 <height>80</height>
-                </size>
-               </property>
-              </widget>
-              <widget class="QPushButton" name="ControlUpCP">
-               <property name="geometry">
-                <rect>
-                 <x>100</x>
-                 <y>50</y>
-                 <width>101</width>
-                 <height>91</height>
-                </rect>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: transparent;
-border: none;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>controlArrows/cartesian/up.png</normaloff>controlArrows/cartesian/up.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>80</width>
-                 <height>80</height>
-                </size>
-               </property>
-              </widget>
-              <widget class="QPushButton" name="ControlLeftCP">
-               <property name="geometry">
-                <rect>
-                 <x>0</x>
-                 <y>140</y>
-                 <width>101</width>
-                 <height>91</height>
-                </rect>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: transparent;
-border: none;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>controlArrows/cartesian/left.png</normaloff>controlArrows/cartesian/left.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>80</width>
-                 <height>80</height>
-                </size>
-               </property>
-              </widget>
-              <widget class="QPushButton" name="ControlDownCP">
-               <property name="geometry">
-                <rect>
-                 <x>100</x>
-                 <y>230</y>
-                 <width>101</width>
-                 <height>91</height>
-                </rect>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: transparent;
-border: none;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>controlArrows/cartesian/down.png</normaloff>controlArrows/cartesian/down.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>80</width>
-                 <height>80</height>
-                </size>
-               </property>
-              </widget>
-              <widget class="QPushButton" name="ControlRightCP">
-               <property name="geometry">
-                <rect>
-                 <x>200</x>
-                 <y>140</y>
-                 <width>101</width>
-                 <height>91</height>
-                </rect>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: transparent;
-border: none;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>controlArrows/cartesian/right.png</normaloff>controlArrows/cartesian/right.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>80</width>
-                 <height>80</height>
-                </size>
-               </property>
-              </widget>
-              <widget class="QPushButton" name="YawMinusCP">
-               <property name="geometry">
-                <rect>
-                 <x>0</x>
-                 <y>270</y>
-                 <width>101</width>
-                 <height>91</height>
-                </rect>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: transparent;
-border: none;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>controlArrows/cartesian/yawMinus.png</normaloff>controlArrows/cartesian/yawMinus.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>80</width>
-                 <height>80</height>
-                </size>
-               </property>
-               <property name="checkable">
-                <bool>false</bool>
-               </property>
-              </widget>
-              <widget class="QWidget" name="ClipperAndResetWidget_3" native="true">
-               <property name="geometry">
-                <rect>
-                 <x>-10</x>
-                 <y>410</y>
-                 <width>311</width>
-                 <height>141</height>
-                </rect>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_10">
-                <item>
-                 <widget class="QPushButton" name="PauseMotor">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">QPushButton {
-    padding: 6px 12px;
-    background-color: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #1a1a1a, stop:1 #000000
-    );
-    color: white;
-    border: 1px solid #444;
-    border-radius: 4px;
-}
-
-QPushButton:hover {
-    background-color: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #2a2a2a, stop:1 #111111
-    );
-}
-
-QPushButton:checked {
-    background-color: #0B76A0;
-    border: 1px solid #0B76A0;
-}
-
-</string>
-                  </property>
-                  <property name="text">
-                   <string>Pause</string>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="StopMotor">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">QPushButton {
+                </property>
+                <property name="text">
+                 <string>Pause</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="StopMotor">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QPushButton {
     padding: 6px 12px;
     background-color: qlineargradient(
         x1:0, y1:0, x2:0, y2:1,
@@ -2352,39 +2107,39 @@ QPushButton:pressed {
 }
 
 </string>
-                  </property>
-                  <property name="text">
-                   <string>STOP</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-              <widget class="QPushButton" name="MotorNextPageButton">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="geometry">
-                <rect>
-                 <x>210</x>
-                 <y>330</y>
-                 <width>91</width>
-                 <height>71</height>
-                </rect>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton {
+                </property>
+                <property name="text">
+                 <string>STOP</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QPushButton" name="HomeMotor">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>370</y>
+               <width>293</width>
+               <height>64</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
     padding: 6px 12px;
     background-color: qlineargradient(
         x1:0, y1:0, x2:0, y2:1,
@@ -2408,15 +2163,13 @@ QPushButton:checked {
 }
 
 </string>
-               </property>
-               <property name="text">
-                <string>next</string>
-               </property>
-               <property name="checkable">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </widget>
+             </property>
+             <property name="text">
+              <string>Home</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
             </widget>
            </widget>
            <widget class="QWidget" name="VisionPage">
@@ -2803,7 +2556,7 @@ QSlider::handle:horizontal {
              <x>10</x>
              <y>100</y>
              <width>291</width>
-             <height>541</height>
+             <height>16</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -6390,22 +6143,22 @@ border-radius: 6px;</string>
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="LanguageButtonGroup"/>
+  <buttongroup name="ThemeButtonGroup"/>
+  <buttongroup name="AutoAndManualButtonGroup"/>
+  <buttongroup name="MenuButtonGroup"/>
   <buttongroup name="ManualButtons">
+   <property name="exclusive">
+    <bool>false</bool>
+   </property>
+  </buttongroup>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="VisionButtonGroup">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
   <buttongroup name="FontSizeButtonGroup"/>
   <buttongroup name="buttonGroup_2"/>
-  <buttongroup name="VisionButtonGroup">
-   <property name="exclusive">
-    <bool>false</bool>
-   </property>
-  </buttongroup>
-  <buttongroup name="AutoAndManualButtonGroup"/>
-  <buttongroup name="buttonGroup"/>
-  <buttongroup name="MenuButtonGroup"/>
-  <buttongroup name="ThemeButtonGroup"/>
-  <buttongroup name="LanguageButtonGroup"/>
  </buttongroups>
 </ui>

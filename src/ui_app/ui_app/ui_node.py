@@ -22,19 +22,20 @@ import threading
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Int32
-from common_msgs.msg import StateCmd, ForkCmd, JogCmd, ComponentCmd, TaskCmd, TaskState, DIDOCmd
+from common_msgs.msg import StateCmd, ForkCmd, JogCmd, ComponentCmd, TaskCmd, TaskState, DIDOCmd, RunCmd, MotionCmd, MotionState
+from uros_interface.srv import ESMCmd
+
 
 class ROSNode(Node):
     def __init__(self):
         super().__init__('ui_node')
 
 
-        self.mode_cmd = {
-            'auto': True,
-            'manual': False,
-            'component_control': False,
-            
-        }
+        # self.mode_cmd = {
+        #     'auto': True,
+        #     'manual': False,
+        #     'component_control': False,  
+        # }
 
         self.task_cmd = {
             'connect': False,
@@ -45,10 +46,10 @@ class ROSNode(Node):
             'assem': False,
         }
 
-        self.menu_cmd = {
-            'main_page': True,
-            'component_control': False
-        }
+        # self.menu_cmd = {
+        #     'main_page': True,
+        #     'component_control': False
+        # }
 
 
 
@@ -61,13 +62,16 @@ class ROSNode(Node):
 
         self.component_cmd_publisher = self.create_publisher(ComponentCmd, "/component_control_cmd", 10)
 
+        #new
+        self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
+
         self.task_cmd_publisher = self.create_publisher(TaskCmd, '/task_cmd', 10)
 
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, '/fork_cmd', 10)
 
         self.jog_cmd_publisher = self.create_publisher(JogCmd, '/jog_cmd', 10)
 
-        self.component_control_publisher = self.create_publisher(String, '/run_cmd', 10)
+        self.component_control_publisher = self.create_publisher(RunCmd, '/run_cmd', 10)
 
         self.vision_control_publisher = self.create_publisher(String, '/detection_task', 10)
 
@@ -90,6 +94,13 @@ class ROSNode(Node):
             10
         )
 
+        # self.motion_state_subscriber = self.create_subscription(
+        #     MotionState,
+        #     '/motion_state',
+        #     self.motion_state_callback,
+        #     10
+        # )
+
         # self.task_state_subscriber = self.create_subscription(
         #     TaskState,
         #     '/task_state',
@@ -98,10 +109,30 @@ class ROSNode(Node):
         # )
 
 
+        # Service server (test/dummy)
+        self.esm_server = self.create_service(ESMCmd, '/esm_command', self.handle_esm)
+        self.get_logger().info('ESMCmd server started at /esm_command')
+
+
         self.bridge = CvBridge()
 
         self.detection_task_callback_ui = None
         self.image_update_callback = None
+
+    def handle_esm(self, request, response):
+        self.get_logger().info(
+            f"ESM request: servo_status={request.servo_status}, "
+            f"mode={request.mode}, speed_limit={request.speed_limit}, lpf={request.lpf}"
+        )
+        # TODO: call your real driver/hardware here
+
+        # If your .srv RESPONSE defines these, set them, otherwise delete these lines:
+        if hasattr(response, 'success'):
+            response.success = True
+        if hasattr(response, 'message'):
+            response.message = 'OK'
+        return response
+
 
 
     def height_info_callback(self, msg: Int32):
@@ -124,6 +155,9 @@ class ROSNode(Node):
     def detection_task_callback(self, msg: String):
         if self.detection_task_callback_ui:
             self.detection_task_callback_ui(msg.data)
+
+    # def motion_state_callback(self, msg: MotionState):
+
 
 
 
@@ -186,9 +220,10 @@ class MainWindow(QMainWindow):
         self.ui.ManualStopButton.clicked.connect(lambda: self.send_state_cmd("stop"))
 
         # vision fix
-        self.ui.VisionOne.toggled.connect(lambda checked: self.on_vision_toggled("screw", checked))
-        self.ui.VisionTwo.toggled.connect(lambda checked: self.on_vision_toggled("l_shape", checked))
-        self.ui.VisionThree.toggled.connect(lambda checked: self.on_vision_toggled("icp_fit", checked))
+        # self.ui.VisionOne.toggled.connect(lambda checked: self.on_vision_toggled("screw", checked))
+        # self.ui.VisionTwo.toggled.connect(lambda checked: self.on_vision_toggled("l_shape", checked))
+        # self.ui.VisionThree.toggled.connect(lambda checked: self.on_vision_toggled("icp_fit", checked))
+
 
 
         # vision
@@ -210,7 +245,7 @@ class MainWindow(QMainWindow):
         self.ui.AutoStopButton.clicked.connect(lambda: self.on_touch_buttons(self.ui.AutoStopButton))
 
         # self.ui.RecordDataButton.clicked.connect(lambda: self.on_record_data_clicked(self.ui.RecordDataButton))
-        self.ui.ClipperButtonOnOff.toggled.connect(lambda: self.update_clipper_state(self.ui.ClipperButtonOnOff))
+        # self.ui.ClipperButtonOnOff.toggled.connect(lambda: self.update_clipper_state(self.ui.ClipperButtonOnOff))
 
         #choose your component control
         self.ui.ChooseMotor.clicked.connect(self.choose_motor)
@@ -242,12 +277,48 @@ class MainWindow(QMainWindow):
         for btn in self.ui.ManualButtons.buttons():
             btn.toggled.connect(lambda checked, b=btn: self.on_manual_button_toggled(b, checked))
 
-        for btn in self.ui.VisionButtonGroup.buttons():
-            btn.toggled.connect(lambda checked, b=btn: self.on_vision_button_toggled(b, checked))
+
+        # after setupUi(...)
+        self._vision_buttons = [
+            (self.ui.VisionOne,   "screw"),
+            (self.ui.VisionTwo,   "l_shape"),
+            (self.ui.VisionThree, "icp_fit"),
+        ]
+
+        # Make sure they’re checkable and not in an exclusive QButtonGroup
+        for btn, mode in self._vision_buttons:
+            btn.setCheckable(True)
+            # 1) publishing: start/stop per button
+            btn.toggled.connect(lambda checked, m=mode: self.on_vision_toggled(m, checked))
+            # 2) manual exclusivity: when one is clicked on, turn others off; clicking again turns it off
+            btn.clicked.connect(lambda checked, b=btn: self._on_vision_clicked(b, checked))
+
+    
         
 
 
 
+        #try
+        self.ui.MotorNextPageButton.clicked.connect(self.go_to_next_page_motor)
+        self.ui.MotorBackPageButton.clicked.connect(self.go_to_back_page_motor)
+        
+
+    def _on_vision_clicked(self, btn, checked):
+        if checked:
+            # Turn others off (this will trigger their toggled(False) → publish "<mode>_off")
+            for other, _ in self._vision_buttons:
+                if other is not btn and other.isChecked():
+                    other.setChecked(False)
+        else:
+            # User clicked the same button to turn it off → no mode selected; nothing else to do
+            pass
+
+
+    
+    def go_to_next_page_motor(self):
+        self.ui.MotorStackedWidget.setCurrentIndex(0)
+    def go_to_back_page_motor(self):
+        self.ui.MotorStackedWidget.setCurrentIndex(1)
 
     def update_circle_off_style(self):
         self.ui.OneCircleOff.setStyleSheet("""
@@ -341,15 +412,15 @@ class MainWindow(QMainWindow):
 
 
     #ROS2 Menu
-    def send_menu_cmd(self, flag):
-        msg = String()
+    def send_run_cmd(self, flag):
+        msg = RunCmd()
 
         # msg.main_page = False
-        msg.data = flag
+        msg.mode = flag
         
-        print(f"[DEBUG] Publishing MenuCmd: {msg}")
+        print(f"[DEBUG] Publishing RunCmd: {msg}")
         self.ros_node.component_control_publisher.publish(msg)
-        print(f"[UI] Sent MenuCmd: {flag}")
+        print(f"[UI] Sent RunCmd: {flag}")
 
 
     def on_pause_toggled(self, checked):
@@ -427,22 +498,34 @@ class MainWindow(QMainWindow):
         self.ros_node.jog_cmd_publisher.publish(msg)
         print(f"[UI] Sent JogCmd: axis={axis}, direction={direction}")
 
-    def update_clipper_state(self, button):
-        if button.isChecked():
-            button.setText("Clipper ON")
-        else:
-            button.setText("Clipper OFF")
+    # def update_clipper_state(self, button):
+    #     if button.isChecked():
+    #         button.setText("Clipper ON")
+    #     else:
+    #         button.setText("Clipper OFF")
 
     #vision fix
     def on_vision_toggled(self, vision_name, checked):
         if checked:
-            self.send_vision_cmd(vision_name)
+            self.send_vision_cmd(f"{vision_name}")
             print(f"[UI] {vision_name} started")
         else:
-            # Since buttons are exclusive, unchecking means no task is active
-            # Optional: send a stop/idle command
-            self.send_vision_cmd("idle")
+            self.send_vision_cmd(f"{vision_name}_off")
             print(f"[UI] {vision_name} stopped")
+
+
+    # def _on_vision_clicked(self, btn, mode, checked):
+    #     if checked:
+    #         # turn others off
+    #         for other, _ in self._vision_buttons:
+    #             if other is not btn:
+    #                 other.setChecked(False)
+    #         # start selected mode
+    #         self.on_vision_toggled(mode, True)
+    #     else:
+    #         # user clicked the same button to turn it off -> no mode active
+    #         self.on_vision_toggled("idle", False)
+
 
     def send_vision_cmd(self, mode):
         print(f"[DEBUG] Trying to publish: {mode}")  
@@ -455,6 +538,12 @@ class MainWindow(QMainWindow):
         self.ros_node.vision_control_publisher.publish(msg)
         print(f"[UI] Sent VisionCmd: {mode}")
 
+    # def send_vision_cmd(self, mode):
+    #     # simplest: no dedupe
+    #     msg = String(); msg.data = mode
+    #     self.ros_node.vision_control_publisher.publish(msg)
+
+
     
     def on_manual_button_toggled(self, button, checked):
         if checked:
@@ -462,11 +551,7 @@ class MainWindow(QMainWindow):
                 if other != button:
                     other.setChecked(False)
     
-    def on_vision_button_toggled(self, button, checked):
-        if checked:
-            for other in self.ui.VisionButtonGroup.buttons():
-                if other != button:
-                    other.setCheckable(False)
+
 
 
     #Principal Menu - StackedWidget
@@ -482,26 +567,30 @@ class MainWindow(QMainWindow):
                 self.ui.AssemblyButton,
                 self.ui.ManualPauseButton
             ]
-            self.reset_buttons_and_machine(main_page_buttons, send_pause=True)
+            self.reset_buttons_and_machine(main_page_buttons, send_pause=False)
 
             self.ui.ParentStackedWidgetToChangeMenuOptions.setCurrentIndex(0)
+
+        
+        self.ui.AutoButton.setChecked(True)
+        self.change_to_auto_page()
+        self.send_run_cmd("auto")
 
     def change_to_component_control_page(self, checked):
         if checked:
             component_control_buttons = [
-                 self.ui.ClipperButtonOnOff,
                  self.ui.VisionOne,
                  self.ui.VisionTwo,
                  self.ui.VisionThree,
 
                  self.ui.buttonGroup
             ]
-            self.reset_buttons_and_machine(component_control_buttons, send_pause=True)
+            self.reset_buttons_and_machine(component_control_buttons, send_pause=False)
 
             self.ui.ParentStackedWidgetToChangeMenuOptions.setCurrentIndex(1)
             self.ui.ComponentControlStackedWidget.setCurrentIndex(0)
             self.ui.MiddleStackedWidget.setCurrentIndex(0)
-            self.send_mode_cmd("component_control")
+            self.send_run_cmd("component_control")
 
     def reset_buttons_and_machine(self, buttons_or_groups, send_pause=False):
         for item in buttons_or_groups:
@@ -575,11 +664,11 @@ class MainWindow(QMainWindow):
     
     def on_auto_toggled(self, checked):
         if checked:
-            self.send_mode_cmd("auto")
+            self.send_run_cmd("auto")
 
     def on_manual_toggled(self, checked):
         if checked:
-            self.send_mode_cmd("manual")
+            self.send_run_cmd("manual")
 
     # def on_dido_toggled(self, checked):
     #     self.send_test_dido("on" if checked else "off")
@@ -704,11 +793,8 @@ def convert_cv_to_qt(cv_img):
     bytes_per_line = ch * w
     return QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
 
-
-
 def ros_spin(node):
     rclpy.spin(node)
-
 
 def main():
     rclpy.init()
