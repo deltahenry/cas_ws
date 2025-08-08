@@ -8,6 +8,10 @@ from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
 from ament_index_python.packages import get_package_prefix
 from tf2_ros import TransformBroadcaster
+from rclpy.time import Time
+from rclpy.duration import Duration
+from tf2_ros import LookupException
+from tf2_ros import Buffer, TransformListener
 from geometry_msgs.msg import TransformStamped
 import transformations as tf_transformations
 from scipy.spatial.transform import Rotation as R
@@ -33,12 +37,16 @@ class RealSenseVision(Node):
     def __init__(self):
         super().__init__('detection_node')
         self.get_logger().info('✅ RealSense Detection Node Started')
+
+        # subs / pubs
         self.subscription = self.create_subscription(String, '/detection_task', self.task_callback, 10)
-
         self.pose_pub = self.create_publisher(PoseStamped, '/screw_center_pose', 10)
+        self.alert_pub = self.create_publisher(String, '/orientation_anomaly', 10)  # ⬅ anomaly topic
 
+        # flags
         self.screw_active = self.lshape_active = self.icp_fit_active = False
 
+        # realsense
         self.pipeline = rs.pipeline()
         config = rs.config()
         config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
@@ -46,24 +54,36 @@ class RealSenseVision(Node):
         self.profile = self.pipeline.start(config)
         self.align = rs.align(rs.stream.color)
 
+        # detectors
         source_root = os.path.dirname(os.path.abspath(__file__))
         template_path = os.path.join(source_root, 'template2_shape')
         self.screw_detector = ScrewDetector(template_path)
-
         self.l_templates = self.load_templates('template2_shape')
         self.l_shape_dector = LShapeDetector(self.l_templates)
         self.icp_fitter = ICPFITTER()
 
+        # TF + state
         self.br = TransformBroadcaster(self)
         self.prev_screw_results = []
         self.prev_avg_center = None
         self.prev_avg_pose = None
         self.frame_count = 0
-        # ✅ 加入角度記憶變數
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
+
+        # last-frame angles (for anomaly comparison)
+        self.abnormal_counter = 0
+        self.screw_active = False
+        self.prev_avg_center = None
+        self.prev_avg_pose = None
         self.prev_yaw = 0.0
         self.prev_pitch = 0.0
-        self.prev_roll = 1.5
-        
+        self.prev_roll = 0.0
+        self.last_success_time = self.get_clock().now()
+        self.null_published = False
+        self.recovery_waiting = False
+        self.null_timeout = 3.0  # ⏱️ 超過 3 秒無法偵測才輸出 NULL
+        self.recovery_duration = 3.0  # ✅ 成功持續 3 秒後才允許再廣播
 
     def load_templates(self, folder_name, augment=False):
         source_root = os.path.dirname(os.path.abspath(__file__))
@@ -72,11 +92,9 @@ class RealSenseVision(Node):
         if not os.path.exists(folder_path):
             print(f"❌ 錯誤：資料夾不存在 - {folder_path}")
             return []
-
         paths = sorted(glob.glob(os.path.join(folder_path, "*.png")))
         if len(paths) == 0:
             print(f"⚠️ 警告：找不到任何 .png 模板在資料夾 {folder_path}")
-
         templates = []
         for path in paths:
             img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
@@ -84,16 +102,18 @@ class RealSenseVision(Node):
                 templates.append(img)
             else:
                 print(f"⚠️ 無法讀取圖片：{path}")
-
         print(f"✅ 成功載入 {len(templates)} 張模板圖片")
         return templates
 
-    def task_callback(self, msg):
+    def task_callback(self, msg: String):
         task = msg.data.lower()
         self.screw_active = task == 'screw'
         self.lshape_active = task == 'l_shape'
         self.icp_fit_active = task == 'icp_fit'
         self.get_logger().info(f"🔄 任務切換: {task}")
+
+        if self.screw_active:
+            self.abnormal_counter = 0
 
     def broadcast_screw_tf(self, idx, x, y, z, quat=None):
         t = TransformStamped()
@@ -103,15 +123,12 @@ class RealSenseVision(Node):
         t.transform.translation.x = float(x)
         t.transform.translation.y = float(y)
         t.transform.translation.z = float(z)
-
         if quat is None:
-            quat = [0, 0, 0, 1]  # default: no rotation
-
+            quat = [0, 0, 0, 1]
         t.transform.rotation.x = float(quat[0])
         t.transform.rotation.y = float(quat[1])
         t.transform.rotation.z = float(quat[2])
         t.transform.rotation.w = float(quat[3])
-
         self.br.sendTransform(t)
 
     def publish_avg_pose(self, x, y, z, quat):
@@ -126,7 +143,24 @@ class RealSenseVision(Node):
         msg.pose.orientation.z = quat[2]
         msg.pose.orientation.w = quat[3]
         self.pose_pub.publish(msg)
+
+    
+    def check_angle_anomaly(self, yaw, pitch, roll, threshold=5.0):
+        anomalies = []
+        if self.prev_yaw is not None and abs(yaw - self.prev_yaw) > threshold:
+            anomalies.append(f"Yaw Δ={yaw - self.prev_yaw:.2f}°")
+        if self.prev_pitch is not None and abs(pitch - self.prev_pitch) > threshold:
+            anomalies.append(f"Pitch Δ={pitch - self.prev_pitch:.2f}°")
+        if self.prev_roll is not None and abs(roll - self.prev_roll) > threshold:
+            anomalies.append(f"Roll Δ={roll - self.prev_roll:.2f}°")
+        if anomalies:
+            msg = f"⚠️ Orientation anomaly: {', '.join(anomalies)} (thres=±{threshold}°)"
+            self.get_logger().warn(msg)
+            self.alert_pub.publish(String(data=msg))
         
+        self.prev_yaw = yaw
+        self.prev_pitch = pitch
+        self.prev_roll = roll
 
 def main():
     rclpy.init()
@@ -134,6 +168,7 @@ def main():
     try:
         while rclpy.ok():
             rclpy.spin_once(node, timeout_sec=0.01)
+
             frames = node.pipeline.wait_for_frames()
             aligned = node.align.process(frames)
             color_frame = aligned.get_color_frame()
@@ -146,104 +181,116 @@ def main():
             depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
 
             if node.screw_active:
+                have_fresh_detection = False
                 screw_results = []
-                if node.frame_count % 10 == 0:
-                    screw_results = node.screw_detector.detect(color_image, depth_frame)
-                    screw_results = remove_duplicate_detections(screw_results)
-                    screw_results = sorted(screw_results, key=lambda r: r['Z'])[:4]
-                    if len(screw_results) == 4:
-                        node.prev_screw_results = screw_results
-                else:
-                    screw_results = node.prev_screw_results
 
+                # 每 10 幀做一次偵測
+                if node.frame_count % 10 == 0:
+                    results = node.screw_detector.detect(color_image, depth_frame)
+                    results = remove_duplicate_detections(results)
+                    results = sorted(results, key=lambda r: r['Z'])[:4]
+                    if len(results) == 4:
+                        node.prev_screw_results = results
+                        have_fresh_detection = True
+                    screw_results = results
+                else:
+                    # 沒有新偵測 → 只用上一幀的結果拿來畫圖，不做廣播
+                    screw_results = node.prev_screw_results
+                    
+
+                # ---- 畫點 & 疊加用（不影響 TF）----
                 if len(screw_results) == 4:
                     avg_x = avg_y = avg_z = 0.0
                     avg_u = avg_v = 0
-                    quats = []
 
-                    dx = screw_results[2]['u'] - screw_results[0]['u']
-                    dy = screw_results[2]['v'] - screw_results[0]['v']
-                    yaw_rad = np.arctan2(dy, dx)
-                    yaw_deg = np.degrees(yaw_rad)
-                    quat = tf_transformations.quaternion_from_euler(0, 0, yaw_rad)
-
-                    r = R.from_quat(quat)
-                    yaw_deg, pitch_deg, roll_deg = r.as_euler('zyx', degrees=True)
-
-                    # ✅ 保留顯示，不做跳過
                     for i, r_ in enumerate(screw_results):
                         u, v = r_['u'], r_['v']
                         X, Y, Z = r_['X'], r_['Y'], r_['Z']
-                        quats.append(quat)
-                        node.broadcast_screw_tf(i + 1, X, Y, Z, quat)
-                        avg_x += X
-                        avg_y += Y
-                        avg_z += Z
-                        avg_u += u
-                        avg_v += v
-
+                        avg_x += X; avg_y += Y; avg_z += Z
+                        avg_u += u;  avg_v += v
                         cv2.circle(color_image, (u, v), 6, (0, 255, 0), -1)
-                        cv2.putText(color_image, f"X={X:.2f} Y={Y:.2f} Z={Z:.2f}", (u + 10, v - 10),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 255), 1)
+                        cv2.putText(color_image, f"X={X:.2f} Y={Y:.2f} Z={Z:.2f}",
+                                    (u + 10, v - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0,255,255), 1)
                         print(f"🟢 螺絲 {i+1}: (u={u}, v={v}), X={X:.3f}, Y={Y:.3f}, Z={Z:.3f}")
 
-                    # ✅ 用三點建立平面方向，求出 R 與四元數
-                    v0 = np.array([screw_results[0]['X'], screw_results[0]['Y'], screw_results[0]['Z']])
-                    v1 = np.array([screw_results[1]['X'], screw_results[1]['Y'], screw_results[1]['Z']])
-                    v2 = np.array([screw_results[2]['X'], screw_results[2]['Y'], screw_results[2]['Z']])
-                    v3 = np.array([screw_results[3]['X'], screw_results[3]['Y'], screw_results[3]['Z']])
-                    
-                    x_axis = v3 - v2
-                    x_axis = x_axis / np.linalg.norm(x_axis)
-                    temp_vec = v0 - v2
-                    z_axis = np.cross(x_axis, temp_vec)
-                    z_axis = z_axis / np.linalg.norm(z_axis)
-                    y_axis = np.cross(z_axis, x_axis)  # ✅ 正交右手系
+                    # 只有「本幀有新偵測」才計算姿態 & 廣播 TF
+                    if have_fresh_detection:
+                        v0 = np.array([screw_results[0]['X'], screw_results[0]['Y'], screw_results[0]['Z']])
+                        v1 = np.array([screw_results[1]['X'], screw_results[1]['Y'], screw_results[1]['Z']])
+                        v2 = np.array([screw_results[2]['X'], screw_results[2]['Y'], screw_results[2]['Z']])
+                        v3 = np.array([screw_results[3]['X'], screw_results[3]['Y'], screw_results[3]['Z']])
 
-                    R_mat = np.column_stack((x_axis, y_axis, z_axis))
-                    quat = tf_transformations.quaternion_from_matrix(
-                        np.vstack((np.hstack((R_mat, np.array([[0], [0], [0]]))), [0, 0, 0, 1]))
-                    )
+                        x_axis = v3 - v2
+                        x_axis = x_axis / np.linalg.norm(x_axis)
+                        temp_vec = v0 - v2
+                        z_axis = np.cross(x_axis, temp_vec)
+                        z_axis = z_axis / np.linalg.norm(z_axis)
+                        y_axis = np.cross(z_axis, x_axis)
 
-                    r = R.from_quat(quat)
-                    yaw_deg, pitch_deg, roll_deg = r.as_euler('zyx', degrees=True)
+                        R_mat = np.column_stack((x_axis, y_axis, z_axis))
+                        Tm = np.eye(4); Tm[:3,:3] = R_mat
+                        quat = tf_transformations.quaternion_from_matrix(Tm)
 
-                    print(f"✅ 四元數: {quat}")
-                    print(f"✅ 尤拉角: Yaw={yaw_deg:.2f}°, Pitch={pitch_deg:.2f}°, Roll={roll_deg:.2f}°")
+                        r_e = R.from_quat(quat)
+                        yaw_deg, pitch_deg, roll_deg = r_e.as_euler('zyx', degrees=True)
 
-                    avg_x /= 4
-                    avg_y /= 4
-                    avg_z /= 4
-                    center_u = avg_u // 4
-                    center_v = avg_v // 4
+                        if node.prev_avg_pose is None:
+                            node.prev_yaw = yaw_deg
+                            node.prev_pitch = pitch_deg
+                            node.prev_roll = roll_deg
+                            print("First detect")
+                        else:
+                            yaw_diff   = abs(yaw_deg - node.prev_yaw)
+                            pitch_diff = abs(pitch_deg - node.prev_pitch)
+                            roll_diff  = abs(roll_deg - node.prev_roll)
 
-                    print(f"[INFO] Orientation: Yaw={yaw_deg:.1f}°, Pitch={pitch_deg:.1f}°, Roll={roll_deg:.1f}°")
+                            if yaw_diff > 5 or pitch_diff > 5 or roll_diff > 5:
+                                print(f"⚠️ 姿態變化過大！Yaw Δ={yaw_diff:.2f}°, Pitch Δ={pitch_diff:.2f}°, Roll Δ={roll_diff:.2f}° → 忽略此次結果")
+                                node.abnormal_counter += 1
+                                if node.abnormal_counter >= 10:
+                                    print("❌ 已連續 10 次異常，顯示 NULL 並停止螺絲偵測")
+                                    node.prev_avg_center = None
+                                    node.prev_avg_pose = None
+                                    node.screw_active = False
+                                    node.abnormal_counter = 0
+                                # 本幀異常 → 不廣播 TF、不更新 prev、直接跳過後續
+                                continue
+                            else:
+                                node.abnormal_counter = 0
 
-                    node.prev_avg_center = (center_u, center_v)
-                    node.prev_avg_pose = (avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg)
+                        print(f"✅ 四元數: {quat}")
+                        print(f"✅ 尤拉角: Yaw={yaw_deg:.2f}°, Pitch={pitch_deg:.2f}°, Roll={roll_deg:.2f}°")
 
-                    node.publish_avg_pose(avg_x, avg_y, avg_z, quat)  # ✅ 呼叫正確方法
+                        # ✅ 只有有新偵測 & 未被判定為異常時才廣播 TF
+                        for i, r_ in enumerate(screw_results):
+                            node.broadcast_screw_tf(i + 1, r_['X'], r_['Y'], r_['Z'], quat)
 
-                    node.prev_yaw = yaw_deg
-                    node.prev_pitch = pitch_deg
-                    node.prev_roll = roll_deg
+                        # 平均中心 & 發布 Pose
+                        avg_x /= 4.0; avg_y /= 4.0; avg_z /= 4.0
+                        center_u = avg_u // 4; center_v = avg_v // 4
 
-                # ✅ 顯示上次有效結果（即使目前沒偵測到）
+                        print(f"[INFO] Orientation: Yaw={yaw_deg:.1f}°, Pitch={pitch_deg:.1f}°, Roll={roll_deg:.1f}°")
+                        node.prev_avg_center = (center_u, center_v)
+                        node.prev_avg_pose = (avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg)
+
+                        node.publish_avg_pose(avg_x, avg_y, avg_z, quat)
+                        node.check_angle_anomaly(yaw_deg, pitch_deg, roll_deg, threshold=5.0)
+
+                # ---- overlay 最後有效姿態（沒有新偵測也能顯示畫面提示；不影響 TF）----
                 if node.prev_avg_center and node.prev_avg_pose:
                     center_u, center_v = node.prev_avg_center
                     avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg = node.prev_avg_pose
-                    text1 = f"Avg X={avg_x:.2f} Y={avg_y:.2f} Z={avg_z:.2f}"
-                    text2 = f"Yaw={yaw_deg:.1f}deg Pitch={pitch_deg:.1f}deg Roll={roll_deg:.1f}deg"
-                    cv2.circle(color_image, (int(center_u), int(center_v)), 8, (0, 255, 255), -1)
-                    cv2.putText(color_image, text1, (center_u - 100, center_v - 20),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
-                    cv2.putText(color_image, text2, (center_u - 100, center_v + 20),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+                    cv2.circle(color_image, (int(center_u), int(center_v)), 8, (0,255,255), -1)
+                    cv2.putText(color_image, f"Avg X={avg_x:.2f} Y={avg_y:.2f} Z={avg_z:.2f}",
+                                (center_u - 100, center_v - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,255,255), 2)
+                    cv2.putText(color_image, f"Yaw={yaw_deg:.1f} Pitch={pitch_deg:.1f} Roll={roll_deg:.1f}",
+                                (center_u - 100, center_v + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,0), 2)
+
 
             if node.lshape_active:
                 results = node.l_shape_dector.detect_l_shape_lines(color_image)
                 for cx, cy in results:
-                    cv2.circle(color_image, (cx, cy), 5, (0, 255, 255), -1)
+                    cv2.circle(color_image, (cx, cy), 5, (0,255,255), -1)
 
             if node.icp_fit_active:
                 dist = node.icp_fitter.icp_fit(color_image, depth_image, depth_intrin)
@@ -252,6 +299,22 @@ def main():
             cv2.imshow("RealSense Detection", color_image)
             if cv2.waitKey(1) == ord('q'):
                 break
+            try:
+                now = Time()
+                for idx in range(1, 5):
+                    tf = node.tf_buffer.lookup_transform(
+                        target_frame='camera_link',
+                        source_frame=f'screw_{idx}',
+                        time=now,
+                        timeout=Duration(seconds=0.5)
+                    )
+                    pos = tf.transform.translation
+                    rot = tf.transform.rotation
+                    print(f"[🔧 TF] screw_{idx} in camera_link:\n"
+                          f"  ↳ Position: ({pos.x:.3f}, {pos.y:.3f}, {pos.z:.3f})\n"
+                          f"  ↳ Quaternion: ({rot.x:.3f}, {rot.y:.3f}, {rot.z:.3f}, {rot.w:.3f})")
+            except LookupException:
+                print("⚠️ 無法查詢 TF: screw_X → camera_link")
 
             node.frame_count += 1
 
@@ -261,3 +324,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
