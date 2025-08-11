@@ -1,9 +1,9 @@
 import rclpy
-from rclpy.node import Node
 import cv2
 import numpy as np
 import pyrealsense2 as rs
 import os, glob
+from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
 from ament_index_python.packages import get_package_prefix
@@ -15,6 +15,7 @@ from tf2_ros import Buffer, TransformListener
 from geometry_msgs.msg import TransformStamped
 import transformations as tf_transformations
 from scipy.spatial.transform import Rotation as R
+from cv_bridge import CvBridge
 
 from vision_module.screw_detector import ScrewDetector
 from vision_module.l_shape_detector import LShapeDetector
@@ -58,9 +59,12 @@ class RealSenseVision(Node):
         source_root = os.path.dirname(os.path.abspath(__file__))
         template_path = os.path.join(source_root, 'template2_shape')
         self.screw_detector = ScrewDetector(template_path)
-        self.l_templates = self.load_templates('template2_shape')
-        self.l_shape_dector = LShapeDetector(self.l_templates)
+        # detectors
+        # self.screw_detector = ScrewDetector('template2_shape')
+        self.l_templates = self.load_templates('template_l_shape')
+        self.l_shape_detector = LShapeDetector(self.l_templates)
         self.icp_fitter = ICPFITTER()
+
 
         # TF + state
         self.br = TransformBroadcaster(self)
@@ -85,6 +89,11 @@ class RealSenseVision(Node):
         self.null_timeout = 3.0  # ⏱️ 超過 3 秒無法偵測才輸出 NULL
         self.recovery_duration = 3.0  # ✅ 成功持續 3 秒後才允許再廣播
 
+    def publish_image(self, color_image):
+        resized_image = cv2.resize(color_image, (701, 481), interpolation=cv2.INTER_AREA)
+        ros_image = self.bridge.cv2_to_imgmsg(resized_image, encoding="bgr8")
+        self.image_pub.publish(ros_image)
+
     def load_templates(self, folder_name, augment=False):
         source_root = os.path.dirname(os.path.abspath(__file__))
         folder_path = os.path.join(source_root, folder_name)
@@ -104,7 +113,23 @@ class RealSenseVision(Node):
                 print(f"⚠️ 無法讀取圖片：{path}")
         print(f"✅ 成功載入 {len(templates)} 張模板圖片")
         return templates
+    
+    # def load_templates(self, folder_name):
+    #     prefix = get_package_prefix('vision_module')
+    #     folder_path = os.path.join(prefix, 'lib', 'vision_module', folder_name)
+    #     paths = sorted(glob.glob(os.path.join(folder_path, "*.png")))
 
+    #     templates = []
+    #     for path in paths:
+    #         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    #         if img is not None:
+    #             templates.append(img)
+    #         else:
+    #             self.get_logger().warn(f"Failed to load: {path}")
+    #     if not templates:
+    #         raise RuntimeError(f"No template found in folder: {folder_name}")
+    #     return templates
+    
     def task_callback(self, msg: String):
         task = msg.data.lower()
         self.screw_active = task == 'screw'
