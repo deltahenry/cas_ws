@@ -1,3 +1,4 @@
+import os
 from setuptools import find_packages, setup
 
 package_name = 'io_module'
@@ -10,6 +11,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'), ['launch/io_control.launch.py'])
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -24,6 +26,7 @@ setup(
             'height = io_module.height:main',
             'forklift = io_module.forklift:main',
             'io_node = io_module.io_node:main',
+            'clipper = io_module.clipper_control:main',
         ],
     },
 )

@@ -32,6 +32,13 @@ class DataNode(Node):
             10
         )
 
+        self.clipper_cmd_subscriber = self.create_subscription(
+            Int32MultiArray,
+            'clipper_io_cmd',
+            self.clipper_cmd_callback,  # 使用同一個回調函數處理不同命令
+            10
+        )
+
         self.dido_cmd_subscriber = self.create_subscription(
             DIDOCmd,
             'test_dido',
@@ -72,6 +79,16 @@ class DataNode(Node):
         self.DO_1[1] = msg.data[1]
         self.DO_1[2] = msg.data[2]
         self.DO_1[3] = msg.data[3]
+
+    def clipper_cmd_callback(self, msg: Int32MultiArray):
+        print(f"接收到夾爪IO命令: {msg.data}")
+        """處理夾爪IO命令"""
+        self.DO_2[0] = msg.data[0]
+        self.DO_2[1] = msg.data[1]
+        self.DO_2[2] = msg.data[2]
+        self.DO_2[3] = msg.data
+        
+        
 
     def handle_dido_cmd(self, msg: DIDOCmd):
         if not msg.name.startswith("DO"):

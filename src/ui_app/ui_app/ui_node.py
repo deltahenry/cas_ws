@@ -110,8 +110,8 @@ class ROSNode(Node):
 
 
         # Service server (test/dummy)
-        self.esm_server = self.create_service(ESMCmd, '/esm_command', self.handle_esm)
-        self.get_logger().info('ESMCmd server started at /esm_command')
+        # self.esm_server = self.create_service(ESMCmd, '/esm_command', self.handle_esm)
+        # self.get_logger().info('ESMCmd server started at /esm_command')
 
 
         self.bridge = CvBridge()
@@ -119,19 +119,19 @@ class ROSNode(Node):
         self.detection_task_callback_ui = None
         self.image_update_callback = None
 
-    def handle_esm(self, request, response):
-        self.get_logger().info(
-            f"ESM request: servo_status={request.servo_status}, "
-            f"mode={request.mode}, speed_limit={request.speed_limit}, lpf={request.lpf}"
-        )
-        # TODO: call your real driver/hardware here
+    # def handle_esm(self, request, response):
+    #     self.get_logger().info(
+    #         f"ESM request: servo_status={request.servo_status}, "
+    #         f"mode={request.mode}, speed_limit={request.speed_limit}, lpf={request.lpf}"
+    #     )
+    #     # TODO: call your real driver/hardware here
 
-        # If your .srv RESPONSE defines these, set them, otherwise delete these lines:
-        if hasattr(response, 'success'):
-            response.success = True
-        if hasattr(response, 'message'):
-            response.message = 'OK'
-        return response
+    #     # If your .srv RESPONSE defines these, set them, otherwise delete these lines:
+    #     if hasattr(response, 'success'):
+    #         response.success = True
+    #     if hasattr(response, 'message'):
+    #         response.message = 'OK'
+    #     return response
 
 
 
@@ -278,6 +278,9 @@ class MainWindow(QMainWindow):
             btn.toggled.connect(lambda checked, b=btn: self.on_manual_button_toggled(b, checked))
 
 
+
+ 
+
         # after setupUi(...)
         self._vision_buttons = [
             (self.ui.VisionOne,   "screw"),
@@ -299,8 +302,9 @@ class MainWindow(QMainWindow):
 
 
         #try
-        self.ui.MotorNextPageButton.clicked.connect(self.go_to_next_page_motor)
-        self.ui.MotorBackPageButton.clicked.connect(self.go_to_back_page_motor)
+        self.ui.MotorConfigNextButton.clicked.connect(lambda: self.go_to_next_page_motor(1))
+        self.ui.MotorJogNextButton.clicked.connect(lambda: self.go_to_next_page_motor(2))
+        self.ui.MotorYAxisNextButton.clicked.connect(lambda: self.go_to_next_page_motor(0))
         
 
     def _on_vision_clicked(self, btn, checked):
@@ -315,10 +319,8 @@ class MainWindow(QMainWindow):
 
 
     
-    def go_to_next_page_motor(self):
-        self.ui.MotorStackedWidget.setCurrentIndex(0)
-    def go_to_back_page_motor(self):
-        self.ui.MotorStackedWidget.setCurrentIndex(1)
+    def go_to_next_page_motor(self, index):
+        self.ui.MotorStackedWidget.setCurrentIndex(index)
 
     def update_circle_off_style(self):
         self.ui.OneCircleOff.setStyleSheet("""

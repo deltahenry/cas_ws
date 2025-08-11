@@ -63,8 +63,9 @@ class MotionController(Node):
                 relative_pose = [
                     self.current_cartesian_pose[0] + msg.pose_data[0],
                     self.current_cartesian_pose[1] + msg.pose_data[1],
-                    self.current_cartesian_pose[2] + msg.pose_data[2]
+                    self.current_cartesian_pose[2] + msg.pose_data[2]/57.29  # 將角度轉換為弧度
                 ]
+                print(f"Relative pose: {relative_pose}")
                 self.move_p(relative_pose, msg.speed)
                 self.motion_finished = False  # 收到指令後，將 motion_finished 設為 False
             else:
@@ -101,6 +102,8 @@ class MotionController(Node):
         self.get_logger().info("Received set_cartesian_position command")
 
         in_workspace = self.robot_model.check_workspace_limits(cartesian_pos_cmd)
+        
+        print("Target position:", cartesian_pos_cmd)
 
         if in_workspace:
 

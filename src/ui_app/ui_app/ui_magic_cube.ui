@@ -1641,7 +1641,7 @@ QPushButton:pressed {
           <enum>QFrame::Shadow::Raised</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="BeforeComponentControl">
           <layout class="QVBoxLayout" name="verticalLayout_28">
@@ -1819,7 +1819,7 @@ QPushButton:pressed {
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="MotorPage">
             <widget class="QStackedWidget" name="MotorStackedWidget">
@@ -1832,7 +1832,7 @@ QPushButton:pressed {
               </rect>
              </property>
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="MotorConfigPage">
               <widget class="QPushButton" name="ServoON">
@@ -2009,13 +2009,13 @@ QPushButton:checked {
                 <bool>false</bool>
                </property>
               </widget>
-              <widget class="QPushButton" name="MotorBackPageButton">
+              <widget class="QPushButton" name="MotorConfigNextButton">
                <property name="enabled">
                 <bool>true</bool>
                </property>
                <property name="geometry">
                 <rect>
-                 <x>0</x>
+                 <x>210</x>
                  <y>450</y>
                  <width>91</width>
                  <height>71</height>
@@ -2059,7 +2059,7 @@ QPushButton:checked {
 </string>
                </property>
                <property name="text">
-                <string>back</string>
+                <string>next</string>
                </property>
                <property name="checkable">
                 <bool>false</bool>
@@ -2360,7 +2360,7 @@ QPushButton:pressed {
                 </item>
                </layout>
               </widget>
-              <widget class="QPushButton" name="MotorNextPageButton">
+              <widget class="QPushButton" name="MotorJogNextButton">
                <property name="enabled">
                 <bool>true</bool>
                </property>
@@ -2368,6 +2368,120 @@ QPushButton:pressed {
                 <rect>
                  <x>210</x>
                  <y>330</y>
+                 <width>91</width>
+                 <height>71</height>
+                </rect>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+    padding: 6px 12px;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #1a1a1a, stop:1 #000000
+    );
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+QPushButton:hover {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2a2a2a, stop:1 #111111
+    );
+}
+
+QPushButton:checked {
+    background-color: #0B76A0;
+    border: 1px solid #0B76A0;
+}
+
+</string>
+               </property>
+               <property name="text">
+                <string>next</string>
+               </property>
+               <property name="checkable">
+                <bool>false</bool>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="MotorChooseDistance">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>211</width>
+                 <height>51</height>
+                </rect>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+    padding: 6px 12px;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #1a1a1a, stop:1 #000000
+    );
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+QPushButton:hover {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2a2a2a, stop:1 #111111
+    );
+}
+
+QPushButton:checked {
+    background-color: #0B76A0;
+    border: 1px solid #0B76A0;
+}
+
+</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="checkable">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </widget>
+             <widget class="QWidget" name="YAxisPage">
+              <widget class="QPushButton" name="MotorYAxisNextButton">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>200</x>
+                 <y>370</y>
                  <width>91</width>
                  <height>71</height>
                 </rect>
@@ -2803,7 +2917,7 @@ QSlider::handle:horizontal {
              <x>10</x>
              <y>100</y>
              <width>291</width>
-             <height>541</height>
+             <height>441</height>
             </rect>
            </property>
            <property name="sizePolicy">

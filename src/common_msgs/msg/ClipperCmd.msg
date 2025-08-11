@@ -1,0 +1,2 @@
+#open,close
+string mode

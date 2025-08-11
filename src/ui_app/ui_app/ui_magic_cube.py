@@ -1086,14 +1086,14 @@ class Ui_MainWindow(object):
 "")
         self.ServoOFF.setCheckable(False)
         self.ServoOFF.setChecked(False)
-        self.MotorBackPageButton = QPushButton(self.MotorConfigPage)
-        self.MotorBackPageButton.setObjectName(u"MotorBackPageButton")
-        self.MotorBackPageButton.setEnabled(True)
-        self.MotorBackPageButton.setGeometry(QRect(0, 450, 91, 71))
-        sizePolicy.setHeightForWidth(self.MotorBackPageButton.sizePolicy().hasHeightForWidth())
-        self.MotorBackPageButton.setSizePolicy(sizePolicy)
-        self.MotorBackPageButton.setFont(font)
-        self.MotorBackPageButton.setStyleSheet(u"QPushButton {\n"
+        self.MotorConfigNextButton = QPushButton(self.MotorConfigPage)
+        self.MotorConfigNextButton.setObjectName(u"MotorConfigNextButton")
+        self.MotorConfigNextButton.setEnabled(True)
+        self.MotorConfigNextButton.setGeometry(QRect(210, 450, 91, 71))
+        sizePolicy.setHeightForWidth(self.MotorConfigNextButton.sizePolicy().hasHeightForWidth())
+        self.MotorConfigNextButton.setSizePolicy(sizePolicy)
+        self.MotorConfigNextButton.setFont(font)
+        self.MotorConfigNextButton.setStyleSheet(u"QPushButton {\n"
 "    padding: 6px 12px;\n"
 "    background-color: qlineargradient(\n"
 "        x1:0, y1:0, x2:0, y2:1,\n"
@@ -1117,7 +1117,7 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "")
-        self.MotorBackPageButton.setCheckable(False)
+        self.MotorConfigNextButton.setCheckable(False)
         self.MotorStackedWidget.addWidget(self.MotorConfigPage)
         self.JogPage = QWidget()
         self.JogPage.setObjectName(u"JogPage")
@@ -1260,14 +1260,14 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_10.addWidget(self.StopMotor)
 
-        self.MotorNextPageButton = QPushButton(self.JogPage)
-        self.MotorNextPageButton.setObjectName(u"MotorNextPageButton")
-        self.MotorNextPageButton.setEnabled(True)
-        self.MotorNextPageButton.setGeometry(QRect(210, 330, 91, 71))
-        sizePolicy.setHeightForWidth(self.MotorNextPageButton.sizePolicy().hasHeightForWidth())
-        self.MotorNextPageButton.setSizePolicy(sizePolicy)
-        self.MotorNextPageButton.setFont(font)
-        self.MotorNextPageButton.setStyleSheet(u"QPushButton {\n"
+        self.MotorJogNextButton = QPushButton(self.JogPage)
+        self.MotorJogNextButton.setObjectName(u"MotorJogNextButton")
+        self.MotorJogNextButton.setEnabled(True)
+        self.MotorJogNextButton.setGeometry(QRect(210, 330, 91, 71))
+        sizePolicy.setHeightForWidth(self.MotorJogNextButton.sizePolicy().hasHeightForWidth())
+        self.MotorJogNextButton.setSizePolicy(sizePolicy)
+        self.MotorJogNextButton.setFont(font)
+        self.MotorJogNextButton.setStyleSheet(u"QPushButton {\n"
 "    padding: 6px 12px;\n"
 "    background-color: qlineargradient(\n"
 "        x1:0, y1:0, x2:0, y2:1,\n"
@@ -1291,8 +1291,75 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "")
-        self.MotorNextPageButton.setCheckable(False)
+        self.MotorJogNextButton.setCheckable(False)
+        self.MotorChooseDistance = QPushButton(self.JogPage)
+        self.MotorChooseDistance.setObjectName(u"MotorChooseDistance")
+        self.MotorChooseDistance.setEnabled(True)
+        self.MotorChooseDistance.setGeometry(QRect(0, 0, 211, 51))
+        sizePolicy.setHeightForWidth(self.MotorChooseDistance.sizePolicy().hasHeightForWidth())
+        self.MotorChooseDistance.setSizePolicy(sizePolicy)
+        self.MotorChooseDistance.setFont(font)
+        self.MotorChooseDistance.setStyleSheet(u"QPushButton {\n"
+"    padding: 6px 12px;\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #1a1a1a, stop:1 #000000\n"
+"    );\n"
+"    color: white;\n"
+"    border: 1px solid #444;\n"
+"    border-radius: 4px;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #2a2a2a, stop:1 #111111\n"
+"    );\n"
+"}\n"
+"\n"
+"QPushButton:checked {\n"
+"    background-color: #0B76A0;\n"
+"    border: 1px solid #0B76A0;\n"
+"}\n"
+"\n"
+"")
+        self.MotorChooseDistance.setCheckable(False)
         self.MotorStackedWidget.addWidget(self.JogPage)
+        self.YAxisPage = QWidget()
+        self.YAxisPage.setObjectName(u"YAxisPage")
+        self.MotorYAxisNextButton = QPushButton(self.YAxisPage)
+        self.MotorYAxisNextButton.setObjectName(u"MotorYAxisNextButton")
+        self.MotorYAxisNextButton.setEnabled(True)
+        self.MotorYAxisNextButton.setGeometry(QRect(200, 370, 91, 71))
+        sizePolicy.setHeightForWidth(self.MotorYAxisNextButton.sizePolicy().hasHeightForWidth())
+        self.MotorYAxisNextButton.setSizePolicy(sizePolicy)
+        self.MotorYAxisNextButton.setFont(font)
+        self.MotorYAxisNextButton.setStyleSheet(u"QPushButton {\n"
+"    padding: 6px 12px;\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #1a1a1a, stop:1 #000000\n"
+"    );\n"
+"    color: white;\n"
+"    border: 1px solid #444;\n"
+"    border-radius: 4px;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0 #2a2a2a, stop:1 #111111\n"
+"    );\n"
+"}\n"
+"\n"
+"QPushButton:checked {\n"
+"    background-color: #0B76A0;\n"
+"    border: 1px solid #0B76A0;\n"
+"}\n"
+"\n"
+"")
+        self.MotorYAxisNextButton.setCheckable(False)
+        self.MotorStackedWidget.addWidget(self.YAxisPage)
         self.ChangeComponentControlStackedWidget.addWidget(self.MotorPage)
         self.VisionPage = QWidget()
         self.VisionPage.setObjectName(u"VisionPage")
@@ -1428,7 +1495,7 @@ class Ui_MainWindow(object):
         self.ChangeComponentControlStackedWidget.addWidget(self.DIDOPage)
         self.ListOptionsWidget = QWidget(self.ComponentControlMain)
         self.ListOptionsWidget.setObjectName(u"ListOptionsWidget")
-        self.ListOptionsWidget.setGeometry(QRect(10, 100, 291, 541))
+        self.ListOptionsWidget.setGeometry(QRect(10, 100, 291, 441))
         sizePolicy1.setHeightForWidth(self.ListOptionsWidget.sizePolicy().hasHeightForWidth())
         self.ListOptionsWidget.setSizePolicy(sizePolicy1)
         self.verticalLayout_5 = QVBoxLayout(self.ListOptionsWidget)
@@ -2950,9 +3017,9 @@ class Ui_MainWindow(object):
         self.ParentStackedWidgetToChangeMenuOptions.setCurrentIndex(0)
         self.ProcessAndInfoStackedWidget.setCurrentIndex(0)
         self.ActionButtons.setCurrentIndex(0)
-        self.ComponentControlStackedWidget.setCurrentIndex(0)
-        self.ChangeComponentControlStackedWidget.setCurrentIndex(4)
-        self.MotorStackedWidget.setCurrentIndex(1)
+        self.ComponentControlStackedWidget.setCurrentIndex(1)
+        self.ChangeComponentControlStackedWidget.setCurrentIndex(0)
+        self.MotorStackedWidget.setCurrentIndex(0)
         self.MiddleStackedWidget.setCurrentIndex(0)
 
 
@@ -3031,7 +3098,7 @@ class Ui_MainWindow(object):
         self.ServoON.setText(QCoreApplication.translate("MainWindow", u"Servo ON", None))
         self.HomeMotor.setText(QCoreApplication.translate("MainWindow", u"Home", None))
         self.ServoOFF.setText(QCoreApplication.translate("MainWindow", u"Servo OFF", None))
-        self.MotorBackPageButton.setText(QCoreApplication.translate("MainWindow", u"back", None))
+        self.MotorConfigNextButton.setText(QCoreApplication.translate("MainWindow", u"next", None))
         self.YawPlusCP.setText("")
         self.ControlUpCP.setText("")
         self.ControlLeftCP.setText("")
@@ -3040,7 +3107,9 @@ class Ui_MainWindow(object):
         self.YawMinusCP.setText("")
         self.PauseMotor.setText(QCoreApplication.translate("MainWindow", u"Pause", None))
         self.StopMotor.setText(QCoreApplication.translate("MainWindow", u"STOP", None))
-        self.MotorNextPageButton.setText(QCoreApplication.translate("MainWindow", u"next", None))
+        self.MotorJogNextButton.setText(QCoreApplication.translate("MainWindow", u"next", None))
+        self.MotorChooseDistance.setText("")
+        self.MotorYAxisNextButton.setText(QCoreApplication.translate("MainWindow", u"next", None))
         self.VisionOne.setText(QCoreApplication.translate("MainWindow", u"Screw", None))
         self.VisionTwo.setText(QCoreApplication.translate("MainWindow", u"LShape", None))
         self.VisionThree.setText(QCoreApplication.translate("MainWindow", u"ICP Fit", None))

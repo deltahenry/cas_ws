@@ -9,24 +9,26 @@ class MotorController:
         self.ros_node = ros_node
 
         self.cli: Client = self.ros_node.create_client(ESMCmd, '/esm_command')
-        self.service_ready = False
+        self.waiting_for_result = False
 
         # Disable buttons until service is ready
-        self.ui.ServoON.setEnabled(False)
-        self.ui.ServoOFF.setEnabled(False)
+        # self.ui.ServoON.setEnabled(False)
+        # self.ui.ServoOFF.setEnabled(False)
 
-        # Poll for readiness (non-blocking)
-        self._srv_timer = QTimer()
-        self._srv_timer.timeout.connect(self._check_srv_ready)
-        self._srv_timer.start(200)  # check 5x/sec
+        # # Poll for readiness (non-blocking)
+        # self._srv_timer = QTimer()
+        # self._srv_timer.timeout.connect(self._check_srv_ready)
+        # self._srv_timer.start(200)  # check 5x/sec
 
         # Connect UI buttons to jog commands
-        self.ui.ControlUpCP.clicked.connect(lambda: self.send_jog_cmd("y_axis", 1.0))
-        self.ui.ControlDownCP.clicked.connect(lambda: self.send_jog_cmd("y_axis", -1.0))
-        self.ui.ControlLeftCP.clicked.connect(lambda: self.send_jog_cmd("x_axis", -1.5))
-        self.ui.ControlRightCP.clicked.connect(lambda: self.send_jog_cmd("x_axis", 1.5))
-        self.ui.YawPlusCP.clicked.connect(lambda: self.send_jog_cmd("yaw", 0.5))
-        self.ui.YawMinusCP.clicked.connect(lambda: self.send_jog_cmd("yaw", -0.5))
+        # Buttons: pass only the SIGN; we’ll compute distance/angle inside.
+        self.ui.ControlUpCP.clicked.connect(  lambda: self.send_jog_cmd("y_axis",  +1))
+        self.ui.ControlDownCP.clicked.connect(lambda: self.send_jog_cmd("y_axis",  -1))
+        self.ui.ControlLeftCP.clicked.connect(lambda: self.send_jog_cmd("x_axis",  -1))
+        self.ui.ControlRightCP.clicked.connect(lambda: self.send_jog_cmd("x_axis", +1))
+        self.ui.YawPlusCP.clicked.connect(    lambda: self.send_jog_cmd("yaw_axis", +1))
+        self.ui.YawMinusCP.clicked.connect(   lambda: self.send_jog_cmd("yaw_axis", -1))
+
 
         self.ui.HomeMotor.clicked.connect(self.send_init_cmd)
 
@@ -43,32 +45,68 @@ class MotorController:
         self.ui.ServoON.clicked.connect(lambda: self.call_servo(True))  
         self.ui.ServoOFF.clicked.connect(lambda: self.call_servo(False))  
 
-    def _check_srv_ready(self):
-        if self.cli.wait_for_service(timeout_sec=0.0):
-            self.service_ready = True
-            self.ui.ServoON.setEnabled(True)
-            self.ui.ServoOFF.setEnabled(True)
-            self.ros_node.get_logger().info('/esm_command is READY')
-            self._srv_timer.stop()
-        else:
-            self.ros_node.get_logger().info('Waiting for /esm_command...')
+        self.motor_distance_state = 0  # 0: first, 1: second, 2: third
+        self.selected_distance = 1.0
+        self.selected_deg = 0.5
+        self.ui.MotorChooseDistance.setText("1 mm - 0.5°")
+
+        self.ui.MotorChooseDistance.clicked.connect(self.on_motor_distance_clicked)
+
+
+    def on_motor_distance_clicked(self):
+        self.motor_distance_state = (self.motor_distance_state + 1) % 3
+
+        if self.motor_distance_state == 0:
+            self.selected_distance = 1.0
+            self.selected_deg = 0.5
+            self.ui.MotorChooseDistance.setText("1 mm - 0.5°")
+        elif self.motor_distance_state == 1:
+            self.selected_distance = 5.0
+            self.selected_deg = 1.0
+            self.ui.MotorChooseDistance.setText("5 mm - 1°")
+        elif self.motor_distance_state == 2:
+            self.selected_distance = 10.0
+            self.selected_deg = 5.0
+            self.ui.MotorChooseDistance.setText("10 mm - 5°")
+
+        print(f"[UI] Motor distance set to {self.selected_distance} mm, {self.selected_deg}°")
 
 
 
-    def send_jog_cmd(self, axis, direction):
+    # def _check_srv_ready(self):
+    #     if self.cli.wait_for_service(timeout_sec=0.0):
+    #         self.service_ready = True
+    #         self.ui.ServoON.setEnabled(True)
+    #         self.ui.ServoOFF.setEnabled(True)
+    #         self.ros_node.get_logger().info('/esm_command is READY')
+    #         self._srv_timer.stop()
+    #     else:
+    #         self.ros_node.get_logger().info('Waiting for /esm_command...')
+
+
+
+    def send_jog_cmd(self, axis, sign):
+        # sign is +1 or -1 (int); keep distance/angle signed as you requested
         msg = JogCmd()
         msg.target = axis
-        msg.direction = direction
-        msg.distance = 5.0
-        msg.speed = 50.0
+        msg.direction = float(1 if sign >= 0 else -1)  # exactly ±1.0
+
+        if axis == "yaw_axis":
+            msg.angle = self.selected_deg     # ±0.5 / ±1 / ±5
+            msg.distance = 0.0
+        else:
+            msg.distance = self.selected_distance  # ±1 / ±5 / ±10
+            msg.angle = 0.0
+
+        msg.speed = 5.0
         self.ros_node.jog_cmd_publisher.publish(msg)
-        print(f"[Motor] Sent JogCmd: axis={axis}, direction={direction}")
+        print(f"[Motor] JogCmd -> target={msg.target}, dir={msg.direction}, dist={msg.distance}, ang={msg.angle}")
 
     def send_init_cmd(self):
         m1 = 0.0
         m2 = 0.0
         m3 = 0.0
-        speed = 50.0
+        speed = 5.0
 
         msg = MotionCmd()
         msg.command_type = MotionCmd.TYPE_HOME
@@ -77,29 +115,35 @@ class MotorController:
         self.ros_node.motion_cmd_publisher.publish(msg)
 
     def call_servo(self, on=True):
-        if not self.cli.wait_for_service(timeout_sec=0.2):
+        if not self.cli.service_is_ready():
             self.ros_node.get_logger().warn('Service not available')
             return
 
-        req = ESMCmd.Request()
-        req.servo_status = on
-        req.mode = 4
-        req.speed_limit = 50
-        req.lpf = 10
+        request = ESMCmd.Request()
+        request.servo_status = on
+        request.mode = 4
+        request.speed_limit = 50
+        request.lpf = 10
 
-        future = self.cli.call_async(req)
+        future = self.cli.call_async(request)
         self.waiting_for_result = True
 
         def handle_response(fut):
             self.waiting_for_result = False
-            exc = fut.exception()
-            if exc is not None:
-                self.ros_node.get_logger().error(f"Service {'ON' if on else 'OFF'} failed: {exc}")
-                return
-            self.ros_node.get_logger().info(f"Service {'ON' if on else 'OFF'} call succeeded")
+            if fut.result() is not None:
+                self.ros_node.get_logger().info(f"Service {'ON' if on else 'OFF'} call succeeded")
+            else:
+                self.ros_node.get_logger().error(f"Service {'ON' if on else 'OFF'} call failed")
 
         future.add_done_callback(handle_response)
 
+
+    def update_gui(self):
+        # 每次更新也可以做其他檢查或顯示狀態
+        if self.ros_node.waiting_for_result:
+            self.status_label.setText("Waiting for service response...")
+        else:
+            self.status_label.setText("Ready")
 
 
 
