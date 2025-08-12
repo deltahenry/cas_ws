@@ -78,10 +78,10 @@ class ClipperControl(Machine):
 
         transitions = [
             # 狀態轉換
-            {'trigger': 'opening', 'source': ClipperControlState.IDLE.value, 'dest': ClipperControlState.OPENING.value},
-            {'trigger': 'closing', 'source': ClipperControlState.IDLE.value, 'dest': ClipperControlState.CLOSING.value},
-            {'trigger': 'open', 'source': ClipperControlState.OPENING.value, 'dest': ClipperControlState.OPEN.value},
-            {'trigger': 'close', 'source': ClipperControlState.OPEN.value, 'dest': ClipperControlState.CLOSING.value},
+            {'trigger': 'opening', 'source': [ClipperControlState.IDLE.value,ClipperControlState.CLOSED.value,], 'dest': ClipperControlState.OPENING.value},
+            {'trigger': 'closing', 'source': [ClipperControlState.IDLE.value,ClipperControlState.OPEN.value], 'dest': ClipperControlState.CLOSING.value},
+            {'trigger': 'open_finish', 'source': ClipperControlState.OPENING.value, 'dest': ClipperControlState.OPEN.value},
+            {'trigger': 'close_finish', 'source': ClipperControlState.CLOSING.value, 'dest': ClipperControlState.CLOSED.value},
             {'trigger': 'stop', 'source': '*', 'dest': ClipperControlState.STOP.value},
             {'trigger': 'fail', 'source': '*', 'dest': ClipperControlState.FAIL.value},
             {'trigger': 'reset', 'source': '*', 'dest': ClipperControlState.IDLE.value}
@@ -151,23 +151,23 @@ class ClipperControl(Machine):
 
         if mode == "open":
             value = Int32MultiArray(data=[1, 0, 0, 1, 0, 0])  # 封裝為 Int32MultiArray
-            self.data_node.clipper_io_cmd_publisher(value)#change receipt
+            self.data_node.clipper_io_cmd_publisher.publish(value)#change receipt
             value = Int32MultiArray(data=[1, 1, 0, 1, 1, 0])  # 封裝為 Int32MultiArray
-            self.data_node.clipper_io_cmd_publisher(value)#open move
-            time.sleep(5)  # 等待夾爪開啟完成
+            self.data_node.clipper_io_cmd_publisher.publish(value)#open move
+            time.sleep(1)  # 等待夾爪開啟完成
             result = 'done'
 
         elif mode == "close":
             value = Int32MultiArray(data=[0, 0, 0, 0, 0, 0])  # 封裝為 Int32MultiArray
-            self.data_node.clipper_io_cmd_publisher(value)  #change receipt
+            self.data_node.clipper_io_cmd_publisher.publish(value)  #change receipt
             value = Int32MultiArray(data=[0, 1, 0, 0, 1, 0])  # 封裝為 Int32MultiArray
-            self.data_node.clipper_io_cmd_publisher(value)  #close move
-            time.sleep(5)  # 等待夾爪關閉完成
+            self.data_node.clipper_io_cmd_publisher.publish(value)  #close move
+            time.sleep(1)  # 等待夾爪關閉完成
             result = 'done'
 
         elif mode == "stop":
             value = Int32MultiArray(data=[0, 0, 1, 0, 0, 1])    # 封裝為 Int32MultiArray
-            self.data_node.clipper_io_cmd_publisher(value)  #stop move
+            self.data_node.clipper_io_cmd_publisher.publish(value)  #stop move
             time.sleep(1)  # 等待夾爪停止完成
             result = 'done'
         
@@ -180,10 +180,10 @@ class ClipperControl(Machine):
         """執行狀態機的邏輯"""
         if self.state == ClipperControlState.IDLE.value:
             print("[ClipperControl] 狀態機處於空閒狀態")
-            if self.data_node.mode == "open":
+            if self.data_node.mode == "open_clipper":
                 print("[ClipperControl] 開始開啟夾爪")
                 self.opening()
-            elif self.data_node.mode == "close":
+            elif self.data_node.mode == "close_clipper":
                 print("[ClipperControl] 開始關閉夾爪")
                 self.closing()
             return
@@ -194,17 +194,17 @@ class ClipperControl(Machine):
             
             if result == 'done':
                 print("[ClipperControl] 夾爪開啟完成")
-                self.open()
+                self.open_finish()
             else:
                 print("[ClipperControl] 夾爪開啟失敗")
                 self.fail()
         
         elif self.state == ClipperControlState.OPEN.value:
             print("[ClipperControl] 狀態機處於夾爪開啟狀態")
-            if self.data_node.mode == "close":
+            if self.data_node.mode == "close_clipper":
                 print("[ClipperControl] 開始關閉夾爪")
                 self.closing()
-            elif self.data_node.mode == "stop":
+            elif self.data_node.mode == "stop_clipper":
                 print("[ClipperControl] 停止夾爪操作")
                 self.stop()
             return
@@ -215,17 +215,17 @@ class ClipperControl(Machine):
             
             if result == 'done':
                 print("[ClipperControl] 夾爪關閉完成")
-                self.close()
+                self.close_finish()
             else:
                 print("[ClipperControl] 夾爪關閉失敗")
                 self.fail()
         
         elif self.state == ClipperControlState.CLOSED.value:
             print("[ClipperControl] 狀態機處於夾爪關閉狀態")
-            if self.data_node.mode == "open":
+            if self.data_node.mode == "open_clipper":
                 print("[ClipperControl] 開始開啟夾爪")
                 self.opening()
-            elif self.data_node.mode == "stop":
+            elif self.data_node.mode == "stop_clipper":
                 print("[ClipperControl] 停止夾爪操作")
                 self.stop()
             return

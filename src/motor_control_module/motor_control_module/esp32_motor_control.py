@@ -27,7 +27,7 @@ class MotorController(Node):
         # Timer
         self.timer = self.create_timer(2, self.timer_callback)  #20Hz       
 
-    def  motor_cmd_callback(self,msg:Float32MultiArray):
+    def motor_cmd_callback(self,msg:Float32MultiArray):
         pos_ref_queue = np.reshape(msg.data,(10,3))
         self.pub_esp_cmd(pos_ref_queue)
 
@@ -37,6 +37,7 @@ class MotorController(Node):
         for i in range (10):
             print([pos_ref_queue[i][0],pos_ref_queue[i][1],pos_ref_queue[i][2],0.0])
             msg.theta_2d_arr[i].theta_arr = [float(pos_ref_queue[i][0]),float(pos_ref_queue[i][1]),float(pos_ref_queue[i][2]),0.0]
+        print("Publishing ESP command:", msg.theta_2d_arr)
         self.esp_control_publisher.publish(msg)
 
     def esp_info_callback(self,msg:JointArr):
@@ -50,7 +51,7 @@ class MotorController(Node):
         motors_info.motor_info[2].id = 3
         motors_info.motor_info[2].fb_position = float(msg.theta_arr[2])
         self.motors_info_publisher.publish(motors_info)
-        print("esp_pub")
+        # print("esp_pub")
     
     def timer_callback(self):
         """This runs at 20Hz."""

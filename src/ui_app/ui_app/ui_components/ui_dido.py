@@ -7,33 +7,59 @@ class DIDOController:
         self.ros_node = ros_node
 
         # Initialize internal DI/DO state
+        self._do_buttons = {}
+        self._di_buttons = {}
+
         self.ros_node.dido_cmd = {}
 
-        # === Setup DO Buttons (48) ===
+        # --- DO buttons (UI -> ROS) ---
         for i in range(1, 49):
-            do_name = f"DO{i}"
-            self.ros_node.dido_cmd[do_name] = False
-            button = getattr(self.ui, do_name)
-            button.toggled.connect(
-                lambda checked, name=do_name: self.toggle_io(name, checked)
-            )
+            name = f"DO{i}"
+            btn = getattr(self.ui, name, None)
+            if btn is None:
+                continue
+            self._do_buttons[name] = btn
+            self.ros_node.dido_cmd[name] = False
+            # publish on user toggle
+            btn.toggled.connect(lambda checked, n=name: self.toggle_do(n, checked))
 
         # === Setup DI Buttons (16) ===
         for i in range(1, 17):
-            di_name = f"DI{i}"
-            self.ros_node.dido_cmd[di_name] = False
-            button = getattr(self.ui, di_name)
-            button.toggled.connect(
-                lambda checked, name=di_name: self.toggle_io(name, checked)
-            )
+            name = f"DI{i}"
+            btn = getattr(self.ui, name, None)
+            if btn is None:
+                continue
+            self._di_buttons[name] = btn
+            self.ros_node.dido_cmd[name] = False
 
-    def toggle_io(self, name, checked):
-        """Toggle DI/DO button, update internal state, and publish ROS message."""
+    # def toggle_io(self, name, checked):
+    #     """Toggle DI/DO button, update internal state, and publish ROS message."""
+    #     self.ros_node.dido_cmd[name] = checked
+
+    #     msg = DIDOCmd()
+    #     msg.name = name
+    #     msg.state = checked 
+    #     self.ros_node.dido_control_publisher.publish(msg)
+
+    #     print(f"[UI] {name} state: {checked}")
+
+    # ===== DO path: publish commands =====
+    def toggle_do(self, name: str, checked: bool):
         self.ros_node.dido_cmd[name] = checked
-
         msg = DIDOCmd()
         msg.name = name
-        msg.state = checked 
+        msg.state = checked
         self.ros_node.dido_control_publisher.publish(msg)
+        print(f"[UI->ROS] {name} -> {checked}")
 
-        print(f"[UI] {name} state: {checked}")
+    # ===== DI path: reflect hardware state (no publish) =====
+    def update_di(self, name: str, state: bool):
+        btn = self._di_buttons.get(name)
+        if not btn:
+            return
+        was_blocked = btn.blockSignals(True)   # make sure no accidental signals
+        btn.setChecked(state)
+        btn.blockSignals(was_blocked)
+        # optional styling
+        # btn.setStyleSheet("background-color: #0B76A0; color: white;" if state else "")
+        self.ros_node.dido_cmd[name] = state

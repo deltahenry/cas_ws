@@ -1641,7 +1641,7 @@ QPushButton:pressed {
           <enum>QFrame::Shadow::Raised</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="BeforeComponentControl">
           <layout class="QVBoxLayout" name="verticalLayout_28">
@@ -1819,7 +1819,7 @@ QPushButton:pressed {
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="MotorPage">
             <widget class="QStackedWidget" name="MotorStackedWidget">
@@ -2480,8 +2480,8 @@ QPushButton:checked {
                </property>
                <property name="geometry">
                 <rect>
-                 <x>200</x>
-                 <y>370</y>
+                 <x>210</x>
+                 <y>470</y>
                  <width>91</width>
                  <height>71</height>
                 </rect>
@@ -2525,6 +2525,230 @@ QPushButton:checked {
                </property>
                <property name="text">
                 <string>next</string>
+               </property>
+               <property name="checkable">
+                <bool>false</bool>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="HomeY">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>140</x>
+                 <y>50</y>
+                 <width>151</width>
+                 <height>71</height>
+                </rect>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+    padding: 6px 12px;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #1a1a1a, stop:1 #000000
+    );
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+QPushButton:hover {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2a2a2a, stop:1 #111111
+    );
+}
+
+QPushButton:checked {
+    background-color: #0B76A0;
+    border: 1px solid #0B76A0;
+}
+
+</string>
+               </property>
+               <property name="text">
+                <string>Home</string>
+               </property>
+               <property name="checkable">
+                <bool>false</bool>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="ReadyY">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>140</x>
+                 <y>140</y>
+                 <width>151</width>
+                 <height>71</height>
+                </rect>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+    padding: 6px 12px;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #1a1a1a, stop:1 #000000
+    );
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+QPushButton:hover {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2a2a2a, stop:1 #111111
+    );
+}
+
+QPushButton:checked {
+    background-color: #0B76A0;
+    border: 1px solid #0B76A0;
+}
+
+</string>
+               </property>
+               <property name="text">
+                <string>Ready</string>
+               </property>
+               <property name="checkable">
+                <bool>false</bool>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="AssemblyY">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>140</x>
+                 <y>230</y>
+                 <width>151</width>
+                 <height>71</height>
+                </rect>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+    padding: 6px 12px;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #1a1a1a, stop:1 #000000
+    );
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+QPushButton:hover {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2a2a2a, stop:1 #111111
+    );
+}
+
+QPushButton:checked {
+    background-color: #0B76A0;
+    border: 1px solid #0B76A0;
+}
+
+</string>
+               </property>
+               <property name="text">
+                <string>Assembly</string>
+               </property>
+               <property name="checkable">
+                <bool>false</bool>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="SendYCommand">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>40</x>
+                 <y>350</y>
+                 <width>231</width>
+                 <height>71</height>
+                </rect>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+    padding: 6px 12px;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #1a1a1a, stop:1 #000000
+    );
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+QPushButton:hover {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2a2a2a, stop:1 #111111
+    );
+}
+
+QPushButton:checked {
+    background-color: #0B76A0;
+    border: 1px solid #0B76A0;
+}
+
+</string>
+               </property>
+               <property name="text">
+                <string>Send Y Command</string>
                </property>
                <property name="checkable">
                 <bool>false</bool>
@@ -2620,17 +2844,104 @@ QPushButton:checked {
             </widget>
            </widget>
            <widget class="QWidget" name="ClipperPage">
-            <widget class="QLabel" name="label_6">
+            <widget class="QPushButton" name="OpenClipper">
              <property name="geometry">
               <rect>
-               <x>130</x>
-               <y>320</y>
-               <width>67</width>
-               <height>17</height>
+               <x>40</x>
+               <y>70</y>
+               <width>111</width>
+               <height>79</height>
               </rect>
              </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
              <property name="text">
-              <string>Clipper Page</string>
+              <string>open</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="CloseClipper">
+             <property name="geometry">
+              <rect>
+               <x>170</x>
+               <y>70</y>
+               <width>111</width>
+               <height>79</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>close</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="StopClipper">
+             <property name="geometry">
+              <rect>
+               <x>40</x>
+               <y>190</y>
+               <width>111</width>
+               <height>79</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>stop</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="ResetClipper">
+             <property name="geometry">
+              <rect>
+               <x>170</x>
+               <y>190</y>
+               <width>111</width>
+               <height>79</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>reset</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
              </property>
             </widget>
            </widget>
@@ -2917,7 +3228,7 @@ QSlider::handle:horizontal {
              <x>10</x>
              <y>100</y>
              <width>291</width>
-             <height>441</height>
+             <height>541</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -5315,6 +5626,9 @@ border-radius: 6px;</string>
             </property>
             <item row="1" column="3">
              <widget class="QPushButton" name="DI8">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5351,6 +5665,9 @@ border-radius: 6px;</string>
             </item>
             <item row="0" column="2">
              <widget class="QPushButton" name="DI3">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5387,6 +5704,9 @@ border-radius: 6px;</string>
             </item>
             <item row="2" column="3">
              <widget class="QPushButton" name="DI12">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5423,6 +5743,9 @@ border-radius: 6px;</string>
             </item>
             <item row="1" column="2">
              <widget class="QPushButton" name="DI7">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5459,6 +5782,9 @@ border-radius: 6px;</string>
             </item>
             <item row="2" column="2">
              <widget class="QPushButton" name="DI11">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5495,6 +5821,9 @@ border-radius: 6px;</string>
             </item>
             <item row="3" column="3">
              <widget class="QPushButton" name="DI16">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5531,6 +5860,9 @@ border-radius: 6px;</string>
             </item>
             <item row="2" column="0">
              <widget class="QPushButton" name="DI9">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5567,6 +5899,9 @@ border-radius: 6px;</string>
             </item>
             <item row="0" column="3">
              <widget class="QPushButton" name="DI4">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5603,6 +5938,9 @@ border-radius: 6px;</string>
             </item>
             <item row="0" column="1">
              <widget class="QPushButton" name="DI2">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5639,6 +5977,9 @@ border-radius: 6px;</string>
             </item>
             <item row="3" column="1">
              <widget class="QPushButton" name="DI14">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5675,6 +6016,9 @@ border-radius: 6px;</string>
             </item>
             <item row="3" column="2">
              <widget class="QPushButton" name="DI15">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5711,6 +6055,9 @@ border-radius: 6px;</string>
             </item>
             <item row="1" column="1">
              <widget class="QPushButton" name="DI6">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5747,6 +6094,9 @@ border-radius: 6px;</string>
             </item>
             <item row="0" column="0">
              <widget class="QPushButton" name="DI1">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5783,6 +6133,9 @@ border-radius: 6px;</string>
             </item>
             <item row="2" column="1">
              <widget class="QPushButton" name="DI10">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5819,6 +6172,9 @@ border-radius: 6px;</string>
             </item>
             <item row="3" column="0">
              <widget class="QPushButton" name="DI13">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -5855,6 +6211,9 @@ border-radius: 6px;</string>
             </item>
             <item row="1" column="0">
              <widget class="QPushButton" name="DI5">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -6509,17 +6868,17 @@ border-radius: 6px;</string>
     <bool>false</bool>
    </property>
   </buttongroup>
-  <buttongroup name="FontSizeButtonGroup"/>
+  <buttongroup name="LanguageButtonGroup"/>
+  <buttongroup name="ThemeButtonGroup"/>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="MenuButtonGroup"/>
   <buttongroup name="buttonGroup_2"/>
   <buttongroup name="VisionButtonGroup">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
+  <buttongroup name="FontSizeButtonGroup"/>
   <buttongroup name="AutoAndManualButtonGroup"/>
-  <buttongroup name="buttonGroup"/>
-  <buttongroup name="MenuButtonGroup"/>
-  <buttongroup name="ThemeButtonGroup"/>
-  <buttongroup name="LanguageButtonGroup"/>
  </buttongroups>
 </ui>

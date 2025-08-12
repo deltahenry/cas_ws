@@ -2,6 +2,7 @@ from PySide6.QtCore import QTimer
 from common_msgs.msg import JogCmd, MotionCmd
 from uros_interface.srv import ESMCmd
 from rclpy.client import Client
+from std_msgs.msg import String
 
 class MotorController:
     def __init__(self, ui, ros_node):
@@ -22,12 +23,31 @@ class MotorController:
 
         # Connect UI buttons to jog commands
         # Buttons: pass only the SIGN; we’ll compute distance/angle inside.
+
+        self.ui.ControlUpCP.setAutoRepeat(True)
+        self.ui.ControlUpCP.setAutoRepeatDelay(300)
+        self.ui.ControlUpCP.setAutoRepeatInterval(80) 
+
+        self.ui.ControlDownCP.setAutoRepeat(True)
+        self.ui.ControlDownCP.setAutoRepeatDelay(300)
+        self.ui.ControlDownCP.setAutoRepeatInterval(80) 
+
+        self.ui.ControlLeftCP.setAutoRepeat(True)
+        self.ui.ControlLeftCP.setAutoRepeatDelay(300)
+        self.ui.ControlLeftCP.setAutoRepeatInterval(80) 
+
+        self.ui.ControlRightCP.setAutoRepeat(True)
+        self.ui.ControlRightCP.setAutoRepeatDelay(300)
+        self.ui.ControlRightCP.setAutoRepeatInterval(80) 
+
+
         self.ui.ControlUpCP.clicked.connect(  lambda: self.send_jog_cmd("y_axis",  +1))
         self.ui.ControlDownCP.clicked.connect(lambda: self.send_jog_cmd("y_axis",  -1))
         self.ui.ControlLeftCP.clicked.connect(lambda: self.send_jog_cmd("x_axis",  -1))
         self.ui.ControlRightCP.clicked.connect(lambda: self.send_jog_cmd("x_axis", +1))
         self.ui.YawPlusCP.clicked.connect(    lambda: self.send_jog_cmd("yaw_axis", +1))
         self.ui.YawMinusCP.clicked.connect(   lambda: self.send_jog_cmd("yaw_axis", -1))
+        
 
 
         self.ui.HomeMotor.clicked.connect(self.send_init_cmd)
@@ -44,6 +64,10 @@ class MotorController:
 
         self.ui.ServoON.clicked.connect(lambda: self.call_servo(True))  
         self.ui.ServoOFF.clicked.connect(lambda: self.call_servo(False))  
+
+        self.ui.HomeY.clicked.connect(lambda: self.send_y_motor_cmd("home_y"))
+        self.ui.ReadyY.clicked.connect(lambda: self.send_y_motor_cmd("ready_y"))
+        self.ui.AssemblyY.clicked.connect(lambda: self.send_y_motor_cmd("assembly_y"))
 
         self.motor_distance_state = 0  # 0: first, 1: second, 2: third
         self.selected_distance = 1.0
@@ -72,19 +96,6 @@ class MotorController:
         print(f"[UI] Motor distance set to {self.selected_distance} mm, {self.selected_deg}°")
 
 
-
-    # def _check_srv_ready(self):
-    #     if self.cli.wait_for_service(timeout_sec=0.0):
-    #         self.service_ready = True
-    #         self.ui.ServoON.setEnabled(True)
-    #         self.ui.ServoOFF.setEnabled(True)
-    #         self.ros_node.get_logger().info('/esm_command is READY')
-    #         self._srv_timer.stop()
-    #     else:
-    #         self.ros_node.get_logger().info('Waiting for /esm_command...')
-
-
-
     def send_jog_cmd(self, axis, sign):
         # sign is +1 or -1 (int); keep distance/angle signed as you requested
         msg = JogCmd()
@@ -98,7 +109,7 @@ class MotorController:
             msg.distance = self.selected_distance  # ±1 / ±5 / ±10
             msg.angle = 0.0
 
-        msg.speed = 5.0
+        msg.speed = 20.0
         self.ros_node.jog_cmd_publisher.publish(msg)
         print(f"[Motor] JogCmd -> target={msg.target}, dir={msg.direction}, dist={msg.distance}, ang={msg.angle}")
 
@@ -113,6 +124,8 @@ class MotorController:
         msg.pose_data = [m1, m2, m3]
         msg.speed = speed
         self.ros_node.motion_cmd_publisher.publish(msg)
+        print(f"[Home]: \n Command Type: {msg.command_type} \n Pose Data: {msg.pose_data} \n Speed: {msg.speed}")
+
 
     def call_servo(self, on=True):
         if not self.cli.service_is_ready():
@@ -136,6 +149,14 @@ class MotorController:
                 self.ros_node.get_logger().error(f"Service {'ON' if on else 'OFF'} call failed")
 
         future.add_done_callback(handle_response)
+
+    def send_y_motor_cmd(self, flag):
+        msg = String()
+        msg.data = flag
+
+        self.ros_node.y_motor_cmd_publisher.publish(msg)
+        print(f"[UI] Sent YMotor Cmd String: {msg.data}")
+
 
 
     def update_gui(self):

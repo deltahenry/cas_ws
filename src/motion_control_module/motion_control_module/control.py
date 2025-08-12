@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool
-from common_msgs.msg import MotionCmd,MultipleM, SingleM
+from common_msgs.msg import MotionCmd,MultipleM, SingleM,MotionState
 from collections import deque
 from model_module.magic_cube import RobotModel  # 自訂 model.py 模組
 from copy import deepcopy
@@ -28,7 +28,7 @@ class MotionController(Node):
         self.motors_info_sub = self.create_subscription(MultipleM,'/multi_motor_info',self.motors_info_callback,10)
         #Publisher
         self.motor_cmd_publisher = self.create_publisher(Float32MultiArray, '/motor_position_ref', 10)
-        # self.done_pub = self.create_publisher(Bool, '/motion_finished', 10)
+        self.motion_state_publisher = self.create_publisher(MotionState, '/motion_state', 10)
 
         # Timer，每次發送 1 筆指令（從 queue 中）
         self.timer = self.create_timer(time_period, self.send_next_batch)
@@ -40,7 +40,7 @@ class MotionController(Node):
         self.check_home = False
         self.check_position = False
         
-        self.current_motor_len = [0.0, 0.0, 0.0]
+        self.current_motor_len = [-10.0, 0.0, 0.0]
         self.current_cartesian_pose = [0.0,0.0,0.0]  # 初始 cartesian pose x y yaw
         self.last_sent_joint_command = [0.0, 0.0, 0.0]  # 上次發送的關節指令
         self.get_logger().info('MotionController ready.')
@@ -76,7 +76,7 @@ class MotionController(Node):
 
     def motors_info_callback(self, msg:MultipleM):
         self.current_motor_len = [msg.motor_info[0].fb_position,msg.motor_info[1].fb_position,msg.motor_info[2].fb_position]
-        print("motor_info callback",self.current_motor_len)
+        # print("motor_info callback",self.current_motor_len)
 
 
     #--motion function--
@@ -244,6 +244,12 @@ class MotionController(Node):
 
     # Timer callback：每次送一 batch（10 點）
     def send_next_batch(self):
+
+        print("motion_finished:", self.motion_finished)
+        self.motion_state_publisher.publish(MotionState(
+            motion_finish=self.motion_finished,
+            init_finish=self.init_finished,))
+        
         # 情況 1：如果有軌跡資料（送出一個 batch）
         if self.trajectory_queue:
             batch = self.trajectory_queue.popleft()
@@ -253,7 +259,7 @@ class MotionController(Node):
 
         # 情況 2：還沒初始化，等待馬達抵達 [0, 0, 0]
         if not self.init_finished:
-            print("Waiting for motor initialization...")
+            # print("Waiting for motor initialization...")
             if np.allclose(self.current_motor_len, [0, 0, 0], atol=0.05):
                 self.init_finished = True
             return
@@ -273,16 +279,18 @@ class MotionController(Node):
                 # print("Motor is in target position.")
                 self.current_cartesian_pose = self.cartesian_pos_cmd
                 self.check_position = False
-        else:
-            # 尚未到達，持續追蹤命令
-            # print("Tracking...")
-            self.send_motor_command([self.last_sent_joint_command] * 10)
+        # else:
+        #     # 尚未到達，持續追蹤命令
+        #     # print("Tracking...")
+        #     # self.send_motor_command([self.last_sent_joint_command] * 10)
+
+
 
     # 發送馬達命令
     def send_motor_command(self, batch):
         # motor_positions 可能是 list of float 或 np.array
         flat_positions = [val for joint in batch for val in joint]  # 展平為一維
-
+        print("Sending motor command:", flat_positions)
         msg = Float32MultiArray()
         msg.data = flat_positions
         self.motor_cmd_publisher.publish(msg)

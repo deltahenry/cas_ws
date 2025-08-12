@@ -11,7 +11,9 @@ import ui_app.resources_rc  # this includes the images and icons
 #ui components
 from ui_app.ui_components.ui_forklift import ForkliftController
 from ui_app.ui_components.ui_motor import MotorController
+from ui_app.ui_components.ui_clipper import ClipperController
 from ui_app.ui_components.ui_dido import DIDOController
+# from ui_app.ui_components.ui_vision import VisionController
 
 #Vision
 from sensor_msgs.msg import Image
@@ -22,7 +24,7 @@ import threading
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Int32
-from common_msgs.msg import StateCmd, ForkCmd, JogCmd, ComponentCmd, TaskCmd, TaskState, DIDOCmd, RunCmd, MotionCmd, MotionState
+from common_msgs.msg import StateCmd, ForkCmd, JogCmd, ComponentCmd, TaskCmd, TaskState, DIDOCmd, RunCmd, MotionCmd, MotionState, ClipperCmd
 from uros_interface.srv import ESMCmd
 
 
@@ -52,8 +54,12 @@ class ROSNode(Node):
         # }
 
 
+        self.height_update_callback = None
 
         self.forklift_controller = None
+
+        self.di_update_callback = None
+
 
         # publisher
         self.mode_cmd_publisher = self.create_publisher(String, '/mode_cmd', 10)
@@ -62,7 +68,6 @@ class ROSNode(Node):
 
         self.component_cmd_publisher = self.create_publisher(ComponentCmd, "/component_control_cmd", 10)
 
-        #new
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
 
         self.task_cmd_publisher = self.create_publisher(TaskCmd, '/task_cmd', 10)
@@ -77,9 +82,12 @@ class ROSNode(Node):
 
         self.dido_control_publisher = self.create_publisher(DIDOCmd, '/test_dido', 10)
 
+        self.y_motor_cmd_publisher = self.create_publisher(String, '/test_y_motor_cmd', 10)
+
+        self.clipper_cmd_publisher = self.create_publisher(ClipperCmd, '/clipper_cmd', 10)
+
 
         # subscriber
-
         self.height_info_subscriber = self.create_subscription(
             Int32,
             'lr_distance',
@@ -91,6 +99,13 @@ class ROSNode(Node):
             Image,
             '/color_image',
             self.image_callback,
+            10
+        )
+
+        self.dido_control_subscriber = self.create_subscription(
+            DIDOCmd,
+            '/dido_cmd',
+            self.dido_callback,
             10
         )
 
@@ -109,37 +124,16 @@ class ROSNode(Node):
         # )
 
 
-        # Service server (test/dummy)
-        # self.esm_server = self.create_service(ESMCmd, '/esm_command', self.handle_esm)
-        # self.get_logger().info('ESMCmd server started at /esm_command')
-
-
         self.bridge = CvBridge()
 
         self.detection_task_callback_ui = None
         self.image_update_callback = None
 
-    # def handle_esm(self, request, response):
-    #     self.get_logger().info(
-    #         f"ESM request: servo_status={request.servo_status}, "
-    #         f"mode={request.mode}, speed_limit={request.speed_limit}, lpf={request.lpf}"
-    #     )
-    #     # TODO: call your real driver/hardware here
-
-    #     # If your .srv RESPONSE defines these, set them, otherwise delete these lines:
-    #     if hasattr(response, 'success'):
-    #         response.success = True
-    #     if hasattr(response, 'message'):
-    #         response.message = 'OK'
-    #     return response
-
-
-
     def height_info_callback(self, msg: Int32):
         self.get_logger().info(f"Received height info: {msg.data} mm")
 
-        if self.forklift_controller:
-            self.forklift_controller.update_height_display(msg.data)
+        if self.height_update_callback:
+            self.height_update_callback(msg.data)
 
     def image_callback(self, msg):
         try:
@@ -156,14 +150,29 @@ class ROSNode(Node):
         if self.detection_task_callback_ui:
             self.detection_task_callback_ui(msg.data)
 
+
+    def dido_callback(self, msg: DIDOCmd):
+        name = msg.name.strip()
+        state = bool(msg.state)
+        if not name.upper().startswith("DI"):
+            return
+        if self.di_update_callback:
+            self.di_update_callback(name, state)
+
+    
+
     # def motion_state_callback(self, msg: MotionState):
 
 
-
-
-
 class MainWindow(QMainWindow):
-    ros_msg_received = Signal(str)  # Thread-safe signal to update UI
+
+    #GUI Threads
+    ros_msg_received = Signal(str)
+    height_update = Signal(int)
+    di_update = Signal(str, bool)
+
+    image_update = Signal(object)   # carries numpy image
+    vision_mode_update = Signal(str)
 
     def __init__(self, ros_node):
         super().__init__()
@@ -173,21 +182,41 @@ class MainWindow(QMainWindow):
         #Start ROS2 Node
         self.ros_node = ros_node
 
-        self.ros_node.image_update_callback = self.update_image
-        self.ros_node.detection_task_callback_ui = self.update_detection_mode
-
         QScroller.grabGesture(self.ui.ScrollAreaDIDO.viewport(), QScroller.LeftMouseButtonGesture)
 
+        #vision ui
+        self.ros_node.image_update_callback = self.update_image
+        self.ros_node.detection_task_callback_ui = self.update_detection_mode
+        # self.vision_controller = VisionController(self.ui, self.ros_node)
+
+        # # Bridge ROS → GUI via signals (thread-safe)
+        # self.image_update.connect(self.vision_controller.update_image)
+        # self.vision_mode_update.connect(self.vision_controller.update_mode)
+
+        # self.ros_node.image_update_callback = lambda cv: self.image_update.emit(cv)
+        # self.ros_node.detection_task_callback_ui = lambda s: self.vision_mode_update.emit(s)
 
         #motor ui
         self.motor_controller = MotorController(self.ui, self.ros_node)
 
         #forklift ui
         self.forklift_controller = ForkliftController(self.ui, self.ros_node)
-        self.ros_node.forklift_controller = self.forklift_controller
+        self.height_update.connect(self.forklift_controller.update_height_display)
+        self.ros_node.height_update_callback = lambda v: self.height_update.emit(v)
+
+        #clipper ui
+        self.clipper_controller = ClipperController(self.ui, self.ros_node)
 
         # DI/DO UI Controller
         self.dido_controller = DIDOController(self.ui, self.ros_node)
+        # self.ros_node.di_update_callback = self.dido_controller.update_di
+
+        # Connect signal to UI updater (GUI thread)
+        self.di_update.connect(self.dido_controller.update_di)
+
+        # Make ROS -> emit the signal instead of touching widgets directly
+        self.ros_node.di_update_callback = lambda name, state: self.di_update.emit(name, state)
+
         
 
         # Get Today's date
@@ -219,20 +248,7 @@ class MainWindow(QMainWindow):
         self.ui.ManualPauseButton.toggled.connect(self.on_pause_toggled)
         self.ui.ManualStopButton.clicked.connect(lambda: self.send_state_cmd("stop"))
 
-        # vision fix
-        # self.ui.VisionOne.toggled.connect(lambda checked: self.on_vision_toggled("screw", checked))
-        # self.ui.VisionTwo.toggled.connect(lambda checked: self.on_vision_toggled("l_shape", checked))
-        # self.ui.VisionThree.toggled.connect(lambda checked: self.on_vision_toggled("icp_fit", checked))
-
-
-
-        # vision
-        #self.ui.VisionOne.toggled.connect(lambda checked: checked and self.send_vision_cmd("screw"))
-        #self.ui.VisionTwo.toggled.connect(lambda checked: checked and self.send_vision_cmd("l_shape"))
-        #self.ui.VisionThree.toggled.connect(lambda checked: checked and self.send_vision_cmd("icp_fit"))
-
         # self.ui.VisionTextInComponentControl.setFixedSize(640, 480)
-
 
         # component control - publisher
         # self.ui.ComponentControlButton.toggled.connect(self.on_component_control_toggled)
@@ -245,14 +261,13 @@ class MainWindow(QMainWindow):
         self.ui.AutoStopButton.clicked.connect(lambda: self.on_touch_buttons(self.ui.AutoStopButton))
 
         # self.ui.RecordDataButton.clicked.connect(lambda: self.on_record_data_clicked(self.ui.RecordDataButton))
-        # self.ui.ClipperButtonOnOff.toggled.connect(lambda: self.update_clipper_state(self.ui.ClipperButtonOnOff))
 
         #choose your component control
-        self.ui.ChooseMotor.clicked.connect(self.choose_motor)
-        self.ui.ChooseVision.clicked.connect(self.choose_vision)
-        self.ui.ChooseClipper.clicked.connect(self.choose_clipper)
-        self.ui.ChooseForklift.clicked.connect(self.choose_forklift)
-        self.ui.ChooseDIDO.clicked.connect(self.choose_DIDO)
+        # self.ui.ChooseMotor.clicked.connect(self.choose_motor)
+        # self.ui.ChooseVision.clicked.connect(self.choose_vision)
+        # self.ui.ChooseClipper.clicked.connect(self.choose_clipper)
+        # self.ui.ChooseForklift.clicked.connect(self.choose_forklift)
+        # self.ui.ChooseDIDO.clicked.connect(self.choose_DIDO)
 
         # menu
         self.ui.MainPageButton.toggled.connect(self.change_to_main_page)
@@ -265,6 +280,13 @@ class MainWindow(QMainWindow):
         self.ui.AutoButton.clicked.connect(self.change_to_auto_page)
         self.ui.ManualButton.clicked.connect(self.change_to_manual_page)
 
+        #Component Control Choose Page
+        self.ui.ChooseMotor.clicked.connect(lambda: self.component_control_choose_page("Motor", 0))
+        self.ui.ChooseVision.clicked.connect(lambda: self.component_control_choose_page("Vision", 1))
+        self.ui.ChooseClipper.clicked.connect(lambda: self.component_control_choose_page("Clipper", 2))
+        self.ui.ChooseForklift.clicked.connect(lambda: self.component_control_choose_page("Forklift", 3))
+        self.ui.ChooseDIDO.clicked.connect(lambda: self.component_control_choose_page("DI/DO", 4))
+
         #Component Control, List Menu
         self.ui.HamburgerMenu.clicked.connect(self.toggle_menu)
 
@@ -276,10 +298,6 @@ class MainWindow(QMainWindow):
 
         for btn in self.ui.ManualButtons.buttons():
             btn.toggled.connect(lambda checked, b=btn: self.on_manual_button_toggled(b, checked))
-
-
-
- 
 
         # after setupUi(...)
         self._vision_buttons = [
@@ -295,10 +313,6 @@ class MainWindow(QMainWindow):
             btn.toggled.connect(lambda checked, m=mode: self.on_vision_toggled(m, checked))
             # 2) manual exclusivity: when one is clicked on, turn others off; clicking again turns it off
             btn.clicked.connect(lambda checked, b=btn: self._on_vision_clicked(b, checked))
-
-    
-        
-
 
 
         #try
@@ -500,33 +514,23 @@ class MainWindow(QMainWindow):
         self.ros_node.jog_cmd_publisher.publish(msg)
         print(f"[UI] Sent JogCmd: axis={axis}, direction={direction}")
 
-    # def update_clipper_state(self, button):
-    #     if button.isChecked():
-    #         button.setText("Clipper ON")
-    #     else:
-    #         button.setText("Clipper OFF")
+    def update_clipper_state(self, button):
+        if button.isChecked():
+            button.setText("Clipper ON")
+        else:
+            button.setText("Clipper OFF")
 
-    #vision fix
+    # vision fix
     def on_vision_toggled(self, vision_name, checked):
+        
+        
+
         if checked:
             self.send_vision_cmd(f"{vision_name}")
             print(f"[UI] {vision_name} started")
         else:
             self.send_vision_cmd(f"{vision_name}_off")
             print(f"[UI] {vision_name} stopped")
-
-
-    # def _on_vision_clicked(self, btn, mode, checked):
-    #     if checked:
-    #         # turn others off
-    #         for other, _ in self._vision_buttons:
-    #             if other is not btn:
-    #                 other.setChecked(False)
-    #         # start selected mode
-    #         self.on_vision_toggled(mode, True)
-    #     else:
-    #         # user clicked the same button to turn it off -> no mode active
-    #         self.on_vision_toggled("idle", False)
 
 
     def send_vision_cmd(self, mode):
@@ -540,21 +544,16 @@ class MainWindow(QMainWindow):
         self.ros_node.vision_control_publisher.publish(msg)
         print(f"[UI] Sent VisionCmd: {mode}")
 
-    # def send_vision_cmd(self, mode):
-    #     # simplest: no dedupe
-    #     msg = String(); msg.data = mode
-    #     self.ros_node.vision_control_publisher.publish(msg)
-
-
+    def send_vision_cmd(self, mode):
+        # simplest: no dedupe
+        msg = String(); msg.data = mode
+        self.ros_node.vision_control_publisher.publish(msg)
     
     def on_manual_button_toggled(self, button, checked):
         if checked:
             for other in self.ui.ManualButtons.buttons():
                 if other != button:
                     other.setChecked(False)
-    
-
-
 
     #Principal Menu - StackedWidget
     def change_to_main_page(self, checked):
@@ -689,6 +688,29 @@ class MainWindow(QMainWindow):
     def toggle_menu(self):
         self.ui.ListOptionsWidget.setVisible(not self.ui.ListOptionsWidget.isVisible())
 
+    def component_control_choose_page(self, name, index):
+        self.ui.ComponentControlStackedWidget.setCurrentIndex(1)
+        self.ui.MotorStartedButton.setText(name)
+        self.ui.ChangeComponentControlStackedWidget.setCurrentIndex(index)
+
+        if name == "DI/DO":
+            self.send_component_cmd("dido_control")
+            self.ui.MiddleStackedWidget.setCurrentIndex(1)
+        elif name == "Motor":
+            self.send_component_cmd("pose_control")
+            self.ui.MiddleStackedWidget.setCurrentIndex(0)
+        elif name == "Vision":
+            self.send_component_cmd("vision_control")
+            self.ui.MiddleStackedWidget.setCurrentIndex(0)
+        elif name == "Clipper":
+            self.send_component_cmd("cliper_control")
+            self.ui.MiddleStackedWidget.setCurrentIndex(0)
+        elif name == "Forklift":
+            self.send_component_cmd("forklift_control")
+            self.ui.MiddleStackedWidget.setCurrentIndex(0)
+
+
+
     def component_control_switch_page(self, name, index):
         self.ui.MotorStartedButton.setText(name)
         self.ui.ChangeComponentControlStackedWidget.setCurrentIndex(index)
@@ -786,7 +808,6 @@ class MainWindow(QMainWindow):
         else:
             self.showMaximized()
             print("Only one screen, maximized")
-
 
 
 def convert_cv_to_qt(cv_img):

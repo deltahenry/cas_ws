@@ -84,10 +84,12 @@ class DataNode(Node):
         print(f"接收到夾爪IO命令: {msg.data}")
         """處理夾爪IO命令"""
         self.DO_2[0] = msg.data[0]
-        self.DO_2[1] = msg.data[1]
-        self.DO_2[2] = msg.data[2]
-        self.DO_2[3] = msg.data
+        self.DO_2[2] = msg.data[1]
+        self.DO_2[3] = msg.data[2]
         
+        self.DO_2[5] = msg.data[3]
+        self.DO_2[7] = msg.data[4]
+        self.DO_2[8] = msg.data[5]
         
 
     def handle_dido_cmd(self, msg: DIDOCmd):
