@@ -68,6 +68,19 @@ class MotionController(Node):
                 print(f"Relative pose: {relative_pose}")
                 self.move_p(relative_pose, msg.speed)
                 self.motion_finished = False  # 收到指令後，將 motion_finished 設為 False
+            elif msg.command_type == MotionCmd.TYPE_Y_MOVE:
+                # 處理 Y 軸移動指令
+                abs_y = msg.pose_data[1]  # 假設 Y 軸位置在第二個元素
+                
+                relative_pose= [
+                    self.current_cartesian_pose[0],  # 保持 X 軸不變
+                    abs_y,  # 更新 Y 軸位置
+                    self.current_cartesian_pose[2]  # 保持 Yaw 不變
+                ]
+                print(f"Y Move to: {relative_pose}")
+                self.move_p(relative_pose, msg.speed)  # 使用 move_p 方法移動到
+                self.motion_finished = False
+
             else:
                 self.get_logger().error(f"Unknown command type: {msg.command_type}")
         else:

@@ -150,17 +150,17 @@ class ClipperControl(Machine):
         result = 'waiting'
 
         if mode == "open":
-            value = Int32MultiArray(data=[1, 0, 0, 1, 0, 0])  # 封裝為 Int32MultiArray
-            self.data_node.clipper_io_cmd_publisher.publish(value)#change receipt
-            value = Int32MultiArray(data=[1, 1, 0, 1, 1, 0])  # 封裝為 Int32MultiArray
+            value = Int32MultiArray(data=[0, 0, 0, 0, 0, 0])  # 封裝為 Int32MultiArray
+            self.data_node.clipper_io_cmd_publisher.publish(value)  #change receipt
+            value = Int32MultiArray(data=[0, 1, 0, 0, 1, 0])  # 封裝為 Int32MultiArray
             self.data_node.clipper_io_cmd_publisher.publish(value)#open move
             time.sleep(1)  # 等待夾爪開啟完成
             result = 'done'
 
         elif mode == "close":
-            value = Int32MultiArray(data=[0, 0, 0, 0, 0, 0])  # 封裝為 Int32MultiArray
-            self.data_node.clipper_io_cmd_publisher.publish(value)  #change receipt
-            value = Int32MultiArray(data=[0, 1, 0, 0, 1, 0])  # 封裝為 Int32MultiArray
+            value = Int32MultiArray(data=[1, 0, 0, 1, 0, 0])  # 封裝為 Int32MultiArray
+            self.data_node.clipper_io_cmd_publisher.publish(value)#change receipt
+            value = Int32MultiArray(data=[1, 1, 0, 1, 1, 0])  # 封裝為 Int32MultiArray
             self.data_node.clipper_io_cmd_publisher.publish(value)  #close move
             time.sleep(1)  # 等待夾爪關閉完成
             result = 'done'
