@@ -64,12 +64,12 @@ class RobotModel:
         x, y, yaw = target_pose
 
         if yaw<=0:
-            if -880.0*-sin(yaw) + x>-139.5:
+            if -880.0*-sin(yaw) + x>-139.5 and y>-5.0 and y<1150.0:
                 return True
             else:
                 return False
         else:
-            if -880.0*sin(yaw) + x <160.5:
+            if -880.0*sin(yaw) + x <160.5 and y>-5.0 and y<1150.0:
                 return True
             else:
                 return False
