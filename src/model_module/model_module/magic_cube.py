@@ -36,7 +36,7 @@ class RobotModel:
         M1 = -400.0 * -sin(yaw) + x
         M2 = -880.0 * -sin(yaw) + x
         M3 = y #need to change
-        joint_length = [M3,M2,M1]
+        joint_length = [-M3,-M2,-M1]
 
         return joint_length
 
