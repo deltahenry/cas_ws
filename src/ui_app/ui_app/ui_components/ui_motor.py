@@ -5,6 +5,18 @@ from uros_interface.srv import ESMCmd
 from rclpy.client import Client
 from std_msgs.msg import String
 
+
+'''Use this if needs to be scaled down'''
+
+# import os
+# os.environ["QT_SCALE_FACTOR"] = "0.95"
+
+# from PySide6.QtGui import QGuiApplication
+# from PySide6.QtCore import Qt
+# QGuiApplication.setHighDpiScaleFactorRoundingPolicy(
+#     Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+# )
+
 class MotorController:
     def __init__(self, ui, ros_node):
         self.ui = ui
@@ -189,7 +201,7 @@ class MotorController:
     def _on_mh2_state_ui(self, servo_on: bool, alarm_code: int):
         btn = self.ui.ServoONOFFButton
         btn.blockSignals(True)
-        btn.setChecked(servo_on)                  # QSS :checked applies here
+        btn.setChecked(servo_on)
         btn.setText("Servo ON" if servo_on else "Servo OFF")
         btn.blockSignals(False)
         btn.setEnabled(True)
@@ -234,6 +246,21 @@ class MotorController:
 
     #     self.ros_node.y_motor_cmd_publisher.publish(msg)
     #     print(f"[UI] Sent YMotor Cmd String: {msg.data}")
+
+    def current_pose(self, x: float, y: float, yaw_deg: float):
+        """
+        Slot to handle current pose updates from ROS and show them on the UI.
+        Connected in MainWindow:
+            self.current_pose_update.connect(self.motor_controller.current_pose)
+        """
+        # Defensive: make sure the labels exist and have setText
+        if hasattr(self.ui, "xPos"):
+            self.ui.xPos.setText(f"{x:.1f}")      # mm or whatever unit you use
+        if hasattr(self.ui, "yPos"):
+            self.ui.yPos.setText(f"{y:.1f}")
+        if hasattr(self.ui, "yawPos"):
+            self.ui.yawPos.setText(f"{yaw_deg:.2f}")  # degrees with 2 decimal places
+
 
     def send_y_motor_cmd(self, flag):
         msg = MotionCmd()

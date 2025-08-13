@@ -1,0 +1,44 @@
+object_frame_compensation_node:
+  ros__parameters:
+    # Camera-in-Hand 固定轉換 (相機相對於手臂末端)
+    camera_in_hand_tf:
+      translation:
+        x: 0.05   # 相機相對手臂末端的 x 偏移 (m)
+        y: -0.02  # 相機相對手臂末端的 y 偏移 (m)  
+        z: 0.15   # 相機相對手臂末端的 z 偏移 (m)
+      rotation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0
+    
+    # Golden Sample 手臂抓取位置 (世界座標系)
+    golden_arm_pose:
+      position:
+        x: 0.3    # Golden Sample 時手臂的 x 位置 (m)
+        y: 0.2    # Golden Sample 時手臂的 y 位置 (m)
+        z: 0.5    # Golden Sample 時手臂的 z 位置 (m)
+      orientation:
+        x: 0.0
+        y: 0.707  # 45度俯視角
+        z: 0.0
+        w: 0.707
+    
+    # Golden Sample 物件位置 (相機座標系)
+    golden_object_camera_pose:
+      position:
+        x: 0.1    # Golden Sample 時物件在相機中的 x 位置 (m)
+        y: 0.05   # Golden Sample 時物件在相機中的 y 位置 (m)
+        z: 0.3    # Golden Sample 時物件在相機中的 z 位置 (m)
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0
+    
+    # 節點行為參數
+    auto_calculate_on_startup: true      # 啟動時自動計算
+    publish_debug_info: false            # 發布除錯資訊
+    enable_method_comparison: false      # 啟用方法比較
+    comparison_threshold_mm: 1.0         # 比較閾值 (毫米)
+    comparison_threshold_deg: 1.0        # 比較閾值 (度)

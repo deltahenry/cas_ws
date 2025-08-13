@@ -25,7 +25,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Int32
 
-from common_msgs.msg import StateCmd, ForkCmd, JogCmd, ComponentCmd, TaskCmd, TaskState, DIDOCmd, RunCmd, MotionCmd, MotionState, ClipperCmd, MultipleM, MH2State
+from common_msgs.msg import StateCmd, ForkCmd, JogCmd, ComponentCmd, TaskCmd, TaskState, DIDOCmd, RunCmd, MotionCmd, MotionState, ClipperCmd, MultipleM, MH2State, CurrentPose
 
 from uros_interface.srv import ESMCmd
 
@@ -63,6 +63,7 @@ class ROSNode(Node):
         self.forklift_controller = None
 
         self.di_update_callback = None
+        self.current_pose_callback_ui = None
 
         # self.current_motor_len = [0.0, 0.0, 0.0]
 
@@ -107,6 +108,13 @@ class ROSNode(Node):
 
 
         # subscriber
+        self.current_pose_subscriber = self.create_subscription(
+            CurrentPose,
+            "current_pose",
+            self.current_pose_callback,
+            10
+        )
+
         self.mh2_state_subscriber = self.create_subscription(
             MH2State,
             "mh2_state",
@@ -175,6 +183,16 @@ class ROSNode(Node):
             self.mh2_state_callback_ui(msg)  # hand off to UI layer
 
 
+    def current_pose_callback(self, msg: CurrentPose):
+        self.get_logger().info(f"Received CurrentPose: \n pose_data: {msg.pose_data}")
+        if self.current_pose_callback_ui:
+            data = list(msg.pose_data) if hasattr(msg, "pose_data") else []
+            while len(data) < 3:
+                data.append(0.0)
+            self.current_pose_callback_ui(float(data[0]), float(data[1]), float(data[2]))
+
+
+
     def height_info_callback(self, msg: Int32):
         self.get_logger().info(f"Received height info: {msg.data} mm")
 
@@ -233,6 +251,7 @@ class MainWindow(QMainWindow):
     vision_mode_update = Signal(str)
 
     motion_state_update = Signal(bool, bool)
+    current_pose_update = Signal(float, float, float)
     motor_info_update = Signal(float, float, float)
 
     def __init__(self, ros_node):
@@ -274,6 +293,9 @@ class MainWindow(QMainWindow):
         self.mh2_state_update.connect(self.motor_controller._on_mh2_state_ui)
         self.ros_node.mh2_state_callback_ui = \
             (lambda msg: self.mh2_state_update.emit(bool(msg.servo_state), int(msg.alarm_code)))
+        
+        self.current_pose_update.connect(self.motor_controller.current_pose)
+        self.ros_node.current_pose_callback_ui = self.current_pose_update.emit
 
         #forklift ui
         self.forklift_controller = ForkliftController(self.ui, self.ros_node)
@@ -314,11 +336,10 @@ class MainWindow(QMainWindow):
             background-color: #4CAF50; /* ON */
         }
         """)
+        self.ui.ServoONOFFButton.setCheckable(True)
 
         #servo, alarm, reset
         self.ui.ServoONOFFButton.clicked.connect(lambda checked: self.on_servo_click(checked))
-
-        
         
 
         # auto
@@ -505,12 +526,8 @@ class MainWindow(QMainWindow):
         btn.setChecked(prev)          # undo the automatic toggle -> stays gray/green as before
         btn.blockSignals(False)
 
-        btn.setEnabled(False)         # avoid double clicks
+        # btn.setEnabled(False)         # avoid double clicks
         self.motor_controller.call_servo(desired)
-
-
-
-        
 
     # def on_servo_on_off_toggled(self, checked: bool):
 
@@ -953,7 +970,7 @@ class MainWindow(QMainWindow):
             self.setMaximumWidth(1280)
             self.setMaximumHeight(800)
             # self.showMaximized()
-            print("Fixed size: 1280x800")
+            print("Fixed size: 1280 x 800")
         else:
             self.showMaximized()
             print("Only one screen, screen fullscreen anyways")

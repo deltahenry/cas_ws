@@ -204,7 +204,7 @@ class Ui_MainWindow(object):
 
         self.ProcessAndInfoStackedWidget = QStackedWidget(self.MainPagePage)
         self.ProcessAndInfoStackedWidget.setObjectName(u"ProcessAndInfoStackedWidget")
-        self.ProcessAndInfoStackedWidget.setGeometry(QRect(0, 500, 701, 181))
+        self.ProcessAndInfoStackedWidget.setGeometry(QRect(0, 500, 701, 191))
         self.ProcessAndInfoStackedWidget.setStyleSheet(u" background-color: #000000; color: white;")
         self.AutoProcessPage = QWidget()
         self.AutoProcessPage.setObjectName(u"AutoProcessPage")
@@ -1477,10 +1477,10 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_22.addWidget(self.y_2)
 
-        self.yText_2 = QLabel(self.yPosFrame_2)
-        self.yText_2.setObjectName(u"yText_2")
+        self.yPos = QLabel(self.yPosFrame_2)
+        self.yPos.setObjectName(u"yPos")
 
-        self.horizontalLayout_22.addWidget(self.yText_2)
+        self.horizontalLayout_22.addWidget(self.yPos)
 
 
         self.gridLayout_4.addWidget(self.yPosFrame_2, 1, 1, 1, 1)
@@ -1498,10 +1498,10 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_28.addWidget(self.yaw_2)
 
-        self.yawText_2 = QLabel(self.yawPosFrame_2)
-        self.yawText_2.setObjectName(u"yawText_2")
+        self.yawPos = QLabel(self.yawPosFrame_2)
+        self.yawPos.setObjectName(u"yawPos")
 
-        self.horizontalLayout_28.addWidget(self.yawText_2)
+        self.horizontalLayout_28.addWidget(self.yawPos)
 
 
         self.gridLayout_4.addWidget(self.yawPosFrame_2, 2, 1, 1, 1)
@@ -1520,10 +1520,10 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_29.addWidget(self.x_2)
 
-        self.xText_2 = QLabel(self.xPosFrame_2)
-        self.xText_2.setObjectName(u"xText_2")
+        self.xPos = QLabel(self.xPosFrame_2)
+        self.xPos.setObjectName(u"xPos")
 
-        self.horizontalLayout_29.addWidget(self.xText_2)
+        self.horizontalLayout_29.addWidget(self.xPos)
 
 
         self.gridLayout_4.addWidget(self.xPosFrame_2, 1, 0, 1, 1)
@@ -1684,6 +1684,7 @@ class Ui_MainWindow(object):
         self.MiddleStackedWidget.addWidget(self.VisionAndInfoPage)
         self.DIDOContainerPage = QWidget()
         self.DIDOContainerPage.setObjectName(u"DIDOContainerPage")
+        self.DIDOContainerPage.setStyleSheet(u"")
         self.ScrollAreaDIDO = QScrollArea(self.DIDOContainerPage)
         self.ScrollAreaDIDO.setObjectName(u"ScrollAreaDIDO")
         self.ScrollAreaDIDO.setGeometry(QRect(0, 350, 701, 331))
@@ -1696,7 +1697,7 @@ class Ui_MainWindow(object):
         self.ScrollAreaDIDO.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 588, 648))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 685, 648))
         self.horizontalLayout_34 = QHBoxLayout(self.scrollAreaWidgetContents_2)
         self.horizontalLayout_34.setSpacing(9)
         self.horizontalLayout_34.setObjectName(u"horizontalLayout_34")
@@ -2914,7 +2915,7 @@ class Ui_MainWindow(object):
         self.ParentStackedWidgetToChangeMenuOptions.setCurrentIndex(0)
         self.ProcessAndInfoStackedWidget.setCurrentIndex(0)
         self.ActionButtons.setCurrentIndex(0)
-        self.ComponentControlStackedWidget.setCurrentIndex(1)
+        self.ComponentControlStackedWidget.setCurrentIndex(0)
         self.ChangeComponentControlStackedWidget.setCurrentIndex(0)
         self.MotorStackedWidget.setCurrentIndex(0)
         self.MiddleStackedWidget.setCurrentIndex(0)
@@ -3018,11 +3019,11 @@ class Ui_MainWindow(object):
         self.z_2.setText(QCoreApplication.translate("MainWindow", u"z:", None))
         self.zPose.setText(QCoreApplication.translate("MainWindow", u"pos", None))
         self.y_2.setText(QCoreApplication.translate("MainWindow", u"y:", None))
-        self.yText_2.setText(QCoreApplication.translate("MainWindow", u"pos", None))
-        self.yaw_2.setText(QCoreApplication.translate("MainWindow", u"yaw:", None))
-        self.yawText_2.setText(QCoreApplication.translate("MainWindow", u"pos", None))
+        self.yPos.setText(QCoreApplication.translate("MainWindow", u"pos", None))
+        self.yaw_2.setText(QCoreApplication.translate("MainWindow", u"yaw", None))
+        self.yawPos.setText(QCoreApplication.translate("MainWindow", u"pos", None))
         self.x_2.setText(QCoreApplication.translate("MainWindow", u"x:", None))
-        self.xText_2.setText(QCoreApplication.translate("MainWindow", u"pos", None))
+        self.xPos.setText(QCoreApplication.translate("MainWindow", u"pos", None))
         self.Position_2.setText(QCoreApplication.translate("MainWindow", u"Position:", None))
         self.MotorPos.setText(QCoreApplication.translate("MainWindow", u"pos", None))
         self.MotorInfoText_2.setText(QCoreApplication.translate("MainWindow", u"Motor Info", None))
