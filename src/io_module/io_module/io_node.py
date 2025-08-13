@@ -6,7 +6,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Int32MultiArray
-from common_msgs.msg import DIDOCmd
+from common_msgs.msg import DIDOCmd,MH2State
 from pymodbus.client import ModbusTcpClient
 import time
 import numpy as np
@@ -46,7 +46,11 @@ class DataNode(Node):
             10
         )
 
-        
+        self.MH2_state_publisher = self.create_publisher(
+            MH2State,
+            'mh2_state',
+            10
+        )
 
     def init_modbus(self):
         """初始化叉車Modbus通訊"""
@@ -62,15 +66,17 @@ class DataNode(Node):
         self.client.connect()
 
     def init_io_port(self):
-        self.DI_1 = np.zeros(16, dtype=int) # 初始化16個DI端口
+        
+        self.J12_state = np.zeros(16, dtype=int)  # 對應位址 0x0008
+        self.J34_state = np.zeros(16, dtype=int)  # 對應位址 0x0009
+        
+        self.J1_error = np.zeros(16, dtype=int)  # 對應位址 0x014C
+        self.J2_error = np.zeros(16, dtype=int)  # 對應位址 0x014D
+        self.J3_error = np.zeros(16, dtype=int)  # 對應位址 0x014E
 
         self.DO_1 = np.zeros(16, dtype=int)  # 初始化16個DO端口
         self.DO_2 = np.zeros(16, dtype=int)  # 初始化16個DO端口
         self.DO_3 = np.zeros(16, dtype=int)  # 初始化16個DO端口
-
-        # self.DO_1[0] = 1  # 初始化DO1.0為1，其他為0
-        # self.DO_2[0] = 1  # 初始化DO2.0為
-        # self.DO_3[0] = 1  # 初始化DO3.0為1，其他為0
 
     def fork_io_cmd_callback(self, msg: Int32MultiArray):
         print(f"接收到叉車IO命令: {msg.data}")
@@ -91,7 +97,6 @@ class DataNode(Node):
         self.DO_2[7] = msg.data[4]
         self.DO_2[8] = msg.data[5]
         
-
     def handle_dido_cmd(self, msg: DIDOCmd):
         if not msg.name.startswith("DO"):
             self.get_logger().warn(f"Unknown DO name format: {msg.name}")
@@ -150,6 +155,70 @@ class ForkliftControl(Machine):
             print(f"[Slave {slave_id}] 寫入位址 {hex(address)} 的值: {value} (0b{value:016b})")
 
 
+    def read_di(self):
+        """從多個 Modbus 暫存器讀取 DI 狀態到各自陣列"""
+        try:
+            di_map = [
+                {"slave_id": 2,"address": 0x0008, "array": self.data_node.J12_state},
+                {"slave_id": 2,"address": 0x0009, "array": self.data_node.J34_state},
+                {"slave_id": 2,"address": 0x014C, "array": self.data_node.J1_error},
+                {"slave_id": 2,"address": 0x014D, "array": self.data_node.J2_error},
+                {"slave_id": 2,"address": 0x014E, "array": self.data_node.J3_error},
+            ]
+
+            for item in di_map:
+                addr = item["address"]
+                arr = item["array"]
+                slave_id = item["slave_id"]
+
+                result = self.data_node.client.read_holding_registers(
+                    address=addr,
+                    count=1,
+                    slave=slave_id
+                )
+
+                if result.isError():
+                    print(f"讀取 DI 位址 {hex(addr)} 失敗: {result}")
+                    continue
+
+                reg_value = result.registers[0]
+                for i in range(16):
+                    arr[i] = (reg_value >> i) & 0x1
+                print(f"[Slave {slave_id}] 讀取位址 {hex(addr)} 的值: {reg_value} (0b{reg_value:016b})")
+
+        except Exception as e:
+            print(f"Modbus DI 讀取異常: {e}")
+
+        J12_state_int = self.bits_to_int(self.data_node.J12_state)
+        J34_state_int = self.bits_to_int(self.data_node.J34_state)
+        J1_error_int = self.bits_to_int(self.data_node.J1_error)
+        J2_error_int = self.bits_to_int(self.data_node.J2_error)
+        J3_error_int = self.bits_to_int(self.data_node.J3_error)
+
+        # 發佈 MH2 狀態
+        mh2_state = MH2State()
+        if J12_state_int == 257 and J34_state_int == 257:
+            mh2_state.servo_state = True
+        else:
+            mh2_state.servo_state = False
+        
+        # 假設 alarm_code 取自 J1_error 的第一個元素
+        mh2_state.alarm_code = 0  # 預設為正常狀態
+        
+        if J1_error_int != 0 or J2_error_int != 0 or J3_error_int != 0:
+            mh2_state.servo_state = False
+            mh2_state.alarm_code = J1_error_int  # 使用 J1_error 的值作為警報代碼
+            print(f"MH2 狀態異常:J1_error: {J1_error_int}")
+            print(f"MH2 狀態異常:J2_error: {J2_error_int}")
+            print(f"MH2 狀態異常:J3_error: {J3_error_int}")
+        
+        self.data_node.MH2_state_publisher.publish(mh2_state)
+
+    def bits_to_int(self,bits):
+        value = 0
+        for i, bit in enumerate(bits):
+            value |= (bit & 1) << i
+        return value
 
 
 
@@ -166,7 +235,8 @@ def main():
     try:
         while rclpy.ok():
             executor.spin_once(timeout_sec=0.1)
-            system.run()
+            # system.run()
+            system.read_di()  # 讀取 DI 狀態
             time.sleep(timer_period)
 
     except KeyboardInterrupt:

@@ -32,6 +32,7 @@ class ForkliftController:
     def update_height_display(self, height):
         self.current_height = height
         self.ui.currentHeight.setText(f"{height} mm")  
+        self.ui.zPose.setText(f"{height} mm") # cartesian pose: z
 
     def lift_up_10mm(self):
         self.on_touch_buttons(self.ui.LiftUp)

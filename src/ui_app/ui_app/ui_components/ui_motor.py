@@ -1,5 +1,6 @@
-from PySide6.QtCore import QTimer
-from common_msgs.msg import JogCmd, MotionCmd
+from PySide6.QtCore import QTimer, Qt
+from PySide6.QtGui import QPixmap
+from common_msgs.msg import JogCmd, MotionCmd, MultipleM, MH2State
 from uros_interface.srv import ESMCmd
 from rclpy.client import Client
 from std_msgs.msg import String
@@ -11,6 +12,32 @@ class MotorController:
 
         self.cli: Client = self.ros_node.create_client(ESMCmd, '/esm_command')
         self.waiting_for_result = False
+
+        self._light_colors = {
+            "red_on":    "#FF4D4D",
+            "red_off":   "#660000",
+            "yellow_on": "#FFEB3B",
+            "yellow_off":"#666633",
+            "green_on":  "#6FCF53",
+            "green_off": "#336633",
+        }
+
+        self._set_lights(on_red=False, on_yellow=False, on_green=False)
+
+        # def _prepare_lamp(lbl):
+        #     lbl.setPixmap(QPixmap())                # ensure no image covers the bg
+        #     lbl.setText("")                         # no text overlay
+        #     # lbl.setAttribute(Qt.WA_StyledBackground, True)
+        #     # lbl.setFixedSize(size, size)            # consistent circle size (optional)
+        #     # lbl.setStyleSheet(f"border-radius:{size//2}px;")  # circle
+
+
+        #     lbl.setStyleSheet("border-radius:10px;")
+
+        # # prepare once
+        # _prepare_lamp(self.ui.RedSignal)
+        # _prepare_lamp(self.ui.YellowSignal)
+        # _prepare_lamp(self.ui.GreenSignal)
 
         # Disable buttons until service is ready
         # self.ui.ServoON.setEnabled(False)
@@ -39,6 +66,11 @@ class MotorController:
         self.ui.ControlRightCP.setAutoRepeat(True)
         self.ui.ControlRightCP.setAutoRepeatDelay(300)
         self.ui.ControlRightCP.setAutoRepeatInterval(80) 
+
+        # self.ui.RedSignal.setStyleSheet("background-color: red")
+        # self.ui.YellowSignal.setStyleSheet("background-color: yellow")
+
+        # self.ui.GreenSignal.setStyleSheet("background-color: green")
 
 
         self.ui.ControlUpCP.clicked.connect(  lambda: self.send_jog_cmd("y_axis",  +1))
@@ -109,7 +141,7 @@ class MotorController:
             msg.distance = self.selected_distance  # ±1 / ±5 / ±10
             msg.angle = 0.0
 
-        msg.speed = 20.0
+        msg.speed = 5.0
         self.ros_node.jog_cmd_publisher.publish(msg)
         print(f"[Motor] JogCmd -> target={msg.target}, dir={msg.direction}, dist={msg.distance}, ang={msg.angle}")
 
@@ -126,6 +158,52 @@ class MotorController:
         self.ros_node.motion_cmd_publisher.publish(msg)
         print(f"[Home]: \n Command Type: {msg.command_type} \n Pose Data: {msg.pose_data} \n Speed: {msg.speed}")
 
+    # def on_mh2_state(self, msg: MH2State):
+    #     """Called from Qt thread (via singleShot)."""
+    #     self._apply_servo_ui(msg.servo_state)
+    #     self._apply_alarm_ui(msg.alarm_code)
+
+    # def _apply_servo_ui(self, is_on: bool):
+    #     # Keep your original styles; just add a semi-transparent overlay
+    #     if is_on:
+    #         self.ui.ServoON.setStyleSheet(
+    #             self.ui.ServoON.styleSheet() + "\nQPushButton { border: 2px solid yellow; }"
+    #         )
+    #         self.ui.ServoOFF.setStyleSheet(self.ui.ServoOFF.styleSheet())
+    #     else:
+    #         self.ui.ServoOFF.setStyleSheet(
+    #             self.ui.ServoOFF.styleSheet() + "\nQPushButton { border: 2px solid yellow; }"
+    #         )
+    #         self.ui.ServoON.setStyleSheet(self.ui.ServoON.styleSheet())
+
+    # def _apply_alarm_ui(self, code: int):
+    #     if code == 0:
+    #         # normal: no change, keep default
+    #         self.ui.AlarmButton.setStyleSheet(self.ui.AlarmButton.styleSheet())
+    #     else:
+    #         # highlight the alarm button to show it's active
+    #         self.ui.AlarmButton.setStyleSheet(
+    #             self.ui.AlarmButton.styleSheet() + "\nQPushButton { border: 2px solid yellow; }"
+    #         )
+
+    def _on_mh2_state_ui(self, servo_on: bool, alarm_code: int):
+        btn = self.ui.ServoONOFFButton
+        btn.blockSignals(True)
+        btn.setChecked(servo_on)                  # QSS :checked applies here
+        btn.setText("Servo ON" if servo_on else "Servo OFF")
+        btn.blockSignals(False)
+        btn.setEnabled(True)
+
+        # Alarm UI
+        if hasattr(self.ui, "AlarmButton"):
+            self.ui.AlarmButton.setText(f"Alarm: {alarm_code}")
+            # optional coloring: 0 = ok (green-ish), else = warn (yellow) / error (red)
+            if alarm_code == 0:
+                self.ui.AlarmButton.setStyleSheet("background-color: black; color: white;")   # green
+            else:
+                self.ui.AlarmButton.setStyleSheet("background-color: #FFEB3B; color:black;")   # yellow (or red)
+        else:
+            print("[UI] AlarmButton not found - check your .ui objectName")
 
     def call_servo(self, on=True):
         if not self.cli.service_is_ready():
@@ -150,6 +228,13 @@ class MotorController:
 
         future.add_done_callback(handle_response)
 
+    # def send_y_motor_cmd(self, flag):
+    #     msg = String()
+    #     msg.data = flag
+
+    #     self.ros_node.y_motor_cmd_publisher.publish(msg)
+    #     print(f"[UI] Sent YMotor Cmd String: {msg.data}")
+
     def send_y_motor_cmd(self, flag):
         msg = MotionCmd()
         msg.command_type = MotionCmd.TYPE_Y_MOVE
@@ -173,7 +258,7 @@ class MotorController:
         msg.speed = 20.0  # 可以根據需要調整速度
         self.ros_node.motion_cmd_publisher.publish(msg)
         print(f"[YMotor] Command Type: {msg.command_type}, Pose Data: {msg.pose_data}, Speed: {msg.speed}")
-        
+
 
     def update_gui(self):
         # 每次更新也可以做其他檢查或顯示狀態
@@ -181,6 +266,39 @@ class MotorController:
             self.status_label.setText("Waiting for service response...")
         else:
             self.status_label.setText("Ready")
+
+
+    def on_motor_info(self, m1: float, m2: float, m3: float):
+        self.ui.MotorPos.setText(f"M1:{m1:.1f}, M2:{m2:.1f}, M3:{m3:.1f}")
+        # self.ui.CurrentPos.setText(f"{m1:.1f}")
+
+
+    def _paint_light(self, lbl, on_color, off_color, is_on):
+        color = on_color if is_on else off_color
+        lbl.setStyleSheet(f"background-color:{color}; border-radius:{lbl.height()//2}px;")
+
+
+
+    def _set_lights(self, on_red: bool, on_yellow: bool, on_green: bool):
+        c = self._light_colors
+        self._paint_light(self.ui.RedSignal,    c["red_on"],    c["red_off"],    on_red)
+        self._paint_light(self.ui.YellowSignal, c["yellow_on"], c["yellow_off"], on_yellow)
+        self._paint_light(self.ui.GreenSignal,  c["green_on"],  c["green_off"],  on_green)
+        
+
+    def apply_motion_state(self, init_done: bool, motion_done: bool):
+        if init_done and motion_done:
+            r, y, g = False, False, True
+        elif init_done and not motion_done:
+            r, y, g = False, True,  False
+        elif not init_done and not motion_done:
+            r, y, g = True,  False, False
+        else:
+            r, y, g = False, True,  False
+        self._set_lights(r, y, g)  # now on GUI thread
+
+
+
 
 
 

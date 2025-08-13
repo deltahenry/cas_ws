@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool
-from common_msgs.msg import MotionCmd,MultipleM, SingleM,MotionState
+from common_msgs.msg import MotionCmd,MultipleM, SingleM,MotionState,CurrentPose
 from collections import deque
 from model_module.magic_cube import RobotModel  # 自訂 model.py 模組
 from copy import deepcopy
@@ -29,6 +29,7 @@ class MotionController(Node):
         #Publisher
         self.motor_cmd_publisher = self.create_publisher(Float32MultiArray, '/motor_position_ref', 10)
         self.motion_state_publisher = self.create_publisher(MotionState, '/motion_state', 10)
+        self.current_cartesian_pose_publisher = self.create_publisher(CurrentPose, '/current_pose', 10)
 
         # Timer，每次發送 1 筆指令（從 queue 中）
         self.timer = self.create_timer(time_period, self.send_next_batch)
@@ -296,8 +297,14 @@ class MotionController(Node):
         #     # 尚未到達，持續追蹤命令
         #     # print("Tracking...")
         #     # self.send_motor_command([self.last_sent_joint_command] * 10)
-
-
+        
+        # 發佈當前 Cartesian 位置
+        x = self.current_cartesian_pose[0]
+        y = self.current_cartesian_pose[1]
+        yaw = self.current_cartesian_pose[2] * 57.29  #
+        pose_data = [x, y, yaw]
+        self.current_cartesian_pose_publisher.publish(CurrentPose(pose_data=pose_data
+        ))
 
     # 發送馬達命令
     def send_motor_command(self, batch):

@@ -2,7 +2,7 @@ import sys
 from datetime import date
 import cv2
 from PySide6.QtCore import Qt, QEvent, QTimer, Signal
-from PySide6.QtGui import QIcon, QImage, QPixmap
+from PySide6.QtGui import QIcon, QImage, QPixmap, QKeySequence, QShortcut
 from PySide6.QtWidgets import QApplication, QMainWindow, QButtonGroup, QScroller
 
 from ui_app.ui_magic_cube import Ui_MainWindow # Import my design made in Qt Designer (already in .py)
@@ -24,7 +24,9 @@ import threading
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Int32
-from common_msgs.msg import StateCmd, ForkCmd, JogCmd, ComponentCmd, TaskCmd, TaskState, DIDOCmd, RunCmd, MotionCmd, MotionState, ClipperCmd
+
+from common_msgs.msg import StateCmd, ForkCmd, JogCmd, ComponentCmd, TaskCmd, TaskState, DIDOCmd, RunCmd, MotionCmd, MotionState, ClipperCmd, MultipleM, MH2State
+
 from uros_interface.srv import ESMCmd
 
 
@@ -54,14 +56,29 @@ class ROSNode(Node):
         # }
 
 
+        self.mh2_state_callback_ui = None
+
         self.height_update_callback = None
 
         self.forklift_controller = None
 
         self.di_update_callback = None
 
+        # self.current_motor_len = [0.0, 0.0, 0.0]
 
+        self.motion_state_callback_ui = None
+        
+        # self.motor_info_update_callback_ui = None
+
+        self.current_motor_len = [10.0, 0.0, 0.0]
+
+        
         # publisher
+
+        # self.MH2_cmd_publisher = self.create_publisher(MH2Cmd, '/MH2_cmd', 10)
+
+        # self.MH2_cmd_publisher = self.create_publisher()
+
         self.mode_cmd_publisher = self.create_publisher(String, '/mode_cmd', 10)
 
         self.state_cmd_publisher = self.create_publisher(StateCmd, '/state_cmd', 10)
@@ -87,7 +104,16 @@ class ROSNode(Node):
         self.clipper_cmd_publisher = self.create_publisher(ClipperCmd, '/clipper_cmd', 10)
 
 
+
+
         # subscriber
+        self.mh2_state_subscriber = self.create_subscription(
+            MH2State,
+            "mh2_state",
+            self.mh2_state_callback,
+            10
+        )
+
         self.height_info_subscriber = self.create_subscription(
             Int32,
             'lr_distance',
@@ -102,6 +128,19 @@ class ROSNode(Node):
             10
         )
 
+        # self.motion_cmd_subscriber = self.create_subscription(
+        #     MotionCmd,
+        #     "/"
+        # )
+
+        self.motors_info_sub = self.create_subscription(
+            MultipleM,
+            '/multi_motor_info',
+            self.motors_info_callback,
+            10
+        )
+
+
         self.dido_control_subscriber = self.create_subscription(
             DIDOCmd,
             '/dido_cmd',
@@ -109,12 +148,12 @@ class ROSNode(Node):
             10
         )
 
-        # self.motion_state_subscriber = self.create_subscription(
-        #     MotionState,
-        #     '/motion_state',
-        #     self.motion_state_callback,
-        #     10
-        # )
+        self.motion_state_subscriber = self.create_subscription(
+            MotionState,
+            '/motion_state',
+            self.motion_state_callback,
+            10
+        )
 
         # self.task_state_subscriber = self.create_subscription(
         #     TaskState,
@@ -128,6 +167,13 @@ class ROSNode(Node):
 
         self.detection_task_callback_ui = None
         self.image_update_callback = None
+
+    def mh2_state_callback(self, msg: MH2State):
+        self.get_logger().info(f"Received MH2State: \n servo_state: {msg.servo_state} \n alarm_code: {msg.alarm_code}")
+        
+        if self.mh2_state_callback_ui:
+            self.mh2_state_callback_ui(msg)  # hand off to UI layer
+
 
     def height_info_callback(self, msg: Int32):
         self.get_logger().info(f"Received height info: {msg.data} mm")
@@ -150,6 +196,16 @@ class ROSNode(Node):
         if self.detection_task_callback_ui:
             self.detection_task_callback_ui(msg.data)
 
+    def motors_info_callback(self, msg: MultipleM):
+            m1 = msg.motor_info[0].fb_position
+            m2 = msg.motor_info[1].fb_position
+            m3 = msg.motor_info[2].fb_position
+
+            if self.motor_info_update_callback_ui:
+                # This runs in the ROS thread; it's fine to emit a Qt Signal from here
+                # because Qt will queue delivery to the UI thread.
+                self.motor_info_update_callback_ui(m1, m2, m3)
+
 
     def dido_callback(self, msg: DIDOCmd):
         name = msg.name.strip()
@@ -159,30 +215,38 @@ class ROSNode(Node):
         if self.di_update_callback:
             self.di_update_callback(name, state)
 
-    
-
-    # def motion_state_callback(self, msg: MotionState):
+    def motion_state_callback(self, msg: MotionState):
+        print(f"[ROS] /motion_state -> init={msg.init_finish}, motion={msg.motion_finish}")
+        if self.motion_state_callback_ui:
+            self.motion_state_callback_ui(bool(msg.init_finish), bool(msg.motion_finish))
 
 
 class MainWindow(QMainWindow):
 
     #GUI Threads
     ros_msg_received = Signal(str)
+    mh2_state_update = Signal(bool, int)
     height_update = Signal(int)
     di_update = Signal(str, bool)
 
     image_update = Signal(object)   # carries numpy image
     vision_mode_update = Signal(str)
 
+    motion_state_update = Signal(bool, bool)
+    motor_info_update = Signal(float, float, float)
+
     def __init__(self, ros_node):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        QShortcut(QKeySequence(Qt.Key_Escape), self, activated=self.close)
+
         #Start ROS2 Node
         self.ros_node = ros_node
 
         QScroller.grabGesture(self.ui.ScrollAreaDIDO.viewport(), QScroller.LeftMouseButtonGesture)
+
 
         #vision ui
         self.ros_node.image_update_callback = self.update_image
@@ -196,8 +260,20 @@ class MainWindow(QMainWindow):
         # self.ros_node.image_update_callback = lambda cv: self.image_update.emit(cv)
         # self.ros_node.detection_task_callback_ui = lambda s: self.vision_mode_update.emit(s)
 
+
         #motor ui
         self.motor_controller = MotorController(self.ui, self.ros_node)
+        self.motor_info_update.connect(self.motor_controller.on_motor_info)
+        self.ros_node.motor_info_update_callback_ui = \
+            lambda m1, m2, m3: self.motor_info_update.emit(m1, m2, m3)
+        
+
+        self.motion_state_update.connect(self.motor_controller.apply_motion_state)
+        self.ros_node.motion_state_callback_ui = self.motion_state_update.emit
+
+        self.mh2_state_update.connect(self.motor_controller._on_mh2_state_ui)
+        self.ros_node.mh2_state_callback_ui = \
+            (lambda msg: self.mh2_state_update.emit(bool(msg.servo_state), int(msg.alarm_code)))
 
         #forklift ui
         self.forklift_controller = ForkliftController(self.ui, self.ros_node)
@@ -228,6 +304,23 @@ class MainWindow(QMainWindow):
         # Connect Qt signal to UI handler
         self.ros_msg_received.connect(self.handle_ros_message)
 
+        self.ui.ServoONOFFButton.setStyleSheet("""
+        QPushButton#ServoONOFFButton {
+            color: black;
+            border-radius: 8px;
+            background-color: #A0A0A0; /* OFF (default) */
+        }
+        QPushButton#ServoONOFFButton:checked {
+            background-color: #4CAF50; /* ON */
+        }
+        """)
+
+        #servo, alarm, reset
+        self.ui.ServoONOFFButton.clicked.connect(lambda checked: self.on_servo_click(checked))
+
+        
+        
+
         # auto
         self.ui.AutoButton.toggled.connect(self.on_auto_toggled)
 
@@ -245,8 +338,8 @@ class MainWindow(QMainWindow):
         self.ui.PickButton.toggled.connect(lambda checked: self.on_task_toggled("pick", checked))
         self.ui.AssemblyButton.toggled.connect(lambda checked: self.on_task_toggled("assembly", checked))
 
-        self.ui.ManualPauseButton.toggled.connect(self.on_pause_toggled)
-        self.ui.ManualStopButton.clicked.connect(lambda: self.send_state_cmd("stop"))
+        # self.ui.ManualPauseButton.toggled.connect(self.on_pause_toggled)
+        # self.ui.ManualStopButton.clicked.connect(lambda: self.send_state_cmd("stop"))
 
         # self.ui.VisionTextInComponentControl.setFixedSize(640, 480)
 
@@ -319,7 +412,7 @@ class MainWindow(QMainWindow):
         self.ui.MotorConfigNextButton.clicked.connect(lambda: self.go_to_next_page_motor(1))
         self.ui.MotorJogNextButton.clicked.connect(lambda: self.go_to_next_page_motor(2))
         self.ui.MotorYAxisNextButton.clicked.connect(lambda: self.go_to_next_page_motor(0))
-        
+
 
     def _on_vision_clicked(self, btn, checked):
         if checked:
@@ -402,7 +495,50 @@ class MainWindow(QMainWindow):
             }
         """)
 
+    def on_servo_click(self, checked: bool):
+        btn = self.ui.ServoONOFFButton
+        prev = not checked            # this was the state before the click
+        desired = checked             # what the user asked for
+
+        # Revert UI until ROS confirms
+        btn.blockSignals(True)
+        btn.setChecked(prev)          # undo the automatic toggle -> stays gray/green as before
+        btn.blockSignals(False)
+
+        btn.setEnabled(False)         # avoid double clicks
+        self.motor_controller.call_servo(desired)
+
+
+
         
+
+    # def on_servo_on_off_toggled(self, checked: bool):
+
+        
+
+    #     if checked:
+    #         # ON: green
+    #         self.ui.ServoONOFFButton.setStyleSheet("""
+    #             QPushButton {
+    #                 background-color: #4CAF50;  /* Green */
+    #                 color: white;
+    #                 border-radius: 8px;
+    #             }
+    #         """)
+    #         self.ui.ServoONOFFButton.setText("Servo ON")
+    #         # Optionally call your service
+    #         self.motor_controller.call_servo(True if checked else False)
+    #     else:
+    #         # OFF: gray
+    #         self.ui.ServoONOFFButton.setStyleSheet("""
+    #             QPushButton {
+    #                 background-color: #A0A0A0;  /* Gray */
+    #                 color: white;
+    #                 border-radius: 8px;
+    #             }
+    #         """)
+    #         self.ui.ServoONOFFButton.setText("Servo OFF")
+    #         self.motor_controller.call_servo(True if checked else False)
 
     def update_image(self, cv_img):
         qt_img = convert_cv_to_qt(cv_img)
@@ -424,7 +560,22 @@ class MainWindow(QMainWindow):
 
     def update_detection_mode(self, mode):
         print(f"[UI] Detection mode is now: {mode}")
-        # Optionally update label or status bar
+        # Optionally update label or status bar  
+    
+    # def on_servo_on_off_toggled(self, checked):
+    #     if checked: 
+
+
+
+    
+    # def send_MH2_cmd(self, flag):
+    #     msg = MH2Cmd()
+
+    #     msg.servo_state = True
+
+    #     print(f"[UI] Sent MH2Cmd: {flag}")
+
+
 
 
     #ROS2 Menu
@@ -522,9 +673,6 @@ class MainWindow(QMainWindow):
 
     # vision fix
     def on_vision_toggled(self, vision_name, checked):
-        
-        
-
         if checked:
             self.send_vision_cmd(f"{vision_name}")
             print(f"[UI] {vision_name} started")
@@ -544,10 +692,10 @@ class MainWindow(QMainWindow):
         self.ros_node.vision_control_publisher.publish(msg)
         print(f"[UI] Sent VisionCmd: {mode}")
 
-    def send_vision_cmd(self, mode):
-        # simplest: no dedupe
-        msg = String(); msg.data = mode
-        self.ros_node.vision_control_publisher.publish(msg)
+    # def send_vision_cmd(self, mode):
+    #     # simplest: no dedupe
+    #     msg = String(); msg.data = mode
+    #     self.ros_node.vision_control_publisher.publish(msg)
     
     def on_manual_button_toggled(self, button, checked):
         if checked:
@@ -566,7 +714,7 @@ class MainWindow(QMainWindow):
                 self.ui.PreciseAlignButton,
                 self.ui.PickButton,
                 self.ui.AssemblyButton,
-                self.ui.ManualPauseButton
+                # self.ui.ManualPauseButton
             ]
             self.reset_buttons_and_machine(main_page_buttons, send_pause=False)
 
@@ -784,7 +932,6 @@ class MainWindow(QMainWindow):
         }
         """))
 
-
     def on_ros_message(self, text):
         self.ros_msg_received.emit(text)
 
@@ -803,11 +950,13 @@ class MainWindow(QMainWindow):
             second_screen = screens[1]  # Use the actual second screen
             second_geom = second_screen.geometry()
             self.setGeometry(second_geom)  # Move and resize in one step
-            self.showFullScreen()
-            print("Moved to second screen and fullscreen")
+            self.setMaximumWidth(1280)
+            self.setMaximumHeight(800)
+            # self.showMaximized()
+            print("Fixed size: 1280x800")
         else:
             self.showMaximized()
-            print("Only one screen, maximized")
+            print("Only one screen, screen fullscreen anyways")
 
 
 def convert_cv_to_qt(cv_img):
