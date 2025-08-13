@@ -10,8 +10,8 @@ class ScrewDetector:
         print(f"✅ Loaded {len(self.templates)} augmented templates from {template_dir}")
 
         # ROI 區域，可外部修改
-        self.roi_top_left = (55, 8)
-        self.roi_bottom_right = (1255, 711)
+        self.roi_top_left = (331, 207)
+        self.roi_bottom_right = (1069, 462)
 
     def augment_template_rotation(self, img, angles=[-10, -5, 0, 5, 10]):
         augmented = []
@@ -37,7 +37,7 @@ class ScrewDetector:
                 print(f"⚠️ Failed to load image from: {path}")
         return templates
 
-    def match_templates(self, frame_gray, threshold=0.55):
+    def match_templates(self, frame_gray, threshold=0.45):
         matches = []
         for template in self.templates:
             th, tw = template.shape

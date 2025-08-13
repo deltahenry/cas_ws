@@ -21,6 +21,7 @@ from vision_module.screw_detector import ScrewDetector
 from vision_module.l_shape_detector import LShapeDetector
 from vision_module.icp_fitter import ICPFITTER
 
+
 def remove_duplicate_detections(results, threshold=15):
     filtered = []
     for r in results:
@@ -34,6 +35,7 @@ def remove_duplicate_detections(results, threshold=15):
             filtered.append(r)
     return filtered
 
+
 class RealSenseVision(Node):
     def __init__(self):
         super().__init__('detection_node')
@@ -43,6 +45,13 @@ class RealSenseVision(Node):
         self.subscription = self.create_subscription(String, '/detection_task', self.task_callback, 10)
         self.pose_pub = self.create_publisher(PoseStamped, '/screw_center_pose', 10)
         self.alert_pub = self.create_publisher(String, '/orientation_anomaly', 10)  # ⬅ anomaly topic
+
+        # NEW: ICP 指令訂閱者 + 目前 ICP 區域 + 最新影像快取
+        self.icp_region = "screw"
+        self.icp_cmd_sub = self.create_subscription(String, '/icp_cmd', self.icp_cmd_callback, 10)
+        self.latest_color = None
+        self.latest_depth = None
+        self.latest_intrin = None
 
         # flags
         self.screw_active = self.lshape_active = self.icp_fit_active = False
@@ -59,12 +68,9 @@ class RealSenseVision(Node):
         source_root = os.path.dirname(os.path.abspath(__file__))
         template_path = os.path.join(source_root, 'template2_shape')
         self.screw_detector = ScrewDetector(template_path)
-        # detectors
-        # self.screw_detector = ScrewDetector('template2_shape')
         self.l_templates = self.load_templates('template_l_shape')
         self.l_shape_detector = LShapeDetector(self.l_templates)
         self.icp_fitter = ICPFITTER()
-
 
         # TF + state
         self.br = TransformBroadcaster(self)
@@ -91,8 +97,10 @@ class RealSenseVision(Node):
 
     def publish_image(self, color_image):
         resized_image = cv2.resize(color_image, (701, 481), interpolation=cv2.INTER_AREA)
-        ros_image = self.bridge.cv2_to_imgmsg(resized_image, encoding="bgr8")
-        self.image_pub.publish(ros_image)
+        ros_image = CvBridge().cv2_to_imgmsg(resized_image, encoding="bgr8")
+        # 這裡沒有 image_pub，就不發 ROS 影像；若需要可自行新增 publisher
+        # self.image_pub.publish(ros_image)
+        pass
 
     def load_templates(self, folder_name, augment=False):
         source_root = os.path.dirname(os.path.abspath(__file__))
@@ -113,23 +121,7 @@ class RealSenseVision(Node):
                 print(f"⚠️ 無法讀取圖片：{path}")
         print(f"✅ 成功載入 {len(templates)} 張模板圖片")
         return templates
-    
-    # def load_templates(self, folder_name):
-    #     prefix = get_package_prefix('vision_module')
-    #     folder_path = os.path.join(prefix, 'lib', 'vision_module', folder_name)
-    #     paths = sorted(glob.glob(os.path.join(folder_path, "*.png")))
 
-    #     templates = []
-    #     for path in paths:
-    #         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-    #         if img is not None:
-    #             templates.append(img)
-    #         else:
-    #             self.get_logger().warn(f"Failed to load: {path}")
-    #     if not templates:
-    #         raise RuntimeError(f"No template found in folder: {folder_name}")
-    #     return templates
-    
     def task_callback(self, msg: String):
         task = msg.data.lower()
         self.screw_active = task == 'screw'
@@ -139,6 +131,30 @@ class RealSenseVision(Node):
 
         if self.screw_active:
             self.abnormal_counter = 0
+
+    def icp_cmd_callback(self, msg: String):
+        """
+        /icp_cmd 指令：
+          - 'save screw'   : 用當下畫面存螺絲區 golden
+          - 'save battery' : 用當下畫面存電池區 golden
+          - 'icp screw'    : 切換 ICP 目標區域為 screw
+          - 'icp battery'  : 切換 ICP 目標區域為 battery
+        """
+        cmd = msg.data.strip().lower()
+        if cmd in ("save screw", "screw save", "save_screw"):
+            ok = self.icp_fitter.save_golden(self.latest_color, self.latest_depth, self.latest_intrin, "screw")
+            self.get_logger().info("📸 儲存螺絲區 golden " + ("成功" if ok else "失敗"))
+        elif cmd in ("save battery", "battery save", "save_battery"):
+            ok = self.icp_fitter.save_golden(self.latest_color, self.latest_depth, self.latest_intrin, "battery")
+            self.get_logger().info("📸 儲存電池區 golden " + ("成功" if ok else "失敗"))
+        elif cmd in ("icp screw", "run screw", "icp_screw"):
+            self.icp_region = "screw"
+            self.get_logger().info("🔧 ICP 目標區域切到 screw")
+        elif cmd in ("icp battery", "run battery", "icp_battery"):
+            self.icp_region = "battery"
+            self.get_logger().info("🔧 ICP 目標區域切到 battery")
+        else:
+            self.get_logger().warn(f"❓ 未知 icp_cmd: {cmd}")
 
     def broadcast_screw_tf(self, idx, x, y, z, quat=None):
         t = TransformStamped()
@@ -169,7 +185,6 @@ class RealSenseVision(Node):
         msg.pose.orientation.w = quat[3]
         self.pose_pub.publish(msg)
 
-    
     def check_angle_anomaly(self, yaw, pitch, roll, threshold=5.0):
         anomalies = []
         if self.prev_yaw is not None and abs(yaw - self.prev_yaw) > threshold:
@@ -182,10 +197,11 @@ class RealSenseVision(Node):
             msg = f"⚠️ Orientation anomaly: {', '.join(anomalies)} (thres=±{threshold}°)"
             self.get_logger().warn(msg)
             self.alert_pub.publish(String(data=msg))
-        
+
         self.prev_yaw = yaw
         self.prev_pitch = pitch
         self.prev_roll = roll
+
 
 def main():
     rclpy.init()
@@ -205,6 +221,11 @@ def main():
             depth_image = np.asanyarray(depth_frame.get_data())
             depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
 
+            # NEW: 記住最新影像，方便 /icp_cmd 立即存 golden
+            node.latest_color = color_image
+            node.latest_depth = depth_image
+            node.latest_intrin = depth_intrin
+
             if node.screw_active:
                 have_fresh_detection = False
                 screw_results = []
@@ -221,7 +242,6 @@ def main():
                 else:
                     # 沒有新偵測 → 只用上一幀的結果拿來畫圖，不做廣播
                     screw_results = node.prev_screw_results
-                    
 
                 # ---- 畫點 & 疊加用（不影響 TF）----
                 if len(screw_results) == 4:
@@ -278,7 +298,6 @@ def main():
                                     node.prev_avg_pose = None
                                     node.screw_active = False
                                     node.abnormal_counter = 0
-                                # 本幀異常 → 不廣播 TF、不更新 prev、直接跳過後續
                                 continue
                             else:
                                 node.abnormal_counter = 0
@@ -311,15 +330,15 @@ def main():
                     cv2.putText(color_image, f"Yaw={yaw_deg:.1f} Pitch={pitch_deg:.1f} Roll={roll_deg:.1f}",
                                 (center_u - 100, center_v + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,0), 2)
 
-
             if node.lshape_active:
-                results = node.l_shape_dector.detect_l_shape_lines(color_image)
+                results = node.l_shape_detector.detect_l_shape_lines(color_image)  # 修正變數名
                 for cx, cy in results:
                     cv2.circle(color_image, (cx, cy), 5, (0,255,255), -1)
 
             if node.icp_fit_active:
-                dist = node.icp_fitter.icp_fit(color_image, depth_image, depth_intrin)
-                print(f"ICP Distance: {dist:.4f}" if dist else "ICP fitting failed")
+                # NEW: 帶上目前的 ICP 區域
+                dist = node.icp_fitter.icp_fit(color_image, depth_image, depth_intrin, region=node.icp_region)
+                print(f"ICP Distance ({node.icp_region}): {dist:.4f}" if dist is not None else "ICP fitting failed")
 
             cv2.imshow("RealSense Detection", color_image)
             if cv2.waitKey(1) == ord('q'):
@@ -347,6 +366,6 @@ def main():
         node.pipeline.stop()
         cv2.destroyAllWindows()
 
+
 if __name__ == "__main__":
     main()
-
