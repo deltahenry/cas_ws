@@ -3,14 +3,14 @@ object_frame_compensation_node:
     # Camera-in-Hand 固定轉換 (相機相對於手臂末端)
     camera_in_hand_tf:
       translation:
-        x: 0.05   # 相機相對手臂末端的 x 偏移 (m)
-        y: -0.02  # 相機相對手臂末端的 y 偏移 (m)  
-        z: 0.15   # 相機相對手臂末端的 z 偏移 (m)
+        x: 0.0   # 相機相對手臂末端的 x 偏移 (m)
+        y: 0.0  # 相機相對手臂末端的 y 偏移 (m)  
+        z: 0.3   # 相機相對手臂末端的 z 偏移 (m)
       rotation:
-        x: 0.0
+        x: -0.707
         y: 0.0
         z: 0.0
-        w: 1.0
+        w: 0.707
     
     # Golden Sample 手臂抓取位置 (世界座標系)
     golden_arm_pose:

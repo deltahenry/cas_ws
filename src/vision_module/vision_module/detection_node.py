@@ -238,7 +238,7 @@ def main():
                 if node.frame_count % 10 == 0:
                     results = node.screw_detector.detect(color_image, depth_frame)
                     results = remove_duplicate_detections(results)
-                    results = sorted(results, key=lambda r: r['Z'])[:4]
+                    results = sorted(results, key=lambda r: (r['u'], r['v']))
                     if len(results) == 4:
                         node.prev_screw_results = results
                         have_fresh_detection = True
@@ -268,6 +268,7 @@ def main():
                         v1 = np.array([screw_results[1]['X'], screw_results[1]['Y'], screw_results[1]['Z']])
                         v2 = np.array([screw_results[2]['X'], screw_results[2]['Y'], screw_results[2]['Z']])
                         v3 = np.array([screw_results[3]['X'], screw_results[3]['Y'], screw_results[3]['Z']])
+                        
                         
 
                         x_axis = v3 - v2
