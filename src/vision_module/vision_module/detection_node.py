@@ -5,7 +5,7 @@ import pyrealsense2 as rs
 import os, glob
 from rclpy.node import Node
 from std_msgs.msg import String
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped,Pose
 from ament_index_python.packages import get_package_prefix
 from tf2_ros import TransformBroadcaster
 from rclpy.time import Time
@@ -43,7 +43,7 @@ class RealSenseVision(Node):
 
         # subs / pubs
         self.subscription = self.create_subscription(String, '/detection_task', self.task_callback, 10)
-        self.pose_pub = self.create_publisher(PoseStamped, '/screw_center_pose', 10)
+        self.pose_pub = self.create_publisher(Pose, '/object_camera_pose', 10)
         self.alert_pub = self.create_publisher(String, '/orientation_anomaly', 10)  # ⬅ anomaly topic
 
         # NEW: ICP 指令訂閱者 + 目前 ICP 區域 + 最新影像快取
@@ -173,16 +173,16 @@ class RealSenseVision(Node):
         self.br.sendTransform(t)
 
     def publish_avg_pose(self, x, y, z, quat):
-        msg = PoseStamped()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'camera_link'
-        msg.pose.position.x = x
-        msg.pose.position.y = y
-        msg.pose.position.z = z
-        msg.pose.orientation.x = quat[0]
-        msg.pose.orientation.y = quat[1]
-        msg.pose.orientation.z = quat[2]
-        msg.pose.orientation.w = quat[3]
+        msg = Pose()
+        # msg.header.stamp = self.get_clock().now().to_msg()
+        # msg.header.frame_id = 'camera_link'
+        msg.position.x = x
+        msg.position.y = y
+        msg.position.z = z
+        msg.orientation.x = quat[0]
+        msg.orientation.y = quat[1]
+        msg.orientation.z = quat[2]
+        msg.orientation.w = quat[3]
         self.pose_pub.publish(msg)
 
     def check_angle_anomaly(self, yaw, pitch, roll, threshold=5.0):
@@ -231,7 +231,7 @@ def main():
                 screw_results = []
 
                 # 每 10 幀做一次偵測
-                if node.frame_count % 10 == 0:
+                if node.frame_count % 5 == 0:
                     results = node.screw_detector.detect(color_image, depth_frame)
                     results = remove_duplicate_detections(results)
                     results = sorted(results, key=lambda r: r['Z'])[:4]
