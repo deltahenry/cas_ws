@@ -19,12 +19,12 @@ def generate_launch_description():
             name='height_sensor',
             output='screen'
         ),
-        # Node(
-        #     package='io_module',
-        #     executable='depth_rangefinder',
-        #     name='depth_rangefinder',
-        #     output='screen'
-        # ),
+        Node(
+            package='io_module',
+            executable='depth_rangefinder',
+            name='depth_rangefinder',
+            output='screen'
+        ),
         Node(
             package='io_module',
             executable='forklift',

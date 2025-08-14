@@ -255,11 +255,11 @@ class MotorController:
         """
         # Defensive: make sure the labels exist and have setText
         if hasattr(self.ui, "xPos"):
-            self.ui.xPos.setText(f"{x:.1f}")      # mm or whatever unit you use
+            self.ui.xPos.setText(f"{x:.2f} mm")  
         if hasattr(self.ui, "yPos"):
-            self.ui.yPos.setText(f"{y:.1f}")
+            self.ui.yPos.setText(f"{y:.2f} mm")
         if hasattr(self.ui, "yawPos"):
-            self.ui.yawPos.setText(f"{yaw_deg:.2f}")  # degrees with 2 decimal places
+            self.ui.yawPos.setText(f"{yaw_deg:.2f} mm")  # degrees with 2 decimal places
 
 
     def send_y_motor_cmd(self, flag):
@@ -296,8 +296,9 @@ class MotorController:
 
 
     def on_motor_info(self, m1: float, m2: float, m3: float):
-        self.ui.MotorPos.setText(f"M1:{m1:.1f}, M2:{m2:.1f}, M3:{m3:.1f}")
-        # self.ui.CurrentPos.setText(f"{m1:.1f}")
+        self.ui.MotorM1.setText(f"M1: {m1:.2f}")
+        self.ui.MotorM2.setText(f"M2: {m2:.2f}")
+        self.ui.MotorM3.setText(f"M3: {m3:.2f}")
 
 
     def _paint_light(self, lbl, on_color, off_color, is_on):

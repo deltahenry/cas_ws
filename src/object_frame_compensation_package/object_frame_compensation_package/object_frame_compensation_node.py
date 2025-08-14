@@ -28,14 +28,14 @@ class ObjectFrameCompensationNode(Node):
         # 訂閱者
         self.object_pose_sub = self.create_subscription(
             Pose,
-            '~/object_camera_pose',
+            '/object_camera_pose',
             self.object_pose_callback,
             10
         )
         
         self.current_arm_sub = self.create_subscription(
             Pose,
-            '~/current_arm_pose',
+            '/current_arm_pose',
             self.current_arm_callback,
             10
         )
@@ -43,33 +43,33 @@ class ObjectFrameCompensationNode(Node):
         # 發布者 - 主要輸出
         self.target_arm_pub = self.create_publisher(
             Pose,
-            '~/target_arm_pose',
+            '/target_arm_pose',
             10
         )
         
         # 發布者 - 除錯資訊
         self.object_world_pub = self.create_publisher(
             Pose,
-            '~/object_world_pose',
+            '/object_world_pose',
             10
         )
         
         self.gripper_object_pub = self.create_publisher(
             Pose,
-            '~/gripper_object_relationship',
+            '/gripper_object_relationship',
             10
         )
         
         self.comparison_pub = self.create_publisher(
             String,
-            '~/method_comparison',
+            '/method_comparison',
             10
         )
         
         # 服務
         self.recalculate_srv = self.create_service(
             Empty,
-            '~/recalculate_gripper_relationship',
+            '/recalculate_gripper_relationship',
             self.recalculate_service_callback
         )
         

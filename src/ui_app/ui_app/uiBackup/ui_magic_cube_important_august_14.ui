@@ -403,6 +403,364 @@ Record</string>
           </item>
          </layout>
         </widget>
+        <widget class="QStackedWidget" name="ProcessAndInfoStackedWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>500</y>
+           <width>701</width>
+           <height>191</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"> background-color: #000000; color: white;</string>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="AutoProcessPage">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <widget class="QFrame" name="Timeline">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Shape::StyledPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Shadow::Raised</enum>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item alignment="Qt::AlignmentFlag::AlignVCenter">
+               <widget class="QWidget" name="StartWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_2">
+                 <item>
+                  <widget class="QLabel" name="StartProcessText">
+                   <property name="text">
+                    <string>Start</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                  <widget class="QLabel" name="StartCircle">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="pixmap">
+                    <pixmap>icons/white/timeline-circle.svg</pixmap>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item alignment="Qt::AlignmentFlag::AlignVCenter">
+               <widget class="QWidget" name="ConnectWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout">
+                 <item>
+                  <widget class="QLabel" name="ConnectProcessText">
+                   <property name="text">
+                    <string>Connect</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                  <widget class="QLabel" name="ConnectCircle">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="pixmap">
+                    <pixmap>icons/white/timeline-circle.svg</pixmap>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item alignment="Qt::AlignmentFlag::AlignVCenter">
+               <widget class="QWidget" name="INITWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_3">
+                 <item>
+                  <widget class="QLabel" name="INITProcessText">
+                   <property name="text">
+                    <string>INIT</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                  <widget class="QLabel" name="INITCircle">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="pixmap">
+                    <pixmap>icons/white/timeline-circle.svg</pixmap>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item alignment="Qt::AlignmentFlag::AlignVCenter">
+               <widget class="QWidget" name="IdleWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_6">
+                 <item>
+                  <widget class="QLabel" name="IdleProcessText">
+                   <property name="text">
+                    <string>Idle</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                  <widget class="QLabel" name="IdleCircle">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="pixmap">
+                    <pixmap>icons/white/timeline-circle.svg</pixmap>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item alignment="Qt::AlignmentFlag::AlignVCenter">
+               <widget class="QWidget" name="ManualAlignWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_7">
+                 <item>
+                  <widget class="QLabel" name="RoughAlignProcessText">
+                   <property name="text">
+                    <string>Rough Align</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                  <widget class="QLabel" name="RoughAlignCircle">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="pixmap">
+                    <pixmap>icons/white/timeline-circle.svg</pixmap>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item alignment="Qt::AlignmentFlag::AlignVCenter">
+               <widget class="QWidget" name="AutoAlignWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_8">
+                 <item>
+                  <widget class="QLabel" name="PreciseAlignProcessText">
+                   <property name="text">
+                    <string>Precise Align</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                  <widget class="QLabel" name="PreciseAlignCircle">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="pixmap">
+                    <pixmap>icons/white/timeline-circle.svg</pixmap>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item alignment="Qt::AlignmentFlag::AlignVCenter">
+               <widget class="QWidget" name="AutoPickWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_9">
+                 <item>
+                  <widget class="QLabel" name="PickProcessText">
+                   <property name="text">
+                    <string>Pick</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                  <widget class="QLabel" name="PickCircle">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="pixmap">
+                    <pixmap>icons/white/timeline-circle.svg</pixmap>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item alignment="Qt::AlignmentFlag::AlignVCenter">
+               <widget class="QWidget" name="AssemblyWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_4">
+                 <item alignment="Qt::AlignmentFlag::AlignTop">
+                  <widget class="QLabel" name="AssemblyProcessText">
+                   <property name="text">
+                    <string>Assembly</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignVCenter">
+                  <widget class="QLabel" name="AssemblyCircle">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="pixmap">
+                    <pixmap>icons/white/timeline-circle.svg</pixmap>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="InformationPage">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+          </layout>
+         </widget>
+        </widget>
         <widget class="QWidget" name="AutoAndManualWidget" native="true">
          <property name="geometry">
           <rect>
@@ -761,337 +1119,6 @@ Record</string>
           </item>
          </layout>
         </widget>
-        <widget class="QFrame" name="Timeline">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>500</y>
-           <width>701</width>
-           <height>191</height>
-          </rect>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: #000000;</string>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::Shape::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Shadow::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="StartWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_2">
-             <item>
-              <widget class="QLabel" name="StartProcessText">
-               <property name="text">
-                <string>Start</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="StartCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="ConnectWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <item>
-              <widget class="QLabel" name="ConnectProcessText">
-               <property name="text">
-                <string>Connect</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="ConnectCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="INITWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_3">
-             <item>
-              <widget class="QLabel" name="INITProcessText">
-               <property name="text">
-                <string>INIT</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="INITCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="IdleWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_6">
-             <item>
-              <widget class="QLabel" name="IdleProcessText">
-               <property name="text">
-                <string>Idle</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="IdleCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="ManualAlignWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_7">
-             <item>
-              <widget class="QLabel" name="RoughAlignProcessText">
-               <property name="text">
-                <string>Rough Align</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="RoughAlignCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="AutoAlignWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_8">
-             <item>
-              <widget class="QLabel" name="PreciseAlignProcessText">
-               <property name="text">
-                <string>Precise Align</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="PreciseAlignCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="AutoPickWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_9">
-             <item>
-              <widget class="QLabel" name="PickProcessText">
-               <property name="text">
-                <string>Pick</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="PickCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="AssemblyWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_4">
-             <item alignment="Qt::AlignmentFlag::AlignTop">
-              <widget class="QLabel" name="AssemblyProcessText">
-               <property name="text">
-                <string>Assembly</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignVCenter">
-              <widget class="QLabel" name="AssemblyCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
        </widget>
        <widget class="QWidget" name="ComponentControlPage">
         <widget class="QStackedWidget" name="ComponentControlStackedWidget">
@@ -1288,7 +1315,7 @@ Record</string>
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="MotorPage">
             <widget class="QStackedWidget" name="MotorStackedWidget">
@@ -2498,7 +2525,7 @@ border: none;</string>
               <rect>
                <x>40</x>
                <y>300</y>
-               <width>251</width>
+               <width>231</width>
                <height>41</height>
               </rect>
              </property>
@@ -2533,12 +2560,6 @@ QSlider::handle:horizontal {
              </property>
              <property name="orientation">
               <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="invertedAppearance">
-              <bool>false</bool>
-             </property>
-             <property name="invertedControls">
-              <bool>false</bool>
              </property>
             </widget>
             <widget class="QPushButton" name="FastForktLiftButton">
@@ -2582,9 +2603,9 @@ QSlider::handle:horizontal {
             <widget class="QPushButton" name="StopForkliftButton">
              <property name="geometry">
               <rect>
-               <x>40</x>
+               <x>30</x>
                <y>30</y>
-               <width>251</width>
+               <width>261</width>
                <height>81</height>
               </rect>
              </property>
@@ -2616,7 +2637,7 @@ QSlider::handle:horizontal {
               <rect>
                <x>40</x>
                <y>360</y>
-               <width>251</width>
+               <width>241</width>
                <height>81</height>
               </rect>
              </property>
@@ -2649,7 +2670,7 @@ QSlider::handle:horizontal {
             <widget class="QLabel" name="label_7">
              <property name="geometry">
               <rect>
-               <x>100</x>
+               <x>90</x>
                <y>270</y>
                <width>141</width>
                <height>20</height>
@@ -2672,7 +2693,7 @@ QSlider::handle:horizontal {
               </rect>
              </property>
              <property name="text">
-              <string>+10 mm</string>
+              <string>+10mm</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -2688,7 +2709,7 @@ QSlider::handle:horizontal {
               </rect>
              </property>
              <property name="text">
-              <string>-10 mm</string>
+              <string>-10mm</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -2703,7 +2724,7 @@ QSlider::handle:horizontal {
              <x>10</x>
              <y>100</y>
              <width>291</width>
-             <height>581</height>
+             <height>571</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -2891,8 +2912,7 @@ QSlider::handle:horizontal {
                 <widget class="QLabel" name="CartesianPoseText_2">
                  <property name="font">
                   <font>
-                   <pointsize>11</pointsize>
-                   <bold>false</bold>
+                   <pointsize>10</pointsize>
                   </font>
                  </property>
                  <property name="styleSheet">
@@ -2916,7 +2936,7 @@ QSlider::handle:horizontal {
                  <property name="frameShadow">
                   <enum>QFrame::Shadow::Raised</enum>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_16">
+                 <layout class="QHBoxLayout" name="horizontalLayout_27">
                   <property name="bottomMargin">
                    <number>14</number>
                   </property>
@@ -2924,12 +2944,11 @@ QSlider::handle:horizontal {
                    <widget class="QLabel" name="z_2">
                     <property name="font">
                      <font>
-                      <pointsize>11</pointsize>
-                      <bold>false</bold>
+                      <pointsize>9</pointsize>
                      </font>
                     </property>
                     <property name="text">
-                     <string>z (mm)</string>
+                     <string>z:</string>
                     </property>
                    </widget>
                   </item>
@@ -2951,7 +2970,7 @@ QSlider::handle:horizontal {
                  <property name="frameShadow">
                   <enum>QFrame::Shadow::Raised</enum>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_14">
+                 <layout class="QHBoxLayout" name="horizontalLayout_22">
                   <property name="bottomMargin">
                    <number>3</number>
                   </property>
@@ -2959,12 +2978,11 @@ QSlider::handle:horizontal {
                    <widget class="QLabel" name="y_2">
                     <property name="font">
                      <font>
-                      <pointsize>11</pointsize>
-                      <bold>false</bold>
+                      <pointsize>9</pointsize>
                      </font>
                     </property>
                     <property name="text">
-                     <string>y (mm)</string>
+                     <string>y:</string>
                     </property>
                    </widget>
                   </item>
@@ -2986,7 +3004,7 @@ QSlider::handle:horizontal {
                  <property name="frameShadow">
                   <enum>QFrame::Shadow::Raised</enum>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_17">
+                 <layout class="QHBoxLayout" name="horizontalLayout_28">
                   <property name="bottomMargin">
                    <number>14</number>
                   </property>
@@ -2994,12 +3012,11 @@ QSlider::handle:horizontal {
                    <widget class="QLabel" name="yaw_2">
                     <property name="font">
                      <font>
-                      <pointsize>11</pointsize>
-                      <bold>false</bold>
+                      <pointsize>9</pointsize>
                      </font>
                     </property>
                     <property name="text">
-                     <string>yaw (deg)</string>
+                     <string>yaw</string>
                     </property>
                    </widget>
                   </item>
@@ -3026,7 +3043,7 @@ QSlider::handle:horizontal {
                  <property name="frameShadow">
                   <enum>QFrame::Shadow::Raised</enum>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_13">
+                 <layout class="QHBoxLayout" name="horizontalLayout_29">
                   <property name="leftMargin">
                    <number>9</number>
                   </property>
@@ -3037,12 +3054,11 @@ QSlider::handle:horizontal {
                    <widget class="QLabel" name="x_2">
                     <property name="font">
                      <font>
-                      <pointsize>11</pointsize>
-                      <bold>false</bold>
+                      <pointsize>9</pointsize>
                      </font>
                     </property>
                     <property name="text">
-                     <string>x (mm)</string>
+                     <string>x:</string>
                     </property>
                    </widget>
                   </item>
@@ -3080,11 +3096,37 @@ QSlider::handle:horizontal {
                <property name="spacing">
                 <number>6</number>
                </property>
+               <item row="1" column="0">
+                <widget class="QFrame" name="PositionFrame_2">
+                 <property name="frameShape">
+                  <enum>QFrame::Shape::StyledPanel</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Shadow::Raised</enum>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_15">
+                  <item>
+                   <widget class="QLabel" name="Position_2">
+                    <property name="text">
+                     <string>Position:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="MotorPos">
+                    <property name="text">
+                     <string>pos</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
                <item row="0" column="0" alignment="Qt::AlignmentFlag::AlignTop">
                 <widget class="QLabel" name="MotorInfoText_2">
                  <property name="font">
                   <font>
-                   <pointsize>11</pointsize>
+                   <pointsize>10</pointsize>
                   </font>
                  </property>
                  <property name="styleSheet">
@@ -3100,55 +3142,26 @@ QSlider::handle:horizontal {
                  </property>
                 </widget>
                </item>
-               <item row="1" column="0" alignment="Qt::AlignmentFlag::AlignTop">
-                <widget class="QFrame" name="PositionFrame_2">
+               <item row="4" column="0">
+                <widget class="QFrame" name="CurrentFrame_2">
                  <property name="frameShape">
                   <enum>QFrame::Shape::StyledPanel</enum>
                  </property>
                  <property name="frameShadow">
                   <enum>QFrame::Shadow::Raised</enum>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_15">
-                  <property name="spacing">
-                   <number>12</number>
-                  </property>
-                  <property name="topMargin">
-                   <number>9</number>
-                  </property>
-                  <property name="bottomMargin">
-                   <number>9</number>
-                  </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_17">
                   <item>
-                   <widget class="QLabel" name="Position_2">
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <bold>false</bold>
-                     </font>
-                    </property>
+                   <widget class="QLabel" name="Current_2">
                     <property name="text">
-                     <string>Position (mm)</string>
+                     <string>Current: </string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLabel" name="MotorM1">
+                   <widget class="QLabel" name="CurrentPos">
                     <property name="text">
-                     <string>m1</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="MotorM2">
-                    <property name="text">
-                     <string>m2</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="MotorM3">
-                    <property name="text">
-                     <string>m3</string>
+                     <string>pos</string>
                     </property>
                    </widget>
                   </item>
@@ -3174,8 +3187,7 @@ QSlider::handle:horizontal {
                 <widget class="QLabel" name="LaserInfoText_2">
                  <property name="font">
                   <font>
-                   <pointsize>11</pointsize>
-                   <italic>false</italic>
+                   <pointsize>10</pointsize>
                   </font>
                  </property>
                  <property name="styleSheet">
@@ -3208,14 +3220,8 @@ QSlider::handle:horizontal {
                   </property>
                   <item>
                    <widget class="QLabel" name="h1_2">
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <bold>false</bold>
-                     </font>
-                    </property>
                     <property name="text">
-                     <string>Height Cmd (mm)</string>
+                     <string>Height Cmd: </string>
                     </property>
                    </widget>
                   </item>
@@ -3246,14 +3252,8 @@ QSlider::handle:horizontal {
                   </property>
                   <item>
                    <widget class="QLabel" name="d2_2">
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <bold>false</bold>
-                     </font>
-                    </property>
                     <property name="text">
-                     <string>Curr. Height (mm)</string>
+                     <string>Current Height: </string>
                     </property>
                    </widget>
                   </item>
@@ -3299,13 +3299,8 @@ QSlider::handle:horizontal {
                   </property>
                   <item>
                    <widget class="QLabel" name="h1_5">
-                    <property name="font">
-                     <font>
-                      <bold>false</bold>
-                     </font>
-                    </property>
                     <property name="text">
-                     <string>Right (mm)</string>
+                     <string>Right:</string>
                     </property>
                    </widget>
                   </item>
@@ -3317,6 +3312,26 @@ QSlider::handle:horizontal {
                    </widget>
                   </item>
                  </layout>
+                </widget>
+               </item>
+               <item row="0" column="0" alignment="Qt::AlignmentFlag::AlignTop">
+                <widget class="QLabel" name="DepthInfoText">
+                 <property name="font">
+                  <font>
+                   <pointsize>10</pointsize>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QLabel#DepthInfoText {
+    border-bottom: 1px solid white;
+}</string>
+                 </property>
+                 <property name="text">
+                  <string>Depth Info</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
                 </widget>
                </item>
                <item row="1" column="0">
@@ -3336,14 +3351,8 @@ QSlider::handle:horizontal {
                   </property>
                   <item>
                    <widget class="QLabel" name="d2_5">
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <bold>false</bold>
-                     </font>
-                    </property>
                     <property name="text">
-                     <string>Left (mm)</string>
+                     <string>Left:</string>
                     </property>
                    </widget>
                   </item>
@@ -3355,26 +3364,6 @@ QSlider::handle:horizontal {
                    </widget>
                   </item>
                  </layout>
-                </widget>
-               </item>
-               <item row="0" column="0" alignment="Qt::AlignmentFlag::AlignTop">
-                <widget class="QLabel" name="DepthInfoText">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                  </font>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">QLabel#DepthInfoText {
-    border-bottom: 1px solid white;
-}</string>
-                 </property>
-                 <property name="text">
-                  <string>Depth Info</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignmentFlag::AlignCenter</set>
-                 </property>
                 </widget>
                </item>
               </layout>
@@ -3411,9 +3400,6 @@ QSlider::handle:horizontal {
            </property>
            <property name="focusPolicy">
             <enum>Qt::FocusPolicy::StrongFocus</enum>
-           </property>
-           <property name="verticalScrollBarPolicy">
-            <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
            </property>
            <property name="widgetResizable">
             <bool>true</bool>
@@ -6509,21 +6495,21 @@ QSlider::handle:horizontal {
  <connections/>
  <buttongroups>
   <buttongroup name="ThemeButtonGroup"/>
-  <buttongroup name="buttonGroup"/>
-  <buttongroup name="VisionButtonGroup">
-   <property name="exclusive">
-    <bool>false</bool>
-   </property>
-  </buttongroup>
-  <buttongroup name="FontSizeButtonGroup"/>
   <buttongroup name="ManualButtons">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
+  <buttongroup name="VisionButtonGroup">
+   <property name="exclusive">
+    <bool>false</bool>
+   </property>
+  </buttongroup>
   <buttongroup name="AutoAndManualButtonGroup"/>
-  <buttongroup name="LanguageButtonGroup"/>
+  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="FontSizeButtonGroup"/>
+  <buttongroup name="LanguageButtonGroup"/>
   <buttongroup name="MenuButtonGroup"/>
  </buttongroups>
 </ui>

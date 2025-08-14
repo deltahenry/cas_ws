@@ -1,4 +1,5 @@
 import sys
+import math
 from datetime import date
 import cv2
 from PySide6.QtCore import Qt, QEvent, QTimer, Signal
@@ -23,7 +24,7 @@ from cv_bridge import CvBridge
 import threading
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String, Int32
+from std_msgs.msg import String, Int32, Float32MultiArray
 
 from common_msgs.msg import StateCmd, ForkCmd, JogCmd, ComponentCmd, TaskCmd, TaskState, DIDOCmd, RunCmd, MotionCmd, MotionState, ClipperCmd, MultipleM, MH2State, CurrentPose
 
@@ -56,6 +57,9 @@ class ROSNode(Node):
         # }
 
 
+        self.depth_data_callback_ui = None   # <-- add this
+
+
         self.mh2_state_callback_ui = None
 
         self.height_update_callback = None
@@ -69,7 +73,7 @@ class ROSNode(Node):
 
         self.motion_state_callback_ui = None
         
-        # self.motor_info_update_callback_ui = None
+        self.motor_info_update_callback_ui = None
 
         self.current_motor_len = [10.0, 0.0, 0.0]
 
@@ -108,10 +112,10 @@ class ROSNode(Node):
 
 
         # subscriber
-        self.current_pose_subscriber = self.create_subscription(
-            CurrentPose,
-            "current_pose",
-            self.current_pose_callback,
+        self.depth_data_subscriber = self.create_subscription(
+            Float32MultiArray,
+            "depth_data",
+            self.depth_data_callback,
             10
         )
 
@@ -119,6 +123,13 @@ class ROSNode(Node):
             MH2State,
             "mh2_state",
             self.mh2_state_callback,
+            10
+        )
+
+        self.current_pose_subscriber = self.create_subscription(
+            CurrentPose,
+            "current_pose",
+            self.current_pose_callback,
             10
         )
 
@@ -175,6 +186,13 @@ class ROSNode(Node):
 
         self.detection_task_callback_ui = None
         self.image_update_callback = None
+
+    def depth_data_callback(self, msg: Float32MultiArray):
+        self.get_logger().info(f"Received Depth data: {msg.data}")
+        if self.depth_data_callback_ui:
+            self.depth_data_callback_ui(list(msg.data))  # hand off to UI
+
+        
 
     def mh2_state_callback(self, msg: MH2State):
         self.get_logger().info(f"Received MH2State: \n servo_state: {msg.servo_state} \n alarm_code: {msg.alarm_code}")
@@ -243,6 +261,9 @@ class MainWindow(QMainWindow):
 
     #GUI Threads
     ros_msg_received = Signal(str)
+
+    depth_data_update = Signal(float, float)
+
     mh2_state_update = Signal(bool, int)
     height_update = Signal(int)
     di_update = Signal(str, bool)
@@ -259,6 +280,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # shortcut keys
         QShortcut(QKeySequence(Qt.Key_Escape), self, activated=self.close)
 
         #Start ROS2 Node
@@ -279,6 +301,15 @@ class MainWindow(QMainWindow):
         # self.ros_node.image_update_callback = lambda cv: self.image_update.emit(cv)
         # self.ros_node.detection_task_callback_ui = lambda s: self.vision_mode_update.emit(s)
 
+
+        #depth data
+        self.depth_data_update.connect(self.update_depth_label)
+
+        self.ros_node.depth_data_callback_ui = \
+            (lambda arr: self.depth_data_update.emit(
+                float(arr[0]) if len(arr) > 0 else float('nan'),
+                float(arr[1]) if len(arr) > 1 else float('nan'),
+            ))
 
         #motor ui
         self.motor_controller = MotorController(self.ui, self.ros_node)
@@ -579,21 +610,10 @@ class MainWindow(QMainWindow):
         print(f"[UI] Detection mode is now: {mode}")
         # Optionally update label or status bar  
     
-    # def on_servo_on_off_toggled(self, checked):
-    #     if checked: 
 
-
-
-    
-    # def send_MH2_cmd(self, flag):
-    #     msg = MH2Cmd()
-
-    #     msg.servo_state = True
-
-    #     print(f"[UI] Sent MH2Cmd: {flag}")
-
-
-
+    def update_depth_label(self, left: float, right: float):
+        self.ui.LeftDepthText.setText("—" if left != left else f"{left:.2f}")
+        self.ui.RightDepthText.setText("—" if right != right else f"{right:.2f}")
 
     #ROS2 Menu
     def send_run_cmd(self, flag):
@@ -969,8 +989,8 @@ class MainWindow(QMainWindow):
             self.setGeometry(second_geom)  # Move and resize in one step
             self.setMaximumWidth(1280)
             self.setMaximumHeight(800)
-            # self.showMaximized()
             print("Fixed size: 1280 x 800")
+            # self.showFullScreen()
         else:
             self.showMaximized()
             print("Only one screen, screen fullscreen anyways")

@@ -6,7 +6,7 @@ import os, glob
 from rclpy.node import Node
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped,Pose
 from ament_index_python.packages import get_package_prefix
 from tf2_ros import TransformBroadcaster
 from rclpy.time import Time
@@ -44,11 +44,11 @@ class RealSenseVision(Node):
 
         # subs / pubs
         self.subscription = self.create_subscription(String, '/detection_task', self.task_callback, 10)
-        self.pose_pub = self.create_publisher(PoseStamped, '/screw_center_pose', 10)
-        self.alert_pub = self.create_publisher(String, '/orientation_anomaly', 10)  # ⬅ anomaly topic
+        self.pose_pub = self.create_publisher(Pose, '/object_camera_pose', 10)
+        self.alert_pub = self.create_publisher(String, '/orientation_anomaly', 10)
         self.image_pub = self.create_publisher(Image, '/color_image', 10)
 
-        # NEW: ICP 指令訂閱者 + 目前 ICP 區域 + 最新影像快取
+        # ICP 指令 & 快取
         self.icp_region = "screw"
         self.icp_cmd_sub = self.create_subscription(String, '/icp_cmd', self.icp_cmd_callback, 10)
         self.latest_color = None
@@ -56,7 +56,12 @@ class RealSenseVision(Node):
         self.latest_intrin = None
 
         # flags
-        self.screw_active = self.lshape_active = self.icp_fit_active = False
+        self.screw_active = False
+        self.lshape_active = False
+        self.icp_fit_active = False
+
+        # 只要「有下過任務指令」才算啟動過；用來避免一開程式就刷警告
+        self.task_armed = False
 
         # realsense
         self.pipeline = rs.pipeline()
@@ -83,19 +88,20 @@ class RealSenseVision(Node):
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
-        # last-frame angles (for anomaly comparison)
+        # 姿態異常檢測
         self.abnormal_counter = 0
-        self.screw_active = False
-        self.prev_avg_center = None
-        self.prev_avg_pose = None
         self.prev_yaw = 0.0
         self.prev_pitch = 0.0
         self.prev_roll = 0.0
-        self.last_success_time = self.get_clock().now()
-        self.null_published = False
-        self.recovery_waiting = False
-        self.null_timeout = 3.0  # ⏱️ 超過 3 秒無法偵測才輸出 NULL
-        self.recovery_duration = 3.0  # ✅ 成功持續 3 秒後才允許再廣播
+
+        # 警告節流（避免狂刷）
+        self.last_tf_warn_time = self.get_clock().now()
+
+    def _warn_tf_rate_limited(self, text: str, min_interval_sec: float = 1.0):
+        now = self.get_clock().now()
+        if (now - self.last_tf_warn_time).nanoseconds * 1e-9 >= min_interval_sec:
+            print(text)
+            self.last_tf_warn_time = now
 
     def publish_image(self, color_image):
         resized_image = cv2.resize(color_image, (701, 481), interpolation=cv2.INTER_AREA)
@@ -125,23 +131,19 @@ class RealSenseVision(Node):
         return templates
 
     def task_callback(self, msg: String):
-        task = msg.data.lower()
-        self.screw_active = task == 'screw'
-        self.lshape_active = task == 'l_shape'
-        self.icp_fit_active = task == 'icp_fit'
+        task = msg.data.lower().strip()
+        self.screw_active = (task == 'screw')
+        self.lshape_active = (task == 'l_shape')
+        self.icp_fit_active = (task == 'icp_fit')
+        self.task_armed = True  # ✅ 有收到任務指令才啟用後續 TF 檢查/警告
         self.get_logger().info(f"🔄 任務切換: {task}")
 
         if self.screw_active:
             self.abnormal_counter = 0
+            # 切入螺絲模式時清空舊結果，避免誤以為已有偵測
+            self.prev_screw_results = []
 
     def icp_cmd_callback(self, msg: String):
-        """
-        /icp_cmd 指令：
-          - 'save screw'   : 用當下畫面存螺絲區 golden
-          - 'save battery' : 用當下畫面存電池區 golden
-          - 'icp screw'    : 切換 ICP 目標區域為 screw
-          - 'icp battery'  : 切換 ICP 目標區域為 battery
-        """
         cmd = msg.data.strip().lower()
         if cmd in ("save screw", "screw save", "save_screw"):
             ok = self.icp_fitter.save_golden(self.latest_color, self.latest_depth, self.latest_intrin, "screw")
@@ -175,31 +177,30 @@ class RealSenseVision(Node):
         self.br.sendTransform(t)
 
     def publish_avg_pose(self, x, y, z, quat):
-        msg = PoseStamped()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'camera_link'
-        msg.pose.position.x = x
-        msg.pose.position.y = y
-        msg.pose.position.z = z
-        msg.pose.orientation.x = quat[0]
-        msg.pose.orientation.y = quat[1]
-        msg.pose.orientation.z = quat[2]
-        msg.pose.orientation.w = quat[3]
+        msg = Pose()
+        # msg.header.stamp = self.get_clock().now().to_msg()
+        # msg.header.frame_id = 'camera_link'
+        msg.position.x = x
+        msg.position.y = y
+        msg.position.z = z
+        msg.orientation.x = quat[0]
+        msg.orientation.y = quat[1]
+        msg.orientation.z = quat[2]
+        msg.orientation.w = quat[3]
         self.pose_pub.publish(msg)
 
     def check_angle_anomaly(self, yaw, pitch, roll, threshold=5.0):
         anomalies = []
-        if self.prev_yaw is not None and abs(yaw - self.prev_yaw) > threshold:
+        if abs(yaw - self.prev_yaw) > threshold:
             anomalies.append(f"Yaw Δ={yaw - self.prev_yaw:.2f}°")
-        if self.prev_pitch is not None and abs(pitch - self.prev_pitch) > threshold:
+        if abs(pitch - self.prev_pitch) > threshold:
             anomalies.append(f"Pitch Δ={pitch - self.prev_pitch:.2f}°")
-        if self.prev_roll is not None and abs(roll - self.prev_roll) > threshold:
+        if abs(roll - self.prev_roll) > threshold:
             anomalies.append(f"Roll Δ={roll - self.prev_roll:.2f}°")
         if anomalies:
             msg = f"⚠️ Orientation anomaly: {', '.join(anomalies)} (thres=±{threshold}°)"
             self.get_logger().warn(msg)
             self.alert_pub.publish(String(data=msg))
-
         self.prev_yaw = yaw
         self.prev_pitch = pitch
         self.prev_roll = roll
@@ -223,11 +224,12 @@ def main():
             depth_image = np.asanyarray(depth_frame.get_data())
             depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
 
-            # NEW: 記住最新影像，方便 /icp_cmd 立即存 golden
+            # 快取給 /icp_cmd 使用
             node.latest_color = color_image
             node.latest_depth = depth_image
             node.latest_intrin = depth_intrin
 
+            # ---------- 螺絲模式 ----------
             if node.screw_active:
                 have_fresh_detection = False
                 screw_results = []
@@ -242,10 +244,10 @@ def main():
                         have_fresh_detection = True
                     screw_results = results
                 else:
-                    # 沒有新偵測 → 只用上一幀的結果拿來畫圖，不做廣播
+                    # 沒有新偵測 → 只用上一幀的結果畫圖，不廣播
                     screw_results = node.prev_screw_results
 
-                # ---- 畫點 & 疊加用（不影響 TF）----
+                # 繪製與（若有）姿態計算 + 廣播
                 if len(screw_results) == 4:
                     avg_x = avg_y = avg_z = 0.0
                     avg_u = avg_v = 0
@@ -266,6 +268,7 @@ def main():
                         v1 = np.array([screw_results[1]['X'], screw_results[1]['Y'], screw_results[1]['Z']])
                         v2 = np.array([screw_results[2]['X'], screw_results[2]['Y'], screw_results[2]['Z']])
                         v3 = np.array([screw_results[3]['X'], screw_results[3]['Y'], screw_results[3]['Z']])
+                        
 
                         x_axis = v3 - v2
                         x_axis = x_axis / np.linalg.norm(x_axis)
@@ -300,14 +303,12 @@ def main():
                                     node.prev_avg_pose = None
                                     node.screw_active = False
                                     node.abnormal_counter = 0
-                                continue
+                                # 本幀不廣播
+                                pass
                             else:
                                 node.abnormal_counter = 0
 
-                        print(f"✅ 四元數: {quat}")
-                        print(f"✅ 尤拉角: Yaw={yaw_deg:.2f}°, Pitch={pitch_deg:.2f}°, Roll={roll_deg:.2f}°")
-
-                        # ✅ 只有有新偵測 & 未被判定為異常時才廣播 TF
+                        # 廣播本幀 TF
                         for i, r_ in enumerate(screw_results):
                             node.broadcast_screw_tf(i + 1, r_['X'], r_['Y'], r_['Z'], quat)
 
@@ -322,7 +323,7 @@ def main():
                         node.publish_avg_pose(avg_x, avg_y, avg_z, quat)
                         node.check_angle_anomaly(yaw_deg, pitch_deg, roll_deg, threshold=5.0)
 
-                # ---- overlay 最後有效姿態（沒有新偵測也能顯示畫面提示；不影響 TF）----
+                # 疊上最後有效姿態資訊（僅視覺提示，不影響 TF）
                 if node.prev_avg_center and node.prev_avg_pose:
                     center_u, center_v = node.prev_avg_center
                     avg_x, avg_y, avg_z, yaw_deg, pitch_deg, roll_deg = node.prev_avg_pose
@@ -332,37 +333,47 @@ def main():
                     cv2.putText(color_image, f"Yaw={yaw_deg:.1f} Pitch={pitch_deg:.1f} Roll={roll_deg:.1f}",
                                 (center_u - 100, center_v + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,0), 2)
 
+            # ---------- L-Shape 模式 ----------
             if node.lshape_active:
-                results = node.l_shape_detector.detect_l_shape_lines(color_image)  # 修正變數名
+                results = node.l_shape_detector.detect_l_shape_lines(color_image)
                 for cx, cy in results:
                     cv2.circle(color_image, (cx, cy), 5, (0,255,255), -1)
 
+            # ---------- ICP 模式 ----------
             if node.icp_fit_active:
-                # NEW: 帶上目前的 ICP 區域
                 dist = node.icp_fitter.icp_fit(color_image, depth_image, depth_intrin, region=node.icp_region)
                 print(f"ICP Distance ({node.icp_region}): {dist:.4f}" if dist is not None else "ICP fitting failed")
 
+            # ---------- 只在「任務已啟動」且「螺絲模式」時才做 TF 查詢或警告 ----------
+            if node.task_armed and node.screw_active:
+                if len(node.prev_screw_results) == 4:
+                    # 有有效結果 → 查詢並輸出 TF 詳情
+                    try:
+                        now = Time()
+                        for idx in range(1, 5):
+                            tf = node.tf_buffer.lookup_transform(
+                                target_frame='camera_link',
+                                source_frame=f'screw_{idx}',
+                                time=now,
+                                timeout=Duration(seconds=0.5)
+                            )
+                            pos = tf.transform.translation
+                            rot = tf.transform.rotation
+                            print(f"[🔧 TF] screw_{idx} in camera_link:\n"
+                                  f"  ↳ Position: ({pos.x:.3f}, {pos.y:.3f}, {pos.z:.3f})\n"
+                                  f"  ↳ Quaternion: ({rot.x:.3f}, {rot.y:.3f}, {rot.z:.3f}, {rot.w:.3f})")
+                    except LookupException:
+                        # 理論上有廣播就不該進來；若進來，節流提示
+                        node._warn_tf_rate_limited("⚠️ 無法查詢 TF: screw_X → camera_link")
+                else:
+                    # 沒抓到 4 顆 → 只在螺絲模式且任務已啟動時，節流提示
+                    node._warn_tf_rate_limited("⚠️ 無法查詢 TF: screw_X → camera_link")
+
+            # 顯示視窗
             cv2.imshow("RealSense Detection", color_image)
             node.publish_image(color_image)
-
             if cv2.waitKey(1) == ord('q'):
                 break
-            try:
-                now = Time()
-                for idx in range(1, 5):
-                    tf = node.tf_buffer.lookup_transform(
-                        target_frame='camera_link',
-                        source_frame=f'screw_{idx}',
-                        time=now,
-                        timeout=Duration(seconds=0.5)
-                    )
-                    pos = tf.transform.translation
-                    rot = tf.transform.rotation
-                    print(f"[🔧 TF] screw_{idx} in camera_link:\n"
-                          f"  ↳ Position: ({pos.x:.3f}, {pos.y:.3f}, {pos.z:.3f})\n"
-                          f"  ↳ Quaternion: ({rot.x:.3f}, {rot.y:.3f}, {rot.z:.3f}, {rot.w:.3f})")
-            except LookupException:
-                print("⚠️ 無法查詢 TF: screw_X → camera_link")
 
             node.frame_count += 1
 

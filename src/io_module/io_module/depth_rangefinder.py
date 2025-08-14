@@ -21,7 +21,7 @@ class TcpRangefinderNode(Node):
         self.publisher_ = self.create_publisher(Float32MultiArray, 'depth_data', 10)
 
         # 控制旗標
-        self.streaming = False
+        self.streaming = True
         self.lock = threading.Lock()
 
         # 背景執行緒
@@ -63,7 +63,7 @@ class TcpRangefinderNode(Node):
                                     self.get_logger().info(f'Parsed values: {value1:.2f}, {value2:.2f}')
                                     # 發佈到 ROS Topic
                                     depth_data_msg = Float32MultiArray()
-                                    depth_data_msg.data = [value1, value2]
+                                    depth_data_msg.data = [value2,value1]
                                     self.publisher_.publish(depth_data_msg)
                                 else:
                                     self.get_logger().warn(f'Unexpected message format: {message}')

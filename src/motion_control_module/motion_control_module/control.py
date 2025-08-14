@@ -8,6 +8,7 @@ from copy import deepcopy
 import numpy as np
 from std_msgs.msg import Float32MultiArray
 import math
+from geometry_msgs.msg import Pose
 
 
 time_period = 0.04  # Timer 的時間間隔，單位為秒
@@ -30,6 +31,7 @@ class MotionController(Node):
         self.motor_cmd_publisher = self.create_publisher(Float32MultiArray, '/motor_position_ref', 10)
         self.motion_state_publisher = self.create_publisher(MotionState, '/motion_state', 10)
         self.current_cartesian_pose_publisher = self.create_publisher(CurrentPose, '/current_pose', 10)
+        self.current_arm_pose_publisher = self.create_publisher(Pose, '/current_arm_pose', 10)
 
         # Timer，每次發送 1 筆指令（從 queue 中）
         self.timer = self.create_timer(time_period, self.send_next_batch)
@@ -263,6 +265,24 @@ class MotionController(Node):
         self.motion_state_publisher.publish(MotionState(
             motion_finish=self.motion_finished,
             init_finish=self.init_finished,))
+
+        # 發佈當前 Cartesian 位置
+        x = self.current_cartesian_pose[0]
+        y = self.current_cartesian_pose[1]
+        yaw = self.current_cartesian_pose[2] * 57.29  #
+        pose_data = [x, y, yaw]
+        self.current_cartesian_pose_publisher.publish(CurrentPose(pose_data=pose_data
+        ))
+        # 發佈當前 Arm 位置
+        arm_pose = Pose()
+        arm_pose.position.x = self.current_cartesian_pose[0]
+        arm_pose.position.y = self.current_cartesian_pose[1]
+        arm_pose.position.z = 0.0  # 假設 Z 軸為 0
+        arm_pose.orientation.w = 1.0  # 假設沒有旋轉
+        arm_pose.orientation.x = 0.0
+        arm_pose.orientation.y = 0.0
+        arm_pose.orientation.z = 0.0
+        self.current_arm_pose_publisher.publish(arm_pose)
         
         # 情況 1：如果有軌跡資料（送出一個 batch）
         if self.trajectory_queue:
@@ -298,13 +318,8 @@ class MotionController(Node):
         #     # print("Tracking...")
         #     # self.send_motor_command([self.last_sent_joint_command] * 10)
         
-        # 發佈當前 Cartesian 位置
-        x = self.current_cartesian_pose[0]
-        y = self.current_cartesian_pose[1]
-        yaw = self.current_cartesian_pose[2] * 57.29  #
-        pose_data = [x, y, yaw]
-        self.current_cartesian_pose_publisher.publish(CurrentPose(pose_data=pose_data
-        ))
+
+
 
     # 發送馬達命令
     def send_motor_command(self, batch):
