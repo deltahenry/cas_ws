@@ -23,7 +23,6 @@ class ICPFITTER:
             if self.golden[k] is not None:
                 print(f"✅ 載入 {k} golden: {p} (點數={len(self.golden[k].points)})")
 
-    # ---- 對外 API -----------------------------------------------------------
 
     def save_golden(self, color_image, depth_image, depth_intrin, region="screw"):
         """用當下影像建立點雲並存成該區域的 golden 檔"""
@@ -76,7 +75,6 @@ class ICPFITTER:
             d = np.mean(g_d.compute_point_cloud_distance(c_d))
             return float(d)
 
-    # ---- 內部工具 -----------------------------------------------------------
 
     def _region_path(self, region):
         region = region.lower()

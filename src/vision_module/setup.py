@@ -44,6 +44,7 @@ setup(
             'screw_detector = vision_module.screw_detector:main',
             'l_shape_detector = vision_module.l_shape_detector:main',
             'icp_fitter = vision_module.icp_fitter:main',
+            'realsense_capture_node = vision_module.realsense_capture_node:main',
         ],
     },
 )
