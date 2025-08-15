@@ -11,7 +11,8 @@ class ForkliftController:
 
         self.current_height = 0 
 
-        self.ui.SliderLift.valueChanged.connect(self.on_slider_changed)
+        # self.ui.SliderLift.valueChanged.connect(self.on_slider_changed)
+        self.ui.InputDistance.textChanged.connect(self.on_input_changed)
 
         # Connect UI buttons
         self.ui.LiftUp.clicked.connect(self.lift_up_10mm)
@@ -31,14 +32,12 @@ class ForkliftController:
 
     def update_height_display(self, height):
         self.current_height = height
-        self.ui.currentHeight.setText(f"{height:.2f} mm")  
-        self.ui.zPose.setText(f"{height:.2f} mm") # cartesian pose: z
+        self.ui.currentHeight.setText(f"{height:.2f}")  
+        self.ui.zPose.setText(f"{height:.2f}") # cartesian pose: z
+        self.ui.zVisionLabel.setText(f"{height:.2f}")
 
     def lift_up_10mm(self):
         self.on_touch_buttons(self.ui.LiftUp)
-
-        # new_height  = min(self.ui.SliderLift.maximum(), self.current_height + 10)
-        # self.ui.currentHeight.setText(str(new_height))
 
         self.publish_fork_cmd("run", self.get_speed(), "up", float(min(1500, self.current_height + 10.0)))  # send only +10mm
 
@@ -48,10 +47,6 @@ class ForkliftController:
 
     def lower_down_10mm(self):
         self.on_touch_buttons(self.ui.LowerDown)
-
-        # Subtract 10mm from current height
-        # new_height = max(self.ui.SliderLift.minimum(), self.current_height - 10)
-        # self.ui.currentHeight.setText(str(new_height))
 
         self.publish_fork_cmd("run", self.get_speed(), "down", float(max(80, self.current_height - 10.0)))  # send only -10mm
 
@@ -125,8 +120,16 @@ class ForkliftController:
 
 
 
-    def on_slider_changed(self, value):
-            self.ui.HeightCommand.setText(f"{value:.2f}")
+    # def on_slider_changed(self, value):
+    #         self.ui.HeightCommand.setText(f"{value:.2f}")
+
+    def on_input_changed(self, value):
+        try:
+            num = float(value)  # convert string to float
+            self.ui.HeightCommand.setText(f"{num:.2f}")
+        except ValueError:
+            # handle non-numeric input gracefully
+            self.ui.HeightCommand.setText("")
 
 
     def publish_adjust_command(self, direction, distance):

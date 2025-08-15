@@ -255,11 +255,11 @@ class MotorController:
         """
         # Defensive: make sure the labels exist and have setText
         if hasattr(self.ui, "xPos"):
-            self.ui.xPos.setText(f"{x:.2f} mm")  
+            self.ui.xPos.setText(f"{x:.2f}")  
         if hasattr(self.ui, "yPos"):
-            self.ui.yPos.setText(f"{y:.2f} mm")
+            self.ui.yPos.setText(f"{y:.2f}")
         if hasattr(self.ui, "yawPos"):
-            self.ui.yawPos.setText(f"{yaw_deg:.2f} mm")  # degrees with 2 decimal places
+            self.ui.yawPos.setText(f"{yaw_deg:.2f}")  # degrees with 2 decimal places
 
 
     def send_y_motor_cmd(self, flag):

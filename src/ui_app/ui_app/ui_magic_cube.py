@@ -16,8 +16,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QButtonGroup, QFrame, QGridLayout,
-    QHBoxLayout, QLabel, QMainWindow, QPushButton,
-    QScrollArea, QSizePolicy, QSlider, QStackedWidget,
+    QHBoxLayout, QLabel, QLineEdit, QMainWindow,
+    QPushButton, QScrollArea, QSizePolicy, QStackedWidget,
     QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
@@ -1174,7 +1174,7 @@ class Ui_MainWindow(object):
         self.VisionButtonGroup.setExclusive(False)
         self.VisionButtonGroup.addButton(self.VisionOne)
         self.VisionOne.setObjectName(u"VisionOne")
-        self.VisionOne.setGeometry(QRect(50, 90, 233, 79))
+        self.VisionOne.setGeometry(QRect(50, 23, 233, 79))
         sizePolicy.setHeightForWidth(self.VisionOne.sizePolicy().hasHeightForWidth())
         self.VisionOne.setSizePolicy(sizePolicy)
         self.VisionOne.setStyleSheet(u"")
@@ -1182,7 +1182,7 @@ class Ui_MainWindow(object):
         self.VisionTwo = QPushButton(self.VisionPage)
         self.VisionButtonGroup.addButton(self.VisionTwo)
         self.VisionTwo.setObjectName(u"VisionTwo")
-        self.VisionTwo.setGeometry(QRect(50, 200, 233, 79))
+        self.VisionTwo.setGeometry(QRect(50, 120, 233, 79))
         sizePolicy.setHeightForWidth(self.VisionTwo.sizePolicy().hasHeightForWidth())
         self.VisionTwo.setSizePolicy(sizePolicy)
         self.VisionTwo.setStyleSheet(u"")
@@ -1190,11 +1190,84 @@ class Ui_MainWindow(object):
         self.VisionThree = QPushButton(self.VisionPage)
         self.VisionButtonGroup.addButton(self.VisionThree)
         self.VisionThree.setObjectName(u"VisionThree")
-        self.VisionThree.setGeometry(QRect(50, 300, 233, 79))
+        self.VisionThree.setGeometry(QRect(50, 210, 233, 79))
         sizePolicy.setHeightForWidth(self.VisionThree.sizePolicy().hasHeightForWidth())
         self.VisionThree.setSizePolicy(sizePolicy)
         self.VisionThree.setStyleSheet(u"")
         self.VisionThree.setCheckable(True)
+        self.VisionSendButton = QPushButton(self.VisionPage)
+        self.VisionSendButton.setObjectName(u"VisionSendButton")
+        self.VisionSendButton.setGeometry(QRect(50, 510, 233, 79))
+        sizePolicy.setHeightForWidth(self.VisionSendButton.sizePolicy().hasHeightForWidth())
+        self.VisionSendButton.setSizePolicy(sizePolicy)
+        self.VisionSendButton.setStyleSheet(u"")
+        self.VisionSendButton.setCheckable(False)
+        self.VisionPoseWidget = QWidget(self.VisionPage)
+        self.VisionPoseWidget.setObjectName(u"VisionPoseWidget")
+        self.VisionPoseWidget.setGeometry(QRect(20, 300, 281, 201))
+        self.VisionPoseWidget.setStyleSheet(u"background-color: #000000;")
+        self.gridLayout = QGridLayout(self.VisionPoseWidget)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.yVisionLabel = QLabel(self.VisionPoseWidget)
+        self.yVisionLabel.setObjectName(u"yVisionLabel")
+
+        self.gridLayout.addWidget(self.yVisionLabel, 1, 1, 1, 1)
+
+        self.yVision = QPushButton(self.VisionPoseWidget)
+        self.yVision.setObjectName(u"yVision")
+        self.yVision.setEnabled(False)
+        sizePolicy.setHeightForWidth(self.yVision.sizePolicy().hasHeightForWidth())
+        self.yVision.setSizePolicy(sizePolicy)
+        self.yVision.setStyleSheet(u"")
+        self.yVision.setCheckable(False)
+
+        self.gridLayout.addWidget(self.yVision, 1, 0, 1, 1)
+
+        self.xVisionLabel = QLabel(self.VisionPoseWidget)
+        self.xVisionLabel.setObjectName(u"xVisionLabel")
+
+        self.gridLayout.addWidget(self.xVisionLabel, 0, 1, 1, 1)
+
+        self.Yaw = QPushButton(self.VisionPoseWidget)
+        self.Yaw.setObjectName(u"Yaw")
+        self.Yaw.setEnabled(False)
+        sizePolicy.setHeightForWidth(self.Yaw.sizePolicy().hasHeightForWidth())
+        self.Yaw.setSizePolicy(sizePolicy)
+        self.Yaw.setStyleSheet(u"")
+        self.Yaw.setCheckable(False)
+
+        self.gridLayout.addWidget(self.Yaw, 2, 0, 1, 1)
+
+        self.xVision = QPushButton(self.VisionPoseWidget)
+        self.xVision.setObjectName(u"xVision")
+        self.xVision.setEnabled(False)
+        sizePolicy.setHeightForWidth(self.xVision.sizePolicy().hasHeightForWidth())
+        self.xVision.setSizePolicy(sizePolicy)
+        self.xVision.setStyleSheet(u"")
+        self.xVision.setCheckable(False)
+
+        self.gridLayout.addWidget(self.xVision, 0, 0, 1, 1)
+
+        self.zVision = QPushButton(self.VisionPoseWidget)
+        self.zVision.setObjectName(u"zVision")
+        self.zVision.setEnabled(False)
+        sizePolicy.setHeightForWidth(self.zVision.sizePolicy().hasHeightForWidth())
+        self.zVision.setSizePolicy(sizePolicy)
+        self.zVision.setStyleSheet(u"")
+        self.zVision.setCheckable(False)
+
+        self.gridLayout.addWidget(self.zVision, 4, 0, 1, 1)
+
+        self.YawVisionLabel = QLabel(self.VisionPoseWidget)
+        self.YawVisionLabel.setObjectName(u"YawVisionLabel")
+
+        self.gridLayout.addWidget(self.YawVisionLabel, 2, 1, 1, 1)
+
+        self.zVisionLabel = QLabel(self.VisionPoseWidget)
+        self.zVisionLabel.setObjectName(u"zVisionLabel")
+
+        self.gridLayout.addWidget(self.zVisionLabel, 4, 1, 1, 1)
+
         self.ChangeComponentControlStackedWidget.addWidget(self.VisionPage)
         self.ClipperPage = QWidget()
         self.ClipperPage.setObjectName(u"ClipperPage")
@@ -1257,29 +1330,6 @@ class Ui_MainWindow(object):
         self.LowerDown.setIcon(icon13)
         self.LowerDown.setIconSize(QSize(80, 80))
         self.LowerDown.setCheckable(False)
-        self.SliderLift = QSlider(self.ForkliftPage)
-        self.SliderLift.setObjectName(u"SliderLift")
-        self.SliderLift.setGeometry(QRect(40, 300, 251, 41))
-        self.SliderLift.setStyleSheet(u"QSlider::groove:horizontal {\n"
-"    height: 20px;\n"
-"    background: #ccc;\n"
-"    border-radius: 10px;\n"
-"}\n"
-"QSlider::handle:horizontal {\n"
-"    background: #000000;\n"
-"    border: 2px solid white;\n"
-"    width: 40px;\n"
-"    margin: -10px 0; /* center handle */\n"
-"    border-radius: 10px;\n"
-"}")
-        self.SliderLift.setMinimum(80)
-        self.SliderLift.setMaximum(1500)
-        self.SliderLift.setSingleStep(10)
-        self.SliderLift.setValue(123)
-        self.SliderLift.setSliderPosition(123)
-        self.SliderLift.setOrientation(Qt.Orientation.Horizontal)
-        self.SliderLift.setInvertedAppearance(False)
-        self.SliderLift.setInvertedControls(False)
         self.FastForktLiftButton = QPushButton(self.ForkliftPage)
         self.buttonGroup = QButtonGroup(MainWindow)
         self.buttonGroup.setObjectName(u"buttonGroup")
@@ -1321,6 +1371,10 @@ class Ui_MainWindow(object):
         self.label_9.setObjectName(u"label_9")
         self.label_9.setGeometry(QRect(210, 570, 67, 17))
         self.label_9.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.InputDistance = QLineEdit(self.ForkliftPage)
+        self.InputDistance.setObjectName(u"InputDistance")
+        self.InputDistance.setGeometry(QRect(70, 300, 191, 41))
+        self.InputDistance.setStyleSheet(u"background-color: #FFFFFF;")
         self.ChangeComponentControlStackedWidget.addWidget(self.ForkliftPage)
         self.DIDOPage = QWidget()
         self.DIDOPage.setObjectName(u"DIDOPage")
@@ -2944,8 +2998,8 @@ class Ui_MainWindow(object):
         self.ParentStackedWidgetToChangeMenuOptions.setCurrentIndex(0)
         self.ActionButtons.setCurrentIndex(0)
         self.ComponentControlStackedWidget.setCurrentIndex(0)
-        self.ChangeComponentControlStackedWidget.setCurrentIndex(2)
-        self.MotorStackedWidget.setCurrentIndex(0)
+        self.ChangeComponentControlStackedWidget.setCurrentIndex(1)
+        self.MotorStackedWidget.setCurrentIndex(1)
         self.MiddleStackedWidget.setCurrentIndex(0)
 
 
@@ -3022,6 +3076,15 @@ class Ui_MainWindow(object):
         self.VisionOne.setText(QCoreApplication.translate("MainWindow", u"Screw", None))
         self.VisionTwo.setText(QCoreApplication.translate("MainWindow", u"LShape", None))
         self.VisionThree.setText(QCoreApplication.translate("MainWindow", u"ICP Fit", None))
+        self.VisionSendButton.setText(QCoreApplication.translate("MainWindow", u"Send", None))
+        self.yVisionLabel.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.yVision.setText(QCoreApplication.translate("MainWindow", u"Y", None))
+        self.xVisionLabel.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.Yaw.setText(QCoreApplication.translate("MainWindow", u"Yaw", None))
+        self.xVision.setText(QCoreApplication.translate("MainWindow", u"X", None))
+        self.zVision.setText(QCoreApplication.translate("MainWindow", u"Z", None))
+        self.YawVisionLabel.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.zVisionLabel.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.OpenClipper.setText(QCoreApplication.translate("MainWindow", u"open", None))
         self.CloseClipper.setText(QCoreApplication.translate("MainWindow", u"close", None))
         self.StopClipper.setText(QCoreApplication.translate("MainWindow", u"stop", None))
@@ -3037,6 +3100,7 @@ class Ui_MainWindow(object):
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Distance (manual)", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"+10 mm", None))
         self.label_9.setText(QCoreApplication.translate("MainWindow", u"-10 mm", None))
+        self.InputDistance.setText("")
         self.MotorOption.setText(QCoreApplication.translate("MainWindow", u"Motor", None))
         self.VisionOption.setText(QCoreApplication.translate("MainWindow", u"Vision", None))
         self.ClipperOption.setText(QCoreApplication.translate("MainWindow", u"Clipper", None))

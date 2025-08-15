@@ -59,6 +59,7 @@ class ROSNode(Node):
 
         self.depth_data_callback_ui = None   # <-- add this
 
+        self.compensate_update_callback = None
 
         self.mh2_state_callback_ui = None
 
@@ -67,6 +68,8 @@ class ROSNode(Node):
         self.forklift_controller = None
 
         self.di_update_callback = None
+        self.do_update_callback = None
+
         self.current_pose_callback_ui = None
 
         # self.current_motor_len = [0.0, 0.0, 0.0]
@@ -102,13 +105,13 @@ class ROSNode(Node):
 
         self.vision_control_publisher = self.create_publisher(String, '/detection_task', 10)
 
+        # self.vision_send_publisher = self.create_publisher(MotionCmd, '/motion_cmd')
+
         self.dido_control_publisher = self.create_publisher(DIDOCmd, '/test_dido', 10)
 
         self.y_motor_cmd_publisher = self.create_publisher(String, '/test_y_motor_cmd', 10)
 
         self.clipper_cmd_publisher = self.create_publisher(ClipperCmd, '/clipper_cmd', 10)
-
-
 
 
         # subscriber
@@ -146,6 +149,20 @@ class ROSNode(Node):
             self.image_callback,
             10
         )
+
+        self.compensate_pose_subscriber = self.create_subscription(
+            Float32MultiArray,
+            'compensate_pose',
+            self.compensate_pose_callback,
+            10
+        )
+
+        # self.get_do_subscriber = self.create_subscription(
+        #     DIDOCmd,
+        #     "get_do",
+        #     self.get_do_callback,
+        #     10
+        # )
 
         # self.motion_cmd_subscriber = self.create_subscription(
         #     MotionCmd,
@@ -228,6 +245,12 @@ class ROSNode(Node):
         if self.image_update_callback:
             self.image_update_callback(cv_img)
 
+    def compensate_pose_callback(self, msg: Float32MultiArray):
+        self.get_logger().info(f"Received compensate_pose: {msg.data}")
+
+        if self.compensate_update_callback:
+            self.compensate_update_callback(list(msg.data))
+
     def detection_task_callback(self, msg: String):
         if self.detection_task_callback_ui:
             self.detection_task_callback_ui(msg.data)
@@ -242,14 +265,17 @@ class ROSNode(Node):
                 # because Qt will queue delivery to the UI thread.
                 self.motor_info_update_callback_ui(m1, m2, m3)
 
-
     def dido_callback(self, msg: DIDOCmd):
-        name = msg.name.strip()
+        name = msg.name.strip().upper()
         state = bool(msg.state)
-        if not name.upper().startswith("DI"):
-            return
-        if self.di_update_callback:
-            self.di_update_callback(name, state)
+
+        if name.startswith("DI"):
+            if self.di_update_callback:
+                self.di_update_callback(name, state)
+        elif name.startswith("DO"):
+            if self.do_update_callback:
+                self.do_update_callback(name, state)
+
 
     def motion_state_callback(self, msg: MotionState):
         print(f"[ROS] /motion_state -> init={msg.init_finish}, motion={msg.motion_finish}")
@@ -264,9 +290,14 @@ class MainWindow(QMainWindow):
 
     depth_data_update = Signal(float, float)
 
+    compensate_pose_update = Signal(float, float, float)
+
     mh2_state_update = Signal(bool, int)
     height_update = Signal(int)
+
     di_update = Signal(str, bool)
+    do_update = Signal(str, bool)
+
 
     image_update = Signal(object)   # carries numpy image
     vision_mode_update = Signal(str)
@@ -287,6 +318,8 @@ class MainWindow(QMainWindow):
         self.ros_node = ros_node
 
         QScroller.grabGesture(self.ui.ScrollAreaDIDO.viewport(), QScroller.LeftMouseButtonGesture)
+
+        self._vision_comp = {"x": float('nan'), "y": float('nan'), "yaw": float('nan')}
 
 
         #vision ui
@@ -310,6 +343,18 @@ class MainWindow(QMainWindow):
                 float(arr[0]) if len(arr) > 0 else float('nan'),
                 float(arr[1]) if len(arr) > 1 else float('nan'),
             ))
+        
+        #vision compensate pose
+        self.compensate_pose_update.connect(self.update_compensate_pose_label)
+
+        self.ros_node.compensate_update_callback = \
+            (lambda arr: self.compensate_pose_update.emit(
+                float(arr[0]) if len(arr) > 0 else float('nan'),
+                float(arr[1]) if len(arr) > 1 else float('nan'),
+                float(arr[2] if len(arr) > 2 else float('nan')),
+                # float(arr[3] if len(arr) > 3 else float('nan'))
+            ))
+        
 
         #motor ui
         self.motor_controller = MotorController(self.ui, self.ros_node)
@@ -338,13 +383,14 @@ class MainWindow(QMainWindow):
 
         # DI/DO UI Controller
         self.dido_controller = DIDOController(self.ui, self.ros_node)
-        # self.ros_node.di_update_callback = self.dido_controller.update_di
-
-        # Connect signal to UI updater (GUI thread)
+        
         self.di_update.connect(self.dido_controller.update_di)
+        # self.do_update.connect(self.dido_controller.update_do)    
 
         # Make ROS -> emit the signal instead of touching widgets directly
         self.ros_node.di_update_callback = lambda name, state: self.di_update.emit(name, state)
+        # self.ros_node.do_update_callback = lambda name, state: self.do_update.emit(name, state)
+
 
         
 
@@ -440,6 +486,8 @@ class MainWindow(QMainWindow):
         self.ui.ClipperOption.clicked.connect(lambda: self.component_control_switch_page("Clipper", 2))
         self.ui.ForkliftOption.clicked.connect(lambda: self.component_control_switch_page("Forklift", 3))
         self.ui.DIDOOption.clicked.connect(lambda: self.component_control_switch_page("DI/DO", 4))
+
+        self.ui.VisionSendButton.clicked.connect(self.send_vision_compensate_pose)
 
         for btn in self.ui.ManualButtons.buttons():
             btn.toggled.connect(lambda checked, b=btn: self.on_manual_button_toggled(b, checked))
@@ -612,8 +660,20 @@ class MainWindow(QMainWindow):
     
 
     def update_depth_label(self, left: float, right: float):
-        self.ui.LeftDepthText.setText("—" if left != left else f"{left:.2f}")
-        self.ui.RightDepthText.setText("—" if right != right else f"{right:.2f}")
+        self.ui.LeftDepthText.setText("—" if math.isnan(left) else f"{left:.2f}")
+        self.ui.RightDepthText.setText("—" if math.isnan(right) else f"{right:.2f}")
+
+    def update_compensate_pose_label(self, x: float, y: float, yaw: float):
+        self._vision_comp["x"] = x
+        self._vision_comp["y"] = y
+        self._vision_comp["yaw"] = yaw
+        # self._vision_comp["z"]  = z
+
+        self.ui.xVisionLabel.setText("-" if math.isnan(x) else f"{x:.2f}")
+        self.ui.yVisionLabel.setText("-" if math.isnan(y) else f"{y:.2f}")
+        self.ui.YawVisionLabel.setText("-" if math.isnan(yaw) else f"{yaw:.2f}")
+        # self.ui.zVisionLabel.setText("-" if z != z else f"{z:.2f}")
+
 
     #ROS2 Menu
     def send_run_cmd(self, flag):
@@ -728,6 +788,26 @@ class MainWindow(QMainWindow):
         msg.data = mode
         self.ros_node.vision_control_publisher.publish(msg)
         print(f"[UI] Sent VisionCmd: {mode}")
+
+    def send_vision_compensate_pose(self):
+        x = self._vision_comp["x"]
+        y = self._vision_comp["y"]
+        yaw = self._vision_comp["yaw"]
+        # z = self._vision_comp["z"]
+
+        # Guard: don’t send if any value is NaN
+        if any(math.isnan(v) for v in (x, y, yaw)):
+            print("[Vision] compensate_pose has NaN; not sending MotionCmd.")
+            return
+
+        msg = MotionCmd()
+        msg.command_type = MotionCmd.TYPE_GOTO
+        msg.pose_data = [x, y, yaw]
+        msg.speed = 5.0
+        self.ros_node.motion_cmd_publisher.publish(msg)
+        print(f"[Vision] Sent MotionCmd → pose:{msg.pose_data} speed:{msg.speed}")
+
+
 
     # def send_vision_cmd(self, mode):
     #     # simplest: no dedupe
@@ -987,10 +1067,10 @@ class MainWindow(QMainWindow):
             second_screen = screens[1]  # Use the actual second screen
             second_geom = second_screen.geometry()
             self.setGeometry(second_geom)  # Move and resize in one step
-            self.setMaximumWidth(1280)
-            self.setMaximumHeight(800)
-            print("Fixed size: 1280 x 800")
-            # self.showFullScreen()
+            # self.setMaximumWidth(1280)
+            # self.setMaximumHeight(800)
+            # print("Fixed size: 1280 x 800")
+            self.showFullScreen()
         else:
             self.showMaximized()
             print("Only one screen, screen fullscreen anyways")

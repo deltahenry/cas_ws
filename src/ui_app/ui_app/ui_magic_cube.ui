@@ -1288,7 +1288,7 @@ Record</string>
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="MotorPage">
             <widget class="QStackedWidget" name="MotorStackedWidget">
@@ -1301,7 +1301,7 @@ Record</string>
               </rect>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>1</number>
              </property>
              <widget class="QWidget" name="MotorConfigPage">
               <widget class="QPushButton" name="ServoON">
@@ -2231,7 +2231,7 @@ QPushButton:checked {
              <property name="geometry">
               <rect>
                <x>50</x>
-               <y>90</y>
+               <y>23</y>
                <width>233</width>
                <height>79</height>
               </rect>
@@ -2259,7 +2259,7 @@ QPushButton:checked {
              <property name="geometry">
               <rect>
                <x>50</x>
-               <y>200</y>
+               <y>120</y>
                <width>233</width>
                <height>79</height>
               </rect>
@@ -2287,7 +2287,7 @@ QPushButton:checked {
              <property name="geometry">
               <rect>
                <x>50</x>
-               <y>300</y>
+               <y>210</y>
                <width>233</width>
                <height>79</height>
               </rect>
@@ -2310,6 +2310,162 @@ QPushButton:checked {
              <attribute name="buttonGroup">
               <string notr="true">VisionButtonGroup</string>
              </attribute>
+            </widget>
+            <widget class="QPushButton" name="VisionSendButton">
+             <property name="geometry">
+              <rect>
+               <x>50</x>
+               <y>510</y>
+               <width>233</width>
+               <height>79</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>Send</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QWidget" name="VisionPoseWidget" native="true">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>300</y>
+               <width>281</width>
+               <height>201</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: #000000;</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout">
+              <item row="1" column="1">
+               <widget class="QLabel" name="yVisionLabel">
+                <property name="text">
+                 <string>TextLabel</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="yVision">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="text">
+                 <string>Y</string>
+                </property>
+                <property name="checkable">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="xVisionLabel">
+                <property name="text">
+                 <string>TextLabel</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QPushButton" name="Yaw">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="text">
+                 <string>Yaw</string>
+                </property>
+                <property name="checkable">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QPushButton" name="xVision">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="text">
+                 <string>X</string>
+                </property>
+                <property name="checkable">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QPushButton" name="zVision">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="text">
+                 <string>Z</string>
+                </property>
+                <property name="checkable">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLabel" name="YawVisionLabel">
+                <property name="text">
+                 <string>TextLabel</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QLabel" name="zVisionLabel">
+                <property name="text">
+                 <string>TextLabel</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </widget>
            <widget class="QWidget" name="ClipperPage">
@@ -2493,54 +2649,6 @@ border: none;</string>
               <string notr="true">buttonGroup_2</string>
              </attribute>
             </widget>
-            <widget class="QSlider" name="SliderLift">
-             <property name="geometry">
-              <rect>
-               <x>40</x>
-               <y>300</y>
-               <width>251</width>
-               <height>41</height>
-              </rect>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QSlider::groove:horizontal {
-    height: 20px;
-    background: #ccc;
-    border-radius: 10px;
-}
-QSlider::handle:horizontal {
-    background: #000000;
-    border: 2px solid white;
-    width: 40px;
-    margin: -10px 0; /* center handle */
-    border-radius: 10px;
-}</string>
-             </property>
-             <property name="minimum">
-              <number>80</number>
-             </property>
-             <property name="maximum">
-              <number>1500</number>
-             </property>
-             <property name="singleStep">
-              <number>10</number>
-             </property>
-             <property name="value">
-              <number>123</number>
-             </property>
-             <property name="sliderPosition">
-              <number>123</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="invertedAppearance">
-              <bool>false</bool>
-             </property>
-             <property name="invertedControls">
-              <bool>false</bool>
-             </property>
-            </widget>
             <widget class="QPushButton" name="FastForktLiftButton">
              <property name="geometry">
               <rect>
@@ -2692,6 +2800,22 @@ QSlider::handle:horizontal {
              </property>
              <property name="alignment">
               <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="InputDistance">
+             <property name="geometry">
+              <rect>
+               <x>70</x>
+               <y>300</y>
+               <width>191</width>
+               <height>41</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: #FFFFFF;</string>
+             </property>
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </widget>
@@ -6509,21 +6633,21 @@ QSlider::handle:horizontal {
  <connections/>
  <buttongroups>
   <buttongroup name="ThemeButtonGroup"/>
-  <buttongroup name="buttonGroup"/>
+  <buttongroup name="LanguageButtonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="VisionButtonGroup">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
   <buttongroup name="FontSizeButtonGroup"/>
+  <buttongroup name="MenuButtonGroup"/>
   <buttongroup name="ManualButtons">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
+  <buttongroup name="buttonGroup"/>
   <buttongroup name="AutoAndManualButtonGroup"/>
-  <buttongroup name="LanguageButtonGroup"/>
-  <buttongroup name="buttonGroup_2"/>
-  <buttongroup name="MenuButtonGroup"/>
  </buttongroups>
 </ui>
