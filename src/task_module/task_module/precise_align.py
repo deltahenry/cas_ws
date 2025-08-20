@@ -230,7 +230,6 @@ class PreciseAlignFSM(Machine):
         }
         self.send_fork_cmd = False
         
-
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
             print("[PreciseAlignmentFSM] 被暫停中")

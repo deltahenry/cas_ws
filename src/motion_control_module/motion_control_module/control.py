@@ -275,8 +275,8 @@ class MotionController(Node):
         ))
         # 發佈當前 Arm 位置
         arm_pose = Pose()
-        arm_pose.position.x = self.current_cartesian_pose[0]
-        arm_pose.position.y = self.current_cartesian_pose[1]
+        arm_pose.position.x = float(self.current_cartesian_pose[0])
+        arm_pose.position.y = float(self.current_cartesian_pose[1])
         arm_pose.position.z = 0.0  # 假設 Z 軸為 0
         arm_pose.orientation.w = 1.0  # 假設沒有旋轉
         arm_pose.orientation.x = 0.0

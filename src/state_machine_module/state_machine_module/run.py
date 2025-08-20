@@ -20,10 +20,13 @@ class DataNode(Node):
     def __init__(self):
 
         self.state_cmd ={
+            'init_button': False,
             'pause_button': False,
+            'run_button': False,
+            'stop_button': False,
         }
 
-        self.task_cmd = "idle"  # rough align,precise align,pick,assembly
+        self.task_cmd = "idle"  # rough align,precise align,pick,RUN
      
         self.forkstate = "idle"
 
@@ -88,7 +91,7 @@ class DataNode(Node):
         )
 
         #publisher
-        self.assembly_state_publisher = self.create_publisher(TaskState, '/task_state_assembly', 10)
+        self.RUN_state_publisher = self.create_publisher(TaskState, '/task_state_RUN', 10)
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
         self.detection_cmd_publisher = self.create_publisher(String,'/detection_task',10)
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
@@ -148,50 +151,47 @@ class DataNode(Node):
         self.current_pose[2] = msg.pose_data[2]
 
 
-class AssemblyState(Enum):
+class RUNState(Enum):
     IDLE = "idle"
     INIT = "init"
-    PUSH = "push"
-    OPEN_CLIPPER = "open_clipper"
-    BACK_HOME = "back_home"
-    MOVE_FORKLIFT = "move_forklift"
+    ROUGH_ALIGN = "rough_align"
+    PRECISE_ALIGN = "precise_align"
+    ASSEMBLY = "assembly"
+    PICK = "pick"
     DONE = "done"
     FAIL = "fail"
 
-class AssemblyFSM(Machine):
+class RUNFSM(Machine):
     def __init__(self, data_node: DataNode):
-        self.phase = AssemblyState.IDLE  # 初始狀態
+        self.phase = RUNState.IDLE  # 初始狀態
         self.data_node = data_node
         self.motor_cmd_sent = False
         self.send_fork_cmd = False
 
         states = [
-            AssemblyState.IDLE.value,
-            AssemblyState.INIT.value,       
-            AssemblyState.PUSH.value,
-            AssemblyState.OPEN_CLIPPER.value,
-            AssemblyState.BACK_HOME.value,
-            AssemblyState.MOVE_FORKLIFT.value,
-            AssemblyState.DONE.value,
-            AssemblyState.FAIL.value
+            RUNState.IDLE.value,
+            RUNState.INIT.value,       
+            RUNState.ROUGH_ALIGN.value,
+            RUNState.PRECISE_ALIGN.value,
+            RUNState.ASSEMBLY.value,
+            RUNState.PICK.value,
+            RUNState.DONE.value,
+            RUNState.FAIL.value
         ]
         
         transitions = [
-            {'trigger': 'idle_to_init', 'source': AssemblyState.IDLE.value, 'dest': AssemblyState.INIT.value},
-            {'trigger': 'init_to_push', 'source': AssemblyState.INIT.value, 'dest': AssemblyState.PUSH.value},
-            {'trigger': 'push_to_open_clipper', 'source': AssemblyState.PUSH.value, 'dest': AssemblyState.OPEN_CLIPPER.value},
-            {'trigger': 'open_clipper_to_back_home', 'source': AssemblyState.OPEN_CLIPPER.value, 'dest': AssemblyState.BACK_HOME.value},
-            {'trigger': 'back_home_to_move_forklift', 'source': AssemblyState.BACK_HOME.value, 'dest': AssemblyState.MOVE_FORKLIFT.value},
-            {'trigger': 'move_forklift_to_done', 'source': AssemblyState.MOVE_FORKLIFT.value, 'dest': AssemblyState.DONE.value},
-            {'trigger': 'fail', 'source': '*', 'dest': AssemblyState.FAIL.value},
-            {'trigger': 'return_to_idle', 'source': '*', 'dest': AssemblyState.IDLE.value},
+            {'trigger': 'idle_to_init', 'source': RUNState.IDLE.value, 'dest': RUNState.INIT.value},
+            
+
+            {'trigger': 'fail', 'source': '*', 'dest': RUNState.FAIL.value},
+            {'trigger': 'return_to_idle', 'source': '*', 'dest': RUNState.IDLE.value},
         ]
 
         self.machine = Machine(model=self, states=states,transitions=transitions,initial=self.phase.value,
                                auto_transitions=False,after_state_change=self._update_phase)
         
     def _update_phase(self):
-        self.phase = AssemblyState(self.state)
+        self.phase = RUNState(self.state)
 
     def depth_ref(self,run_mode):
         """根據運行模式返回參考深度"""
@@ -208,13 +208,13 @@ class AssemblyFSM(Machine):
 
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
-            print("[AssemblymentFSM] 被暫停中")
+            print("[RUNmentFSM] 被暫停中")
         
-        elif self.data_node.task_cmd == "assembly":
-            print("[AssemblymentFSM] 開始手動對齊任務")
+        elif self.data_node.task_cmd == "RUN":
+            print("[RUNmentFSM] 開始手動對齊任務")
             self.run()
         else:
-            print("[AssemblymentFSM] 手動對齊任務未啟動，等待中")
+            print("[RUNmentFSM] 手動對齊任務未啟動，等待中")
             self.reset_parameters()  # 重置參數
             self.return_to_idle()  # 返回到空閒狀態
             self.run()
@@ -226,78 +226,79 @@ class AssemblyFSM(Machine):
         push_pose_cmd = [0.0,500.0,0.0]  # 推進階段的目標位置
         back_pose_cmd = [0.0, 0.0, 0.0]  # 回到家位置的目標位置
 
-        if self.state == AssemblyState.IDLE.value:
-            print("[AssemblymentFSM] 等待開始")
-            if self.data_node.task_cmd == "assembly":
+        if self.state == RUNState.IDLE.value:
+            print("[RUNmentFSM] 等待開始")
+            if self.data_node.task_cmd == "RUN":
                 self.idle_to_init()
-                print("[AssemblymentFSM] 進入初始化階段")
+                print("[RUNmentFSM] 進入初始化階段")
             
-        elif self.state == AssemblyState.INIT.value:
-            print("[AssemblymentFSM] 初始化階段")
+        elif self.state == RUNState.INIT.value:
+            print("[RUNmentFSM] 初始化階段")
             self.init_to_push()
         
-        elif self.state == AssemblyState.PUSH.value:
-            print("[AssemblymentFSM] 推進階段")
+        elif self.state == RUNState.PUSH.value:
+            print("[RUNmentFSM] 推進階段")
             if not self.motor_cmd_sent:
                 self.sent_motor_cmd(push_pose_cmd)
                 self.motor_cmd_sent = True  # 標記已發送初始化命令
             else:
-                print("[AssemblymentFSM] 馬達命令已發送，等待完成")
+                print("[RUNmentFSM] 馬達命令已發送，等待完成")
                 push_arrive = self.check_pose(push_pose_cmd)
                 if push_arrive:
-                    print("[AssemblymentFSM] 馬達已到達推進位置")
+                    print("[RUNmentFSM] 馬達已到達推進位置")
                     self.motor_cmd_sent = False  # 重置標記
                     self.push_to_open_clipper()
                 else:
-                    print("[AssemblymentFSM] 馬達尚未到達推進位置，繼續等待")
+                    print("[RUNmentFSM] 馬達尚未到達推進位置，繼續等待")
         
-        elif self.state == AssemblyState.OPEN_CLIPPER.value:
-            print("[AssemblymentFSM] 開啟夾爪階段")
+        elif self.state == RUNState.OPEN_CLIPPER.value:
+            print("[RUNmentFSM] 開啟夾爪階段")
             self.send_clipper_cmd("open_clipper")
             time.sleep(10)  # 等待夾爪開啟
             self.open_clipper_to_back_home()
 
-        elif self.state == AssemblyState.BACK_HOME.value:
-            print("[AssemblymentFSM] 回到家位置階段")
+        elif self.state == RUNState.BACK_HOME.value:
+            print("[RUNmentFSM] 回到家位置階段")
             if not self.motor_cmd_sent:
                 self.sent_motor_cmd(back_pose_cmd)
                 self.motor_cmd_sent = True
             else:
-                print("[AssemblymentFSM] 馬達命令已發送，等待完成")
+                print("[RUNmentFSM] 馬達命令已發送，等待完成")
                 back_arrive = self.check_pose(back_pose_cmd)
                 if back_arrive:
-                    print("[AssemblymentFSM] 馬達已到達家位置")
+                    print("[RUNmentFSM] 馬達已到達家位置")
                     self.back_home_to_move_forklift()
                 else:
-                    print("[AssemblymentFSM] 馬達尚未到達家位置，繼續等待")
+                    print("[RUNmentFSM] 馬達尚未到達家位置，繼續等待")
         
-        elif self.state == AssemblyState.MOVE_FORKLIFT.value:
-            print("[AssemblymentFSM] 移動叉車階段")
-            height_cmd = 100.0
-            tolerance = 5.0
-            
+        elif self.state == RUNState.MOVE_FORKLIFT.value:
+            print("[RUNmentFSM] 移動叉車階段")
             if not self.send_fork_cmd:
-                self.fork_cmd(mode="run", speed="slow", direction="down", distance=height_cmd)
-                self.send_fork_cmd = True
-            else:
-                if abs(self.data_node.current_height - height_cmd) <= tolerance and self.data_node.forkstate == "idle":
-                    self.send_fork_cmd = False
-                    print("[AssemblymentFSM] 叉車已到達目標高度")
+                height_cmd = 100.0
+                tolerance = 5.0
+
+                if abs(self.data_node.current_height - height_cmd) < tolerance:
+                    print("[RUNmentFSM] 叉車已到達目標高度")
                     self.move_forklift_to_done()
                 else:
-                    print("waiting")
+                    print(f"[RUNmentFSM] 叉車尚未到達目標高度，當前高度: {self.data_node.current_height}, 目標高度: {height_cmd}")
+                    self.fork_cmd(mode="run", speed="slow", direction="down", distance= height_cmd)
+                    self.send_fork_cmd = True
+            else:
+                print("[RUNmentFSM] 叉車命令已發送，等待完成")
         
-        elif self.state == AssemblyState.DONE.value:
-            print("[AssemblymentFSM] 任務完成")
-            # self.return_to_idle()
+        elif self.state == RUNState.DONE.value:
+            print("[RUNmentFSM] 任務完成")
+            self.data_node.task_cmd = "idle"
+            self.return_to_idle()
         
-        elif self.state == AssemblyState.FAIL.value:
-            print("[AssemblymentFSM] 任務失敗")
+        elif self.state == RUNState.FAIL.value:
+            print("[RUNmentFSM] 任務失敗")
             self.data_node.task_cmd = "idle"
             self.return_to_idle()
         
         else:
-            print(f"[AssemblymentFSM] 未知狀態: {self.state}")
+            print(f"[RUNmentFSM] 未知狀態: {self.state}")
             self.data_node.task_cmd = "idle"
             self.return_to_idle()
 
@@ -319,7 +320,7 @@ class AssemblyFSM(Machine):
         self.data_node.motion_cmd_publisher.publish(msg)
     
     def check_pose(self,pose_cmd):
-        print(f"[AssemblymentFSM] 檢查Y位置: {pose_cmd[1]}")
+        print(f"[RUNmentFSM] 檢查Y位置: {pose_cmd[1]}")
         if abs(self.data_node.current_pose[1] - pose_cmd[1]) < 2.0:
             print("馬達已經到位置")
             return True
@@ -337,7 +338,7 @@ class AssemblyFSM(Machine):
 def main():
     rclpy.init()
     data = DataNode()                 # ROS2 subscriber node
-    system = AssemblyFSM(data)    # FSM 實體
+    system = RUNFSM(data)    # FSM 實體
 
     executor = rclpy.executors.SingleThreadedExecutor()
     executor.add_node(data)
@@ -348,8 +349,8 @@ def main():
             system.step()
             print(f"[現在狀態] {system.state}")
             # 更新狀態發布
-            data.assembly_state_publisher.publish(
-                TaskState(mode="assembly", state=system.state)
+            data.RUN_state_publisher.publish(
+                TaskState(mode="RUN", state=system.state)
             )
             time.sleep(timer_period)
 
