@@ -25,4 +25,17 @@ def generate_launch_description():
             name='precise_align',
             output='screen'
         ),
+        # Node(
+        #     package='task_module',
+        #     executable='pick',
+        #     name='pick',
+        #     output='screen'
+        # ),
+        Node(
+            package='task_module',
+            executable='assembly',
+            name='assembly',
+            output='screen'
+        ),
+    
     ])
