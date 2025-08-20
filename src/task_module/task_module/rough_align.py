@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray, Int32MultiArray, Int32
-from common_msgs.msg import StateCmd,TaskCmd, MotionCmd,MotionState,TaskState,ForkCmd,ForkState
+from common_msgs.msg import StateCmd,TaskCmd, MotionCmd,MotionState,TaskState,ForkCmd,ForkState,Recipe
 
 #parameters
 timer_period = 0.5  # seconds
@@ -33,6 +33,9 @@ class DataNode(Node):
         self.current_height = 0.0
         self.point_dist = 1000.0
         self.forkstate = "idle"
+
+        self.target_mode = "idle" # idle,pick,assembly  
+        self.target_height = 80.0
        
         # 初始化 ROS2 Node
         #subscriber
@@ -71,10 +74,18 @@ class DataNode(Node):
             self.height_info_callback,
             10
         )
+       
         self.fork_state_subscriber = self.create_subscription(
             ForkState,
             '/fork_state',
             self.fork_state_callback,
+            10
+        )
+
+        self.recipe_data_subscriber = self.create_subscription(
+            Recipe,
+            'recipe_data',
+            self.recipe_callback,
             10
         )
 
@@ -85,6 +96,7 @@ class DataNode(Node):
         self.detection_cmd_publisher = self.create_publisher(String,'/detection_task',10)
         self.laser_cmd_publisher = self.create_publisher(Int32MultiArray,'/laser_io_cmd',10)
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
+
 
     def state_cmd_callback(self, msg: StateCmd):
         print(f"接收到狀態命令: {msg}")
@@ -130,6 +142,13 @@ class DataNode(Node):
     def fork_state_callback(self, msg: ForkState):
         """接收叉車狀態"""
         self.forkstate = msg.state  # 假設 ForkState 有個 .state 屬性
+
+    def recipe_callback(self, msg: Recipe):
+        self.target_mode = msg.mode
+        self.target_height = msg.height
+        # 在這裡可以添加更多的處理邏輯
+        # 例如，根據接收到的 recipe 更新其他狀態或觸發其他操作
+
 
 class RoughAlignState(Enum):
     IDLE = "idle"
@@ -223,10 +242,10 @@ class RoughAlignFSM(Machine):
         elif self.state == RoughAlignState.INIT.value:
             print("[RoughAlignmentFSM] 初始化階段")
 
-            if self.data_node.func_cmd.get("pick_button", False):
-                self.run_mode = "pick"
-            elif self.data_node.func_cmd.get("push_button", False):
+            if self.data_node.target_mode == "assembly":
                 self.run_mode = "push"
+            elif self.data_node.target_mode == "pick":
+                self.run_mode = "pick"
             else:
                 print("[RoughAlignmentFSM] 未選擇運行模式，等待人為選擇")
                 return

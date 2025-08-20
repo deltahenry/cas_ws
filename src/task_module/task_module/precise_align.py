@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray,Int32
-from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,MotionState,ForkCmd,ForkState
+from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,MotionState,ForkCmd,ForkState,Recipe
 
 #parameters
 timer_period = 0.5  # seconds
@@ -36,6 +36,9 @@ class DataNode(Node):
         self.screw_TF = None
         self.battery_TF = None
         self.forkstate = "idle"
+
+        self.target_mode = "idle" # idle,pick,assembly  
+        self.target_height = 80.0
        
         # 初始化 ROS2 Node
         #subscriber
@@ -79,6 +82,13 @@ class DataNode(Node):
             ForkState,
             'fork_state',
             self.fork_state_callback,
+            10
+        )
+
+        self.recipe_data_subscriber = self.create_subscription(
+            Recipe,
+            'recipe_data',
+            self.recipe_callback,
             10
         )
 
@@ -141,6 +151,12 @@ class DataNode(Node):
 
     def fork_state_callback(self, msg: ForkState):
         self.forkstate = msg.state  # 假設 ForkState 有個 .state 屬性
+
+    def recipe_callback(self, msg: Recipe):
+        self.target_mode = msg.mode
+        self.target_height = msg.height
+        # 在這裡可以添加更多的處理邏輯
+        # 例如，根據接收到的 recipe 更新其他狀態或觸發其他操作
 
 class PreciseAlignState(Enum):
     IDLE = "idle"
@@ -232,6 +248,7 @@ class PreciseAlignFSM(Machine):
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
+
         if self.state == PreciseAlignState.IDLE.value:
             print("[PreciseAlignmentFSM] 等待開始")
             if self.data_node.task_cmd == "precise_align":
@@ -298,7 +315,7 @@ class PreciseAlignFSM(Machine):
         
         elif self.state == PreciseAlignState.MOVE_FORKLIFT.value:
             
-            height_cmd = 150.0  # 假設高度命令為150.0mm #test
+            height_cmd = self.data_node.target_height
             tolerance = 5.0
 
             if not self.send_fork_cmd:

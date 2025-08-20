@@ -194,7 +194,7 @@ class ForkliftControl(Machine):
         result = "waiting"
         # register_address = self.data_node.register_address
         # slave_id = self.data_node.slave_id
-        tolerance = 2
+        tolerance = 1
 
         current_height = self.data_node.current_height
 

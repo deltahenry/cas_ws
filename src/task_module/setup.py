@@ -26,6 +26,7 @@ setup(
             'precise_align = task_module.precise_align:main',
             'pick = task_module.pick:main',
             'assembly = task_module.assembly:main',
+            'recipe_node = task_module.recipe_node:main',
         ],
     },
 )

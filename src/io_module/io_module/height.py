@@ -10,7 +10,7 @@ class LRSensorNode(Node):
         super().__init__('lr_sensor_node')
         self.declare_parameter('sensor_ip', '192.168.1.101')
         self.declare_parameter('instance_id', 1)
-        self.declare_parameter('read_rate', 0.1)
+        self.declare_parameter('read_rate', 0.2)
 
         self.sensor_ip = self.get_parameter('sensor_ip').get_parameter_value().string_value
         self.instance_id = self.get_parameter('instance_id').get_parameter_value().integer_value
