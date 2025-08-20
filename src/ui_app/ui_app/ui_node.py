@@ -448,8 +448,9 @@ class MainWindow(QMainWindow):
         self.ui.ListOptionsWidget.setVisible(False)
 
         # Touchscreen style in Main Page - Auto
-        self.ui.RunButton.clicked.connect(lambda: self.on_touch_buttons(self.ui.RunButton))
-        self.ui.AutoStopButton.clicked.connect(lambda: self.on_touch_buttons(self.ui.AutoStopButton))
+        self.ui.INITButton.clicked.connect(lambda: self.on_touch_different_color(self.ui.INITButton, "#FFB300"))
+        self.ui.RunButton.clicked.connect(lambda: self.on_touch_different_color(self.ui.RunButton, "#1E7E34"))
+        self.ui.AutoStopButton.clicked.connect(lambda: self.on_touch_different_color(self.ui.AutoStopButton, "#990000"))
 
         # self.ui.RecordDataButton.clicked.connect(lambda: self.on_record_data_clicked(self.ui.RecordDataButton))
 
@@ -514,18 +515,6 @@ class MainWindow(QMainWindow):
         self.ui.MotorYAxisNextButton.clicked.connect(lambda: self.go_to_next_page_motor(0))
 
 
-    def _on_vision_clicked(self, btn, checked):
-        if checked:
-            # Turn others off (this will trigger their toggled(False) → publish "<mode>_off")
-            for other, _ in self._vision_buttons:
-                if other is not btn and other.isChecked():
-                    other.setChecked(False)
-        else:
-            # User clicked the same button to turn it off → no mode selected; nothing else to do
-            pass
-
-
-    
     def go_to_next_page_motor(self, index):
         self.ui.MotorStackedWidget.setCurrentIndex(index)
 
@@ -727,7 +716,7 @@ class MainWindow(QMainWindow):
         elif flag == "stop":
             msg.stop_button = True
 
-        print(f"[DEBUG] Publishing StateCmd: {msg}")
+        # print(f"[DEBUG] Publishing StateCmd: {msg}")
         self.ros_node.state_cmd_publisher.publish(msg)
         print(f"[UI] Sent StateCmd: {flag}")
 
@@ -768,6 +757,16 @@ class MainWindow(QMainWindow):
         else:
             button.setText("Clipper OFF")
 
+    def _on_vision_clicked(self, btn, checked):
+        if checked:
+            # Turn others off (this will trigger their toggled(False) → publish "<mode>_off")
+            for other, _ in self._vision_buttons:
+                if other is not btn and other.isChecked():
+                    other.setChecked(False)
+        else:
+            # User clicked the same button to turn it off → no mode selected; nothing else to do
+            pass
+
     # vision fix
     def on_vision_toggled(self, vision_name, checked):
         if checked:
@@ -776,7 +775,7 @@ class MainWindow(QMainWindow):
         else:
             self.send_vision_cmd(f"{vision_name}_off")
             print(f"[UI] {vision_name} stopped")
-
+            
 
     def send_vision_cmd(self, mode):
         print(f"[DEBUG] Trying to publish: {mode}")  
@@ -878,8 +877,6 @@ class MainWindow(QMainWindow):
             msg.stop_button = False
             self.ros_node.state_cmd_publisher.publish(msg)
 
-            
-
     def change_to_production_record_page(self):
         self.ui.ParentStackedWidgetToChangeMenuOptions.setCurrentIndex(2)
 
@@ -900,12 +897,10 @@ class MainWindow(QMainWindow):
         self.ui.ChangeComponentControlStackedWidget.setCurrentIndex(1)
         self.ui.MotorStartedButton.setText("Vision")
 
-
     def choose_clipper(self):
         self.ui.ComponentControlStackedWidget.setCurrentIndex(1)
         self.ui.ChangeComponentControlStackedWidget.setCurrentIndex(2)
         self.ui.MotorStartedButton.setText("Clipper")
-
 
     def choose_forklift(self):
         self.ui.ComponentControlStackedWidget.setCurrentIndex(1)
@@ -925,8 +920,6 @@ class MainWindow(QMainWindow):
     
     def change_to_manual_page(self):
         self.ui.ActionButtons.setCurrentIndex(1)
-        
-
     
     def on_auto_toggled(self, checked):
         if checked:
@@ -935,18 +928,6 @@ class MainWindow(QMainWindow):
     def on_manual_toggled(self, checked):
         if checked:
             self.send_run_cmd("manual")
-
-    # def on_dido_toggled(self, checked):
-    #     self.send_test_dido("on" if checked else "off")
-
-    # def on_component_control_toggled(self, checked):
-    #     if checked:
-            
-
-    # def send_test_dido(self, pin: str, state: str):
-    #     msg = String()
-    #     msg.data = f"{pin}:{state}"
-    #     self.ros_node.dido_control_publisher.publish(msg)
 
 
     #Component Control - Motor
@@ -973,8 +954,6 @@ class MainWindow(QMainWindow):
         elif name == "Forklift":
             self.send_component_cmd("forklift_control")
             self.ui.MiddleStackedWidget.setCurrentIndex(0)
-
-
 
     def component_control_switch_page(self, name, index):
         self.ui.MotorStartedButton.setText(name)
@@ -1011,7 +990,31 @@ class MainWindow(QMainWindow):
         # Optionally send a ROS signal to start detection (if needed)
         # self.send_detection_task("start")  # <-- if you want to publish to /detection_task
 
+    def on_ros_message(self, text):
+        self.ros_msg_received.emit(text)
 
+    def handle_ros_message(self, text):
+        print("ROS message:", text)
+        # Update UI labels here if needed
+
+    def closeEvent(self, event):
+        self.ros_node.destroy_node()
+        rclpy.shutdown()
+        event.accept()
+
+    def move_to_second_screen_and_fullscreen(self):
+        screens = QApplication.screens()
+        if len(screens) > 1:
+            second_screen = screens[1]  # Use the actual second screen
+            second_geom = second_screen.geometry()
+            self.setGeometry(second_geom)  # Move and resize in one step
+            self.setMaximumWidth(1280)
+            self.setMaximumHeight(800)
+            print("Fixed size: 1280 x 800")
+            # self.showFullScreen()
+        else:
+            self.showMaximized()
+            print("Only one screen, screen fullscreen anyways")
 
     def on_touch_controls(self, button):
         # 1. Visual press feedback
@@ -1033,7 +1036,6 @@ class MainWindow(QMainWindow):
         """))
 
     def on_touch_buttons(self, button):
-        # 1. Visual press feedback
         button.setStyleSheet("""
         QPushButton {
             background-color: rgba(11, 118, 160, 0.3); /* soft blue overlay */
@@ -1048,32 +1050,22 @@ class MainWindow(QMainWindow):
             color: white;
         }
         """))
-
-    def on_ros_message(self, text):
-        self.ros_msg_received.emit(text)
-
-    def handle_ros_message(self, text):
-        print("ROS message:", text)
-        # Update UI labels here if needed
-
-    def closeEvent(self, event):
-        self.ros_node.destroy_node()
-        rclpy.shutdown()
-        event.accept()
-
-    def move_to_second_screen_and_fullscreen(self):
-        screens = QApplication.screens()
-        if len(screens) > 1:
-            second_screen = screens[1]  # Use the actual second screen
-            second_geom = second_screen.geometry()
-            self.setGeometry(second_geom)  # Move and resize in one step
-            # self.setMaximumWidth(1280)
-            # self.setMaximumHeight(800)
-            # print("Fixed size: 1280 x 800")
-            self.showFullScreen()
-        else:
-            self.showMaximized()
-            print("Only one screen, screen fullscreen anyways")
+    
+    def on_touch_different_color(self, button, color):
+        button.setStyleSheet(f"""
+        QPushButton {{
+            background-color: {color};
+            border: 1px solid;
+            color: white;
+        }}
+        """)
+        
+        # 2. Reset after 200ms
+        QTimer.singleShot(200, lambda: button.setStyleSheet(f"""
+        QPushButton {{
+            color: white;
+        }}
+        """))
 
 
 def convert_cv_to_qt(cv_img):

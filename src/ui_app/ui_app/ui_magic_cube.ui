@@ -518,7 +518,11 @@ Record</string>
                  </font>
                 </property>
                 <property name="styleSheet">
-                 <string notr="true"/>
+                 <string notr="true">
+
+QPushButton#INITButton:pressed {
+    background-color: #FFB300;     /* darker pressed */
+}</string>
                 </property>
                 <property name="text">
                  <string>INIT</string>
@@ -539,7 +543,10 @@ Record</string>
                  </font>
                 </property>
                 <property name="styleSheet">
-                 <string notr="true"/>
+                 <string notr="true">
+QPushButton#RunButton:pressed {
+    background-color: transparent;
+}</string>
                 </property>
                 <property name="text">
                  <string>RUN</string>
@@ -747,7 +754,10 @@ Record</string>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true"/>
+               <string notr="true">
+QPushButton#AutoStopButton:pressed {
+    background-color: #990000;       /* darker red when pressed */
+}</string>
               </property>
               <property name="text">
                <string>STOP</string>
@@ -1288,7 +1298,7 @@ Record</string>
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="MotorPage">
             <widget class="QStackedWidget" name="MotorStackedWidget">
@@ -1301,7 +1311,7 @@ Record</string>
               </rect>
              </property>
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="MotorConfigPage">
               <widget class="QPushButton" name="ServoON">
@@ -2005,8 +2015,8 @@ QPushButton:checked {
                </property>
                <property name="geometry">
                 <rect>
-                 <x>140</x>
-                 <y>50</y>
+                 <x>150</x>
+                 <y>20</y>
                  <width>151</width>
                  <height>71</height>
                 </rect>
@@ -2061,8 +2071,8 @@ QPushButton:checked {
                </property>
                <property name="geometry">
                 <rect>
-                 <x>140</x>
-                 <y>140</y>
+                 <x>150</x>
+                 <y>100</y>
                  <width>151</width>
                  <height>71</height>
                 </rect>
@@ -2117,8 +2127,8 @@ QPushButton:checked {
                </property>
                <property name="geometry">
                 <rect>
-                 <x>140</x>
-                 <y>230</y>
+                 <x>150</x>
+                 <y>180</y>
                  <width>151</width>
                  <height>71</height>
                 </rect>
@@ -2173,8 +2183,8 @@ QPushButton:checked {
                </property>
                <property name="geometry">
                 <rect>
-                 <x>40</x>
-                 <y>350</y>
+                 <x>30</x>
+                 <y>330</y>
                  <width>231</width>
                  <height>71</height>
                 </rect>
@@ -2221,6 +2231,64 @@ QPushButton:checked {
                </property>
                <property name="checkable">
                 <bool>false</bool>
+               </property>
+              </widget>
+              <widget class="QLineEdit" name="InputMotorDistance">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>50</y>
+                 <width>121</width>
+                 <height>41</height>
+                </rect>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #FFFFFF;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+              <widget class="QLineEdit" name="InputMotorSpeed">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>180</y>
+                 <width>121</width>
+                 <height>41</height>
+                </rect>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #FFFFFF;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_6">
+               <property name="geometry">
+                <rect>
+                 <x>40</x>
+                 <y>20</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Distance</string>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_10">
+               <property name="geometry">
+                <rect>
+                 <x>40</x>
+                 <y>150</y>
+                 <width>67</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Speed</string>
                </property>
               </widget>
              </widget>
@@ -2827,7 +2895,7 @@ border: none;</string>
              <x>10</x>
              <y>100</y>
              <width>291</width>
-             <height>581</height>
+             <height>571</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -6632,22 +6700,22 @@ border: none;</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="ThemeButtonGroup"/>
-  <buttongroup name="LanguageButtonGroup"/>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="VisionButtonGroup">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
-  <buttongroup name="FontSizeButtonGroup"/>
-  <buttongroup name="MenuButtonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="ManualButtons">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="LanguageButtonGroup"/>
+  <buttongroup name="ThemeButtonGroup"/>
   <buttongroup name="AutoAndManualButtonGroup"/>
+  <buttongroup name="MenuButtonGroup"/>
+  <buttongroup name="FontSizeButtonGroup"/>
  </buttongroups>
 </ui>

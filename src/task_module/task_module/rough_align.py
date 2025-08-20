@@ -7,8 +7,8 @@ from enum import Enum, auto
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String,Float32MultiArray
-from common_msgs.msg import StateCmd,TaskCmd, MotionCmd,MotionState,TaskState
+from std_msgs.msg import String,Float32MultiArray, Int32MultiArray, Int32
+from common_msgs.msg import StateCmd,TaskCmd, MotionCmd,MotionState,TaskState,ForkCmd,ForkState
 
 #parameters
 timer_period = 0.5  # seconds
@@ -26,11 +26,13 @@ class DataNode(Node):
 
         self.func_cmd = {
             'pick_button': False,
-            'push_button': False,
+            'push_button': True,
         }
        
         self.depth_data = [500.0,500.0]
+        self.current_height = 0.0
         self.point_dist = 1000.0
+        self.forkstate = "idle"
        
         # 初始化 ROS2 Node
         #subscriber
@@ -63,11 +65,26 @@ class DataNode(Node):
             10
         )
 
+        self.height_info_subscriber = self.create_subscription(
+            Int32,
+            'lr_distance',
+            self.height_info_callback,
+            10
+        )
+        self.fork_state_subscriber = self.create_subscription(
+            ForkState,
+            '/fork_state',
+            self.fork_state_callback,
+            10
+        )
+
         #publisher
         self.rough_align_state_publisher = self.create_publisher(TaskState, '/task_state_rough_align', 10)
         self.motion_state_publisher = self.create_publisher(MotionState, '/motion_state', 10)
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
         self.detection_cmd_publisher = self.create_publisher(String,'/detection_task',10)
+        self.laser_cmd_publisher = self.create_publisher(Int32MultiArray,'/laser_io_cmd',10)
+        self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
 
     def state_cmd_callback(self, msg: StateCmd):
         print(f"接收到狀態命令: {msg}")
@@ -103,8 +120,16 @@ class DataNode(Node):
             self.depth_data[0] = msg.data[0]
             self.depth_data[1] = msg.data[1]        
         else:
-            self.get_logger().warn("接收到的深度數據長度不足，無法更新。")
+            print("接收到的深度數據長度不足，無法更新。")
 
+    def height_info_callback(self,msg: Int32):
+        """接收來自LR Sensor的高度信息"""
+        print(f"接收到高度信息: {msg.data} mm")
+        self.current_height = msg.data
+    
+    def fork_state_callback(self, msg: ForkState):
+        """接收叉車狀態"""
+        self.forkstate = msg.state  # 假設 ForkState 有個 .state 屬性
 
 class RoughAlignState(Enum):
     IDLE = "idle"
@@ -119,6 +144,7 @@ class RoughAlignFSM(Machine):
         self.phase = RoughAlignState.IDLE  # 初始狀態
         self.data_node = data_node
         self.run_mode = "pick"
+        self.send_fork_cmd = False  # 用於控制叉車命令的發送
 
         states = [
             RoughAlignState.IDLE.value,
@@ -161,11 +187,10 @@ class RoughAlignFSM(Machine):
         }
         self.data_node.func_cmd = {
             'pick_button': False,
-            'push_button': False,
+            'push_button': True
         }
+        self.send_fork_cmd = False  # 用於控制叉車命令的發送
         
-
-
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
             print("[RoughAlignmentFSM] 被暫停中")
@@ -183,6 +208,10 @@ class RoughAlignFSM(Machine):
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
+        pick_height = 150.0  # pick模式下的初始高度
+        assem_height = 250.0
+        tolerance = 5.0  # 容差值
+
         if self.state == RoughAlignState.IDLE.value:
             print("[RoughAlignmentFSM] 等待開始手動對齊")
             if self.data_node.task_cmd == "rough_align":
@@ -193,6 +222,7 @@ class RoughAlignFSM(Machine):
         
         elif self.state == RoughAlignState.INIT.value:
             print("[RoughAlignmentFSM] 初始化階段")
+
             if self.data_node.func_cmd.get("pick_button", False):
                 self.run_mode = "pick"
             elif self.data_node.func_cmd.get("push_button", False):
@@ -200,13 +230,37 @@ class RoughAlignFSM(Machine):
             else:
                 print("[RoughAlignmentFSM] 未選擇運行模式，等待人為選擇")
                 return
-            #open_vision_guide_line(red=True, green=False)
-            #open_guide_laser
-            self.init_to_check_depth()
 
+            # control forklift to init position
+            if self.run_mode == "push":
+                print("[RoughAlignmentFSM] 選擇運行模式: 推")
+                if not self.send_fork_cmd:
+                    self.fork_cmd("run", 'slow', "down", assem_height)
+                    self.send_fork_cmd = True
+                else:
+                    if abs(self.data_node.current_height - assem_height) <= tolerance and self.data_node.forkstate == "idle":
+                        print("[RoughAlignmentFSM] 推模式下，叉車已在初始位置")
+                        self.send_fork_cmd = False
+                        self.init_to_check_depth()
+                    else:
+                        print("waiting")
+
+            elif self.run_mode == "pick":
+                if not self.send_fork_cmd:
+                    self.fork_cmd("run", 'slow', "down", pick_height)
+                    self.send_fork_cmd = True
+                else:
+                    if abs(self.data_node.current_height - pick_height) <= tolerance and self.data_node.forkstate == "idle":
+                        print("[RoughAlignmentFSM] pick模式下，叉車已在初始位置")
+                        self.send_fork_cmd = False
+                        self.init_to_check_depth()
+                    else:
+                        print("waiting")
 
         elif self.state == RoughAlignState.CHECK_DEPTH.value:
             print("[RoughAlignmentFSM] 深度檢查階段")
+            #open_guide_laser
+            self.laser_cmd("laser_open")  # 開啟雷射
             # 檢查深度數據
             depth_ref = self.depth_ref(self.run_mode)
 
@@ -231,15 +285,32 @@ class RoughAlignFSM(Machine):
         elif self.state == RoughAlignState.DONE.value:
             print("[RoughAlignmentFSM] 對齊完成階段")
             #change_vision_guide_line(red=False, green=True, blue=False)
-            #open_guide_raser
+            #close_guide_laser
+            self.laser_cmd("laser_close")  # 關閉雷射
             
         elif self.state == RoughAlignState.FAIL.value:
             print("[RoughAlignmentFSM] 對齊失敗階段")
-            #change_vision_guide_line(red=False, green=False, blue=True)
-            #open_guide_raser
-            # 這裡可以加入對齊失敗的處理邏輯，例如重試或報錯
+            
+    def laser_cmd(self, cmd: str):
+        """發送雷射命令"""
+        if cmd == "laser_open":
+            value = [1,1]
+            value = Int32MultiArray(data=value)  # 封裝為 Int32MultiArray
+            self.data_node.laser_cmd_publisher.publish(value)
+        elif cmd == "laser_close":
+            value = [0,0]
+            value = Int32MultiArray(data=value)  # 封裝為 Int32MultiArray
+            self.data_node.laser_cmd_publisher.publish(value)
+        print(f"[RoughAlignmentFSM] 發送雷射命令: {cmd}")
 
-
+    def fork_cmd(self, mode, speed, direction, distance):
+        msg = ForkCmd()
+        msg.mode = mode
+        msg.speed = speed
+        msg.direction = direction
+        msg.distance = distance
+        self.data_node.fork_cmd_publisher.publish(msg)
+        print(f"[RoughAlignmentFSM] 發送叉車命令: mode={mode}, speed={speed}, direction={direction}, distance={distance}")
 
 def main():
     rclpy.init()

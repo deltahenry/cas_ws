@@ -29,6 +29,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/ClipperCmd.msg"
     "msg/CurrentPose.msg"
     "msg/MH2State.msg"
+    "msg/LimitCmd.msg"
+    "msg/ForkState.msg"
 )
 
 if(BUILD_TESTING)

@@ -6,7 +6,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Int32,Float32MultiArray,Int32MultiArray
-from common_msgs.msg import ForkCmd
+from common_msgs.msg import ForkCmd,ForkState
 from pymodbus.client import ModbusTcpClient
 import time
 import csv
@@ -24,7 +24,7 @@ class DataNode(Node):
         self.speed = "slow"
         self.direction = "up"
         self.distance = 0
-        self.current_height = 0  # 當前高度，初始為0
+        self.current_height = 0.0  # 當前高度，初始為0
 
         self.control = 0.0
 
@@ -52,6 +52,8 @@ class DataNode(Node):
         self.height_cmd_info_publisher = self.create_publisher(Float32MultiArray, 'height_cmd_info', 10)
 
         self.fork_io_cmd_publisher = self.create_publisher(Int32MultiArray, 'fork_io_cmd', 10)
+
+        self.fork_state_publisher = self.create_publisher(ForkState, 'fork_state', 10)
 
     def init_fork_modubus(self):
         """初始化叉車Modbus通訊"""
@@ -91,6 +93,7 @@ class DataNode(Node):
 class ForkliftControlState(Enum):
     IDLE = "idle"
     RUNNING = "running"
+    CHECKING = 'checking'
     STOPPED = "stopped"
     FAIL = "fail"
 
@@ -103,10 +106,12 @@ class ForkliftControl(Machine):
 
         self.phase = ForkliftControlState.IDLE  # 初始狀態
         self.data_node = data_node
+        self.count = 0 
 
         states = [
             ForkliftControlState.IDLE.value,
             ForkliftControlState.RUNNING.value,
+            ForkliftControlState.CHECKING.value,
             ForkliftControlState.STOPPED.value,
             ForkliftControlState.FAIL.value
         ]
@@ -114,7 +119,9 @@ class ForkliftControl(Machine):
         transitions = [
             # 狀態轉換
             {"trigger": "start", "source": ForkliftControlState.IDLE.value, "dest": ForkliftControlState.RUNNING.value},
-            {"trigger": "stop", "source": ForkliftControlState.RUNNING.value, "dest": ForkliftControlState.STOPPED.value},
+            {"trigger": "check", "source": ForkliftControlState.RUNNING.value, "dest": ForkliftControlState.CHECKING.value},
+            {"trigger": "resume", "source": ForkliftControlState.CHECKING.value, "dest": ForkliftControlState.RUNNING.value},
+            {"trigger": "stop", "source": ForkliftControlState.CHECKING.value, "dest": ForkliftControlState.STOPPED.value},
             {"trigger": "fail", "source": ForkliftControlState.RUNNING.value, "dest": ForkliftControlState.FAIL.value},
             {"trigger": "return_to_idle", "source": [ForkliftControlState.RUNNING.value, ForkliftControlState.STOPPED.value, ForkliftControlState.FAIL.value], "dest": ForkliftControlState.IDLE.value}
         ]
@@ -226,19 +233,22 @@ class ForkliftControl(Machine):
 
         # up邏輯：
         elif self.data_node.current_direction == "up":
-            if des_direction == "stop":
+            print("up time:", time.time())
+            if des_direction == "stop" or current_height > distance_cmd - 8.0:
+                print(current_height, distance_cmd)
+                print("stop time:", time.time())
                 value_to_write = self.encode("fast", "stop")  # 停止叉車
                 self.data_node.fork_io_cmd_publisher.publish(value_to_write)
                 self.data_node.current_direction = "stop"  # 更新當前方向
                 self.data_node.current_speed = "stop"  # 更新當前速度
                 result = "done"  # 任務完成
 
-            elif current_height > distance_cmd + tolerance:
-                value_to_write = self.encode("fast", "stop")  # 停止叉車
-                self.data_node.fork_io_cmd_publisher.publish(value_to_write)
-                self.data_node.current_direction = "stop"  # 更新當前方向
-                self.data_node.current_speed = "stop"  # 更新當前速度
-                result = "done"  # 任務完成
+            # elif current_height > distance_cmd + tolerance:
+            #     value_to_write = self.encode("fast", "stop")  # 停止叉車
+            #     self.data_node.fork_io_cmd_publisher.publish(value_to_write)
+            #     self.data_node.current_direction = "stop"  # 更新當前方向
+            #     self.data_node.current_speed = "stop"  # 更新當前速度
+            #     result = "done"  # 任務完成
 
             else:
                 value_to_write = self.encode(self.data_node.current_speed, self.data_node.current_direction) # 保持當前速度和方向
@@ -305,13 +315,29 @@ class ForkliftControl(Machine):
             
             if result == "done":
                 # print("[ForkliftControl] 叉車控制任務完成")
-                self.data_node.mode = "stop"
-                self.stop()
-                self.data_node.can_forklift_cmd = True  # 任務完成後允許發送新的命令
-                self.data_node.control = 0.0
+                self.check()
             else:
                 self.data_node.control = 1.0
                 print("waiting")
+
+        elif self.state == ForkliftControlState.CHECKING.value:
+            print("[ForkliftControl] 叉車控制系統正在檢查")
+            if self.count < 10:
+                self.count += 1
+                print("waiting for data update")
+                return
+            else:
+                self.count = 0
+                print(self.data_node.current_height, self.data_node.distance)
+                if self.data_node.current_height >= self.data_node.distance + 5:
+                    print("[ForkliftControl] too high, return to run")
+                    self.resume()
+                else:
+                    self.data_node.mode = "stop"
+                    self.data_node.can_forklift_cmd = True  # 任務完成後允許發送新的命令
+                    self.data_node.control = 0.0
+                    self.stop()
+
 
         elif self.state == ForkliftControlState.STOPPED.value:
             print("[ForkliftControl] 叉車控制系統已停止")
@@ -337,6 +363,9 @@ def main():
             executor.spin_once(timeout_sec=0.1)
             system.step()
             print(f"[現在狀態] {system.state}")
+            data.fork_state_publisher.publish(
+                ForkState(state=system.state)
+            )
             time.sleep(timer_period)
 
     except KeyboardInterrupt:

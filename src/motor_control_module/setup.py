@@ -24,6 +24,7 @@ setup(
         'console_scripts': [
             'esp32_motor_control = motor_control_module.esp32_motor_control:main',
             'set_home = motor_control_module.set_home:main',
+            'esm_log = motor_control_module.esm_log:main',
         ],
     },
 )

@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
             'motion_control = motion_control_module.motion_control:main',
             'control = motion_control_module.control:main',
+            'control_2 = motion_control_module.control_2:main',
         ],
     },
 )

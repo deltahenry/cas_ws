@@ -3,7 +3,10 @@ uint8           TYPE_GOTO = 1
 uint8           TYPE_GOTO_RELATIVE = 2
 uint8           TYPE_Y_MOVE = 3
 
-uint8 command_type
+# add new type for velocity mode
+uint8           TYPE_VELOCITY=4
+
+uint8           command_type
 
 #x y yaw
 float32[3]      pose_data 

@@ -19,4 +19,10 @@ def generate_launch_description():
             name='rough_align',
             output='screen'
         ),
+        Node(
+            package='task_module',
+            executable='precise_align',
+            name='precise_align',
+            output='screen'
+        ),
     ])

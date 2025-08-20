@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray,Int32
-from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,MotionState,ForkCmd
+from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,MotionState,ForkCmd,ForkState
 
 #parameters
 timer_period = 0.5  # seconds
@@ -26,7 +26,7 @@ class DataNode(Node):
 
         self.func_cmd = {
             'pick_button': False,
-            'push_button': False,
+            'push_button': True,
         }
        
         self.depth_data = [500.0,500.0]
@@ -35,6 +35,7 @@ class DataNode(Node):
         self.cabinet_heights = [150, 300, 350, 400, 500]
         self.screw_TF = None
         self.battery_TF = None
+        self.forkstate = "idle"
        
         # 初始化 ROS2 Node
         #subscriber
@@ -71,6 +72,13 @@ class DataNode(Node):
             Int32,
             'lr_distance',
             self.height_info_callback,
+            10
+        )
+
+        self.fork_state_subscriber = self.create_subscription(
+            ForkState,
+            'fork_state',
+            self.fork_state_callback,
             10
         )
 
@@ -131,11 +139,15 @@ class DataNode(Node):
         self.get_logger().info(f"Received height info: {msg.data} mm")
         self.current_height = msg.data
 
+    def fork_state_callback(self, msg: ForkState):
+        self.forkstate = msg.state  # 假設 ForkState 有個 .state 屬性
+
 class PreciseAlignState(Enum):
     IDLE = "idle"
     INIT = "init"
     SCREW_DETECT = "screw_detect"
     SCREW_ALIGN = "screw_align"
+    MOVE_FORKLIFT = "move_forklift"
     BATTERY_DETECT = "battery_detect"
     BATTERY_ALIGN = "battery_align"
     DONE = "done"
@@ -148,12 +160,14 @@ class PreciseAlignFSM(Machine):
         self.run_mode = "pick"
         self.screw_align_threshold = 10.0
         self.batter_dectect_threshold = 5.0
+        self.send_fork_cmd = False
 
         states = [
             PreciseAlignState.IDLE.value,
             PreciseAlignState.INIT.value,
             PreciseAlignState.SCREW_DETECT.value,
             PreciseAlignState.SCREW_ALIGN.value,
+            PreciseAlignState.MOVE_FORKLIFT.value,
             PreciseAlignState.BATTERY_DETECT.value,
             PreciseAlignState.BATTERY_ALIGN.value,
             PreciseAlignState.DONE.value,
@@ -165,7 +179,8 @@ class PreciseAlignFSM(Machine):
             {'trigger': 'init_to_screw_detect', 'source': PreciseAlignState.INIT.value, 'dest': PreciseAlignState.SCREW_DETECT.value},
             {'trigger': 'screw_detect_to_screw_align', 'source': PreciseAlignState.SCREW_DETECT.value, 'dest': PreciseAlignState.SCREW_ALIGN.value},
             {'trigger': 'check_screw_align', 'source': PreciseAlignState.SCREW_ALIGN.value, 'dest': PreciseAlignState.SCREW_DETECT.value},
-            {'trigger': 'screw_align_to_battery_detect', 'source': PreciseAlignState.SCREW_ALIGN.value, 'dest': PreciseAlignState.BATTERY_DETECT.value},
+            {'trigger': 'screw_align_to_move_forklift', 'source': PreciseAlignState.SCREW_ALIGN.value, 'dest': PreciseAlignState.MOVE_FORKLIFT.value},
+            {'trigger': 'move_forklift_to_battery_detect', 'source': PreciseAlignState.MOVE_FORKLIFT.value, 'dest': PreciseAlignState.BATTERY_DETECT.value},
             {'trigger': 'battery_detect_to_battery_align', 'source': PreciseAlignState.BATTERY_DETECT.value, 'dest': PreciseAlignState.BATTERY_ALIGN.value},
             {'trigger': 'battery_align_to_done', 'source': PreciseAlignState.BATTERY_ALIGN.value, 'dest': PreciseAlignState.DONE.value},
             {'trigger': 'return_to_idle', 'source': '*', 'dest': PreciseAlignState.IDLE.value},
@@ -183,7 +198,7 @@ class PreciseAlignFSM(Machine):
         if run_mode == "pick":
             return 90.0
         elif run_mode == "push":
-            return 0.3
+            return 90.0
 
     def reset_parameters(self):
         """重置參數"""
@@ -195,9 +210,9 @@ class PreciseAlignFSM(Machine):
         }
         self.data_node.func_cmd = {
             'pick_button': False,
-            'push_button': False,
+            'push_button': True,
         }
-        
+        self.send_fork_cmd = False
         
 
     def step(self):
@@ -229,96 +244,131 @@ class PreciseAlignFSM(Machine):
             print("[PreciseAlignmentFSM] 初始化階段")
             if self.data_node.func_cmd.get("pick_button", False):
                 self.run_mode = "pick"
+                self.init_to_screw_detect()
             elif self.data_node.func_cmd.get("push_button", False):
                 self.run_mode = "push"
+                self.init_to_screw_detect()
             else:
                 print("[PreciseAlignmentFSM] 未選擇運行模式，等待人為選擇")
                 return
 
         elif self.state == PreciseAlignState.SCREW_DETECT.value:
             print("[PreciseAlignmentFSM] 螺絲檢測階段")
-            #open detection task screw
-            self.data_node.detection_cmd_publisher.publish(String(data="screw"))
-            #get screw detection result -> TF
-            #NEED 
-            if self.data_node.screw_TF  == None:
-                print("[PreciseAlignmentFSM] 螺絲檢測未完成，等待中")
-                return
-            else:
-                print("[PreciseAlignmentFSM] 螺絲檢測完成，進入螺絲對齊階段")
-                #close detection task screw
-                self.data_node.detection_cmd_publisher.publish(String(data="idle"))
-                # 假設檢測完成後進入下一個狀態
-                self.screw_detect_to_screw_align()
+            self.screw_detect_to_screw_align()
+            # #open detection task screw
+            # self.data_node.detection_cmd_publisher.publish(String(data="screw"))
+            # #get screw detection result -> TF
+            # #NEED 
+            # if self.data_node.screw_TF  == None:
+            #     print("[PreciseAlignmentFSM] 螺絲檢測未完成，等待中")
+            #     return
+            # else:
+            #     print("[PreciseAlignmentFSM] 螺絲檢測完成，進入螺絲對齊階段")
+            #     #close detection task screw
+            #     self.data_node.detection_cmd_publisher.publish(String(data="idle"))
+            #     # 假設檢測完成後進入下一個狀態
+            #     self.screw_detect_to_screw_align()
 
         elif self.state == PreciseAlignState.SCREW_ALIGN.value:
             print("[PreciseAlignmentFSM] 螺絲對齊階段")
-            # 根據螺絲檢測結果進行對齊
-            #NEED
-            screw_TF = self.data_node.screw_TF
-            relative_pose = screw_TF
+            self.screw_align_to_move_forklift()
+            # # 根據螺絲檢測結果進行對齊
+            # #NEED
+            # screw_TF = self.data_node.screw_TF
+            # relative_pose = screw_TF
             
-            pose_cmd  = [self.data_node.current_pose[0]+relative_pose[0],
-                         self.data_node.current_pose[1]+relative_pose[1],
-                         self.data_node.current_pose[2]+relative_pose[2]]
+            # pose_cmd  = [self.data_node.current_pose[0]+relative_pose[0],
+            #              self.data_node.current_pose[1]+relative_pose[1],
+            #              self.data_node.current_pose[2]+relative_pose[2]]
             
-            if norm( relative_pose) > self.screw_align_threshold:
-                if not self.motor_cmd_sent:
-                    self.motor_cmd_sent(pose_cmd)
-                    self.motor_cmd_sent = True
-                else:
-                    motor_arrived = self.check_pos(pose_cmd)    
-                    if motor_arrived:
-                        #double check
-                        self.motor_cmd_sent = False
-                        self.data_node.screw_TF = None
-                        self.check_screw_align()
-            else:
-                #finish screw_align
-                self.screw_align_to_battery_detect()
+            # if norm( relative_pose) > self.screw_align_threshold:
+            #     if not self.motor_cmd_sent:
+            #         self.motor_cmd_sent(pose_cmd)
+            #         self.motor_cmd_sent = True
+            #     else:
+            #         motor_arrived = self.check_pos(pose_cmd)    
+            #         if motor_arrived:
+            #             #double check
+            #             self.motor_cmd_sent = False
+            #             self.data_node.screw_TF = None
+            #             self.check_screw_align()
+            # else:
+            #     #finish screw_align
+            #     self.screw_align_to_battery_detect()
         
-        elif self.state == PreciseAlignState.BATTERY_DETECT.value:
-            #open detection task icp_fit
-            self.data_node.detection_cmd_publisher.publish(String(data="icp_fit"))
+        elif self.state == PreciseAlignState.MOVE_FORKLIFT.value:
             
-            if self.data_node.point_dist > self.batter_dectect_threshold:
-                #forklift up to top
-                self.data_node.publish_fork_cmd(mode="run", speed="slow", direction="up", distance="200")
+            height_cmd = 150.0  # 假設高度命令為150.0mm #test
+            tolerance = 5.0
+
+            if not self.send_fork_cmd:
+                self.fork_cmd(mode="run", speed="slow", direction="down", distance=height_cmd)
+                self.send_fork_cmd = True
+            
             else:
-                #forklift stop
-                self.data_node.publish_fork_cmd(mode="stop", speed="slow", direction="up", distance="200")
-                #close detection task icp_fit
-                self.data_node.detection_cmd_publisher.publish(String(data="idle"))
-                #go to battery align
-                self.battery_detect_to_battery_align()
+                if abs(self.data_node.current_height - height_cmd) <= tolerance and self.data_node.forkstate == "idle":
+                    self.send_fork_cmd = False
+                    print("[PreciseAlignmentFSM] 叉車已到達目標高度，進入電池檢測階段")
+                    self.move_forklift_to_battery_detect()
+                else:
+                    print("waiting")
+            
+        elif self.state == PreciseAlignState.BATTERY_DETECT.value:
+            print("[PreciseAlignmentFSM] 電池檢測階段")
+            self.battery_detect_to_battery_align()
+            # #open detection task icp_fit
+            # self.data_node.detection_cmd_publisher.publish(String(data="icp_fit"))
+            
+            # if self.data_node.point_dist > self.batter_dectect_threshold:
+            #     #forklift up to top
+            #     self.data_node.publish_fork_cmd(mode="run", speed="slow", direction="up", distance="200")
+            # else:
+            #     #forklift stop
+            #     self.data_node.publish_fork_cmd(mode="stop", speed="slow", direction="up", distance="200")
+            #     #close detection task icp_fit
+            #     self.data_node.detection_cmd_publisher.publish(String(data="idle"))
+            #     #go to battery align
+            #     self.battery_detect_to_battery_align()
         
         elif self.state == PreciseAlignState.BATTERY_ALIGN.value:
-            #open detection task l_shape
-            self.data_node.detection_cmd_publisher.publish(String(data="l_shape"))
+            print("[PreciseAlignmentFSM] 電池對齊階段")
+            self.battery_align_to_done()
+            # #open detection task l_shape
+            # self.data_node.detection_cmd_publisher.publish(String(data="l_shape"))
                 
-            current_height = self.data_node.current_height
-            cabinet_heights = self.data_node.cabinet_heights
+            # current_height = self.data_node.current_height
+            # cabinet_heights = self.data_node.cabinet_heights
             
-            #get nearest cabinent
-            height_cmd = min(cabinet_heights, key=lambda h: abs(h - current_height))
+            # #get nearest cabinent
+            # height_cmd = min(cabinet_heights, key=lambda h: abs(h - current_height))
             
-            #forklift move 
-            if current_height > height_cmd + 5.0:
-                #forklift down to height_cmd
-                self.data_node.publish_fork_cmd(mode="run", speed="slow", direction="down", distance = height_cmd)
-            else:               
-                #NEED
-                battery_TF = self.data_node.battery_TF
-                relative_height = battery_TF[3]
-                self.data_node.publish_fork_cmd(mode="stop", speed="slow", direction="down", distance = height_cmd)
+            # #forklift move 
+            # if current_height > height_cmd + 5.0:
+            #     #forklift down to height_cmd
+            #     self.data_node.publish_fork_cmd(mode="run", speed="slow", direction="down", distance = height_cmd)
+            # else:               
+            #     #NEED
+            #     battery_TF = self.data_node.battery_TF
+            #     relative_height = battery_TF[3]
+            #     self.data_node.publish_fork_cmd(mode="stop", speed="slow", direction="down", distance = height_cmd)
             
+        elif self.state == PreciseAlignState.DONE.value:
+            print("[PreciseAlignmentFSM] 對齊任務完成")
             
-            
+        elif self.state == PreciseAlignState.FAIL.value:
+            print("[PreciseAlignmentFSM] 對齊任務失敗")
+            # 在這裡可以添加失敗處理邏輯，例如重試或記錄錯誤
+
+    def fork_cmd(self, mode, speed, direction, distance):
+        msg = ForkCmd()
+        msg.mode = mode
+        msg.speed = speed
+        msg.direction = direction
+        msg.distance = distance
+        self.data_node.fork_cmd_publisher.publish(msg)
+        print(f"Published ForkCmd: mode={mode}, speed={speed}, direction={direction}, distance={distance}")
+        # self.get_logger().info(f"Published ForkCmd: mode={mode}, speed={speed}, direction={direction}, distance={distance}")
                 
-
-                
-
-
     def sent_motor_cmd(self,pose_cmd):
         """發送馬達初始化命令"""
         msg = MotionCmd()
@@ -327,14 +377,14 @@ class PreciseAlignFSM(Machine):
         msg.speed = 5.0
         self.data_node.motion_cmd_publisher.publish(msg)
     
-    
     def check_pos(self,pose_cmd):
-        if np.allclose(self.data_node.current_pose, pose_cmd,atol=0.05):
-            print("馬達已經到位置")
-            return True
-        else:
-            print("馬達尚未到位置")
-            return False
+        print(f"[PreciseAlignmentFSM] 檢查馬達位置: {pose_cmd}")
+        # if np.allclose(self.data_node.current_pose, pose_cmd,atol=0.05):
+        #     print("馬達已經到位置")
+        #     return True
+        # else:
+        #     print("馬達尚未到位置")
+        #     return False
 
 
 

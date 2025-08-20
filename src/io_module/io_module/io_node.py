@@ -39,6 +39,13 @@ class DataNode(Node):
             10
         )
 
+        self.laser_cmd_subscriber = self.create_subscription(
+            Int32MultiArray,
+            'laser_io_cmd',
+            self.laser_cmd_callback,  # 使用同一個回調函數處理不同命令
+            10
+        )
+
         self.dido_cmd_subscriber = self.create_subscription(
             DIDOCmd,
             'test_dido',
@@ -67,6 +74,9 @@ class DataNode(Node):
 
     def init_io_port(self):
         
+        self.on12_state = np.zeros(16, dtype=int)  # 對應位址 0x0008
+        self.on34_state = np.zeros(16, dtype=int)  # 對應位址 0x0009
+
         self.J12_state = np.zeros(16, dtype=int)  # 對應位址 0x0008
         self.J34_state = np.zeros(16, dtype=int)  # 對應位址 0x0009
         
@@ -97,6 +107,12 @@ class DataNode(Node):
         self.DO_2[7] = msg.data[4]
         self.DO_2[8] = msg.data[5]
         
+    def laser_cmd_callback(self, msg: Int32MultiArray):
+        print(f"接收到雷射IO命令: {msg.data}")
+        """處理雷射IO命令"""
+        self.DO_2[15] = msg.data[0]
+        self.DO_3[15] = msg.data[1]
+
     def handle_dido_cmd(self, msg: DIDOCmd):
         if not msg.name.startswith("DO"):
             self.get_logger().warn(f"Unknown DO name format: {msg.name}")
@@ -159,6 +175,8 @@ class ForkliftControl(Machine):
         """從多個 Modbus 暫存器讀取 DI 狀態到各自陣列"""
         try:
             di_map = [
+                {"slave_id": 2,"address": 0x0006, "array": self.data_node.on12_state},
+                {"slave_id": 2,"address": 0x0007, "array": self.data_node.on34_state},
                 {"slave_id": 2,"address": 0x0008, "array": self.data_node.J12_state},
                 {"slave_id": 2,"address": 0x0009, "array": self.data_node.J34_state},
                 {"slave_id": 2,"address": 0x014C, "array": self.data_node.J1_error},
@@ -188,7 +206,8 @@ class ForkliftControl(Machine):
 
         except Exception as e:
             print(f"Modbus DI 讀取異常: {e}")
-
+        on12_state_int = self.bits_to_int(self.data_node.on12_state)
+        on34_state_int = self.bits_to_int(self.data_node.on34_state)
         J12_state_int = self.bits_to_int(self.data_node.J12_state)
         J34_state_int = self.bits_to_int(self.data_node.J34_state)
         J1_error_int = self.bits_to_int(self.data_node.J1_error)
@@ -235,7 +254,7 @@ def main():
     try:
         while rclpy.ok():
             executor.spin_once(timeout_sec=0.1)
-            # system.run()
+            system.run()
             system.read_di()  # 讀取 DI 狀態
             time.sleep(timer_period)
 

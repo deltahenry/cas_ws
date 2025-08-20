@@ -255,7 +255,11 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.INITButton.sizePolicy().hasHeightForWidth())
         self.INITButton.setSizePolicy(sizePolicy)
         self.INITButton.setFont(font)
-        self.INITButton.setStyleSheet(u"")
+        self.INITButton.setStyleSheet(u"\n"
+"\n"
+"QPushButton#INITButton:pressed {\n"
+"    background-color: #FFB300;     /* darker pressed */\n"
+"}")
 
         self.verticalLayout_12.addWidget(self.INITButton)
 
@@ -267,7 +271,10 @@ class Ui_MainWindow(object):
         sizePolicy1.setHeightForWidth(self.RunButton.sizePolicy().hasHeightForWidth())
         self.RunButton.setSizePolicy(sizePolicy1)
         self.RunButton.setFont(font)
-        self.RunButton.setStyleSheet(u"")
+        self.RunButton.setStyleSheet(u"\n"
+"QPushButton#RunButton:pressed {\n"
+"    background-color: transparent;\n"
+"}")
 
         self.verticalLayout_12.addWidget(self.RunButton)
 
@@ -353,7 +360,10 @@ class Ui_MainWindow(object):
         self.AutoStopButton.setSizePolicy(sizePolicy)
         self.AutoStopButton.setMinimumSize(QSize(0, 80))
         self.AutoStopButton.setFont(font)
-        self.AutoStopButton.setStyleSheet(u"")
+        self.AutoStopButton.setStyleSheet(u"\n"
+"QPushButton#AutoStopButton:pressed {\n"
+"    background-color: #990000;       /* darker red when pressed */\n"
+"}")
         self.AutoStopButton.setCheckable(False)
 
         self.verticalLayoutAutoPauseAndStop.addWidget(self.AutoStopButton)
@@ -1039,7 +1049,7 @@ class Ui_MainWindow(object):
         self.HomeY = QPushButton(self.YAxisPage)
         self.HomeY.setObjectName(u"HomeY")
         self.HomeY.setEnabled(True)
-        self.HomeY.setGeometry(QRect(140, 50, 151, 71))
+        self.HomeY.setGeometry(QRect(150, 20, 151, 71))
         sizePolicy.setHeightForWidth(self.HomeY.sizePolicy().hasHeightForWidth())
         self.HomeY.setSizePolicy(sizePolicy)
         self.HomeY.setFont(font)
@@ -1071,7 +1081,7 @@ class Ui_MainWindow(object):
         self.ReadyY = QPushButton(self.YAxisPage)
         self.ReadyY.setObjectName(u"ReadyY")
         self.ReadyY.setEnabled(True)
-        self.ReadyY.setGeometry(QRect(140, 140, 151, 71))
+        self.ReadyY.setGeometry(QRect(150, 100, 151, 71))
         sizePolicy.setHeightForWidth(self.ReadyY.sizePolicy().hasHeightForWidth())
         self.ReadyY.setSizePolicy(sizePolicy)
         self.ReadyY.setFont(font)
@@ -1103,7 +1113,7 @@ class Ui_MainWindow(object):
         self.AssemblyY = QPushButton(self.YAxisPage)
         self.AssemblyY.setObjectName(u"AssemblyY")
         self.AssemblyY.setEnabled(True)
-        self.AssemblyY.setGeometry(QRect(140, 230, 151, 71))
+        self.AssemblyY.setGeometry(QRect(150, 180, 151, 71))
         sizePolicy.setHeightForWidth(self.AssemblyY.sizePolicy().hasHeightForWidth())
         self.AssemblyY.setSizePolicy(sizePolicy)
         self.AssemblyY.setFont(font)
@@ -1135,7 +1145,7 @@ class Ui_MainWindow(object):
         self.SendYCommand = QPushButton(self.YAxisPage)
         self.SendYCommand.setObjectName(u"SendYCommand")
         self.SendYCommand.setEnabled(True)
-        self.SendYCommand.setGeometry(QRect(40, 350, 231, 71))
+        self.SendYCommand.setGeometry(QRect(30, 330, 231, 71))
         sizePolicy.setHeightForWidth(self.SendYCommand.sizePolicy().hasHeightForWidth())
         self.SendYCommand.setSizePolicy(sizePolicy)
         self.SendYCommand.setFont(font)
@@ -1164,6 +1174,20 @@ class Ui_MainWindow(object):
 "\n"
 "")
         self.SendYCommand.setCheckable(False)
+        self.InputMotorDistance = QLineEdit(self.YAxisPage)
+        self.InputMotorDistance.setObjectName(u"InputMotorDistance")
+        self.InputMotorDistance.setGeometry(QRect(10, 50, 121, 41))
+        self.InputMotorDistance.setStyleSheet(u"background-color: #FFFFFF;")
+        self.InputMotorSpeed = QLineEdit(self.YAxisPage)
+        self.InputMotorSpeed.setObjectName(u"InputMotorSpeed")
+        self.InputMotorSpeed.setGeometry(QRect(10, 180, 121, 41))
+        self.InputMotorSpeed.setStyleSheet(u"background-color: #FFFFFF;")
+        self.label_6 = QLabel(self.YAxisPage)
+        self.label_6.setObjectName(u"label_6")
+        self.label_6.setGeometry(QRect(40, 20, 67, 17))
+        self.label_10 = QLabel(self.YAxisPage)
+        self.label_10.setObjectName(u"label_10")
+        self.label_10.setGeometry(QRect(40, 150, 67, 17))
         self.MotorStackedWidget.addWidget(self.YAxisPage)
         self.ChangeComponentControlStackedWidget.addWidget(self.MotorPage)
         self.VisionPage = QWidget()
@@ -1381,7 +1405,7 @@ class Ui_MainWindow(object):
         self.ChangeComponentControlStackedWidget.addWidget(self.DIDOPage)
         self.ListOptionsWidget = QWidget(self.ComponentControlMain)
         self.ListOptionsWidget.setObjectName(u"ListOptionsWidget")
-        self.ListOptionsWidget.setGeometry(QRect(10, 100, 291, 581))
+        self.ListOptionsWidget.setGeometry(QRect(10, 100, 291, 571))
         sizePolicy2.setHeightForWidth(self.ListOptionsWidget.sizePolicy().hasHeightForWidth())
         self.ListOptionsWidget.setSizePolicy(sizePolicy2)
         self.verticalLayout_5 = QVBoxLayout(self.ListOptionsWidget)
@@ -2998,8 +3022,8 @@ class Ui_MainWindow(object):
         self.ParentStackedWidgetToChangeMenuOptions.setCurrentIndex(0)
         self.ActionButtons.setCurrentIndex(0)
         self.ComponentControlStackedWidget.setCurrentIndex(0)
-        self.ChangeComponentControlStackedWidget.setCurrentIndex(1)
-        self.MotorStackedWidget.setCurrentIndex(1)
+        self.ChangeComponentControlStackedWidget.setCurrentIndex(0)
+        self.MotorStackedWidget.setCurrentIndex(0)
         self.MiddleStackedWidget.setCurrentIndex(0)
 
 
@@ -3073,6 +3097,10 @@ class Ui_MainWindow(object):
         self.ReadyY.setText(QCoreApplication.translate("MainWindow", u"Ready", None))
         self.AssemblyY.setText(QCoreApplication.translate("MainWindow", u"Assembly", None))
         self.SendYCommand.setText(QCoreApplication.translate("MainWindow", u"Send Y Command", None))
+        self.InputMotorDistance.setText("")
+        self.InputMotorSpeed.setText("")
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Distance", None))
+        self.label_10.setText(QCoreApplication.translate("MainWindow", u"Speed", None))
         self.VisionOne.setText(QCoreApplication.translate("MainWindow", u"Screw", None))
         self.VisionTwo.setText(QCoreApplication.translate("MainWindow", u"LShape", None))
         self.VisionThree.setText(QCoreApplication.translate("MainWindow", u"ICP Fit", None))

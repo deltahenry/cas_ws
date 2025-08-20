@@ -25,6 +25,8 @@ class MotorController:
         self.cli: Client = self.ros_node.create_client(ESMCmd, '/esm_command')
         self.waiting_for_result = False
 
+        
+
         self._light_colors = {
             "red_on":    "#FF4D4D",
             "red_off":   "#660000",
@@ -35,6 +37,9 @@ class MotorController:
         }
 
         self._set_lights(on_red=False, on_yellow=False, on_green=False)
+
+        self.num: float | None = None
+        self.speed: float | None = None
 
         # def _prepare_lamp(lbl):
         #     lbl.setPixmap(QPixmap())                # ensure no image covers the bg
@@ -112,6 +117,12 @@ class MotorController:
         self.ui.HomeY.clicked.connect(lambda: self.send_y_motor_cmd("home_y"))
         self.ui.ReadyY.clicked.connect(lambda: self.send_y_motor_cmd("ready_y"))
         self.ui.AssemblyY.clicked.connect(lambda: self.send_y_motor_cmd("assembly_y"))
+
+        self.ui.InputMotorDistance.textChanged.connect(self.on_distance_changed)
+        self.ui.InputMotorSpeed.textChanged.connect(self.on_speed_changed)
+
+        self.ui.SendYCommand.clicked.connect(self.send_y_command)
+
 
         self.motor_distance_state = 0  # 0: first, 1: second, 2: third
         self.selected_distance = 1.0
@@ -286,6 +297,36 @@ class MotorController:
         self.ros_node.motion_cmd_publisher.publish(msg)
         print(f"[YMotor] Command Type: {msg.command_type}, Pose Data: {msg.pose_data}, Speed: {msg.speed}")
 
+    def on_distance_changed(self, text: str):
+        try:
+            self.num = float(text)
+        except ValueError:
+            self.num = 0.0
+
+    def on_speed_changed(self, text: str):
+        text = text.strip()
+        if text == "":
+            self.speed = None    # nothing entered yet
+        else:
+            try:
+                self.speed = float(text)
+            except ValueError:
+                self.speed = None
+
+    def send_y_command(self):
+        msg = MotionCmd()
+        msg.command_type = MotionCmd.TYPE_Y_MOVE
+
+        y_val = self.num if self.num is not None else 0.0
+        spd   = self.speed if self.speed is not None else 10.0
+
+        msg.pose_data = [0.0, y_val, 0.0]   
+        msg.speed = spd
+
+        self.ros_node.motion_cmd_publisher.publish(msg)
+        print(f"[YMotor] Command Type: {msg.command_type}, Pose Data: {msg.pose_data}, Speed: {msg.speed}")
+
+    
 
     def update_gui(self):
         # 每次更新也可以做其他檢查或顯示狀態
@@ -324,9 +365,6 @@ class MotorController:
         else:
             r, y, g = False, True,  False
         self._set_lights(r, y, g)  # now on GUI thread
-
-
-
 
 
 
