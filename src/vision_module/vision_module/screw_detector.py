@@ -10,8 +10,8 @@ class ScrewDetector:
         print(f"✅ Loaded {len(self.templates)} augmented templates from {template_dir}")
 
         # ROI 區域，可外部修改
-        self.roi_top_left = (310, 394)
-        self.roi_bottom_right = (1226, 669)
+        self.roi_top_left = (332, 262)
+        self.roi_bottom_right = (1113, 627)
 
     def augment_template_rotation(self, img, angles=[-10, -5, 0, 5, 10]):
         augmented = []

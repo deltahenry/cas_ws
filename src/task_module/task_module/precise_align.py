@@ -138,7 +138,6 @@ class DataNode(Node):
         self.target_mode = msg.mode
         self.target_height = msg.height
     
-
     def depth_data_callback(self, msg: Float32MultiArray):
         print(f"接收到深度數據: {msg.data}")
         # 在這裡可以處理深度數據

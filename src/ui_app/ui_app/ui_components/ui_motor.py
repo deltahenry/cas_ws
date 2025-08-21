@@ -344,7 +344,7 @@ class MotorController:
 
     def _paint_light(self, lbl, on_color, off_color, is_on):
         color = on_color if is_on else off_color
-        lbl.setStyleSheet(f"background-color:{color}; border-radius:{lbl.height()//2}px;")
+        lbl.setStyleSheet(f"background-color:{color}; border-radius:25px;")
 
 
 

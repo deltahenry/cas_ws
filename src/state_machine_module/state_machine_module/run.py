@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray,Int32
-from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState
+from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,Recipe
 import numpy as np
 
 #parameters
@@ -27,6 +27,8 @@ class DataNode(Node):
         }
 
         self.task_cmd = "idle"  # rough align,precise align,pick,RUN
+
+        self.target_mode = "idle"  # 目標模式，初始為空閒
      
         self.rough_align_state = "idle"  # rough align task state
         self.precise_align_state = "idle"  # precise align task state
@@ -72,13 +74,19 @@ class DataNode(Node):
             10
         )
 
-        #publisher 
-        #task "rough_align","precise_align","pick","assembly","idle"
+        self.recipe_subscriber = self.create_subscription(
+            Recipe,
+            'recipe_data',
+            self.recipe_callback,
+            10
+        )
+
         self.run_state_publisher = self.create_publisher(
             TaskState,
             '/task_state_run',
             10
         )
+
         self.task_cmd_publisher = self.create_publisher(
             TaskCmd,
             '/task_cmd',
@@ -115,7 +123,8 @@ class DataNode(Node):
         # 在這裡可以處理組裝任務狀態
         self.assembly_state = msg.state
     
-
+    def recipe_callback(self, msg: Recipe):
+        self.target_mode = msg.mode
 
 class RUNState(Enum):
     IDLE = "idle"
@@ -151,9 +160,9 @@ class RUNFSM(Machine):
             {'trigger': 'precise_align_to_pick', 'source': RUNState.PRECISE_ALIGN.value, 'dest': RUNState.PICK.value},
             {'trigger': 'pick_to_assembly', 'source': RUNState.PICK.value, 'dest': RUNState.ASSEMBLY.value},
             {'trigger': 'assembly_to_done', 'source': RUNState.ASSEMBLY.value, 'dest': RUNState.DONE.value},
-            # {'trigger': 'precise_align_to_assembly', 'source': RUNState.PRECISE_ALIGN.value, 'dest': RUNState.ASSEMBLY.value},
-            # {'trigger': 'assembly_to_pick', 'source': RUNState.ASSEMBLY.value, 'dest': RUNState.PICK.value},
-            # {'trigger': 'pick_to_done', 'source': RUNState.PICK.value, 'dest': RUNState.DONE.value},
+            {'trigger': 'precise_align_to_assembly', 'source': RUNState.PRECISE_ALIGN.value, 'dest': RUNState.ASSEMBLY.value},
+            {'trigger': 'assembly_to_pick', 'source': RUNState.ASSEMBLY.value, 'dest': RUNState.PICK.value},
+            {'trigger': 'pick_to_done', 'source': RUNState.PICK.value, 'dest': RUNState.DONE.value},
             {'trigger': 'done_to_idle', 'source': RUNState.DONE.value, 'dest': RUNState.IDLE.value},
             {'trigger': 'fail', 'source': '*', 'dest': RUNState.FAIL.value},
             {'trigger': 'return_to_idle', 'source': '*', 'dest': RUNState.IDLE.value},
@@ -206,6 +215,8 @@ class RUNFSM(Machine):
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
+        print(self.data_node.target_mode)
+
         if self.state == RUNState.IDLE.value:
             print("[RUNmentFSM] 等待啟動")
             if self.data_node.state_cmd.get('run_button', False):
@@ -226,90 +237,103 @@ class RUNFSM(Machine):
         elif self.state == RUNState.ROUGH_ALIGN.value:
             print("[RUNmentFSM] 粗對齊階段")
 
-            time.sleep(3)  # 等待粗對齊任務完成
-            print("[RUNmentFSM] 粗對齊任務完成")
-            print("[RUNmentFSM] 發送任務命令: precise_align")
-            self.send_task_cmd("precise_align")
-            print("[RUNmentFSM] 狀態轉換到 PRECISE_ALIGN")
-            self.rough_align_to_precise_align()
+            # time.sleep(3)  # 等待粗對齊任務完成
+            # print("[RUNmentFSM] 粗對齊任務完成")
+            # print("[RUNmentFSM] 發送任務命令: precise_align")
+            # self.send_task_cmd("precise_align")
+            # print("[RUNmentFSM] 狀態轉換到 PRECISE_ALIGN")
+            # self.rough_align_to_precise_align()
 
-            # if self.data_node.rough_align_state == "done":
-            #     print("[RUNmentFSM] 粗對齊任務完成")
-            #     print("[RUNmentFSM] 發送任務命令: precise_align")
-            #     self.send_task_cmd("precise_align")
-            #     print("[RUNmentFSM] 狀態轉換到 PRECISE_ALIGN")
-            #     self.rough_align_to_precise_align()
-            # elif self.data_node.rough_align_state == "fail":
-            #     print("[RUNmentFSM] 粗對齊任務失敗")
-            #     self.fail()
-            # else:
-            #     print("[RUNmentFSM] 等待粗對齊任務完成")
+            if self.data_node.rough_align_state == "done":
+                print("[RUNmentFSM] 粗對齊任務完成")
+                print("[RUNmentFSM] 發送任務命令: precise_align")
+                self.send_task_cmd("precise_align")
+                print("[RUNmentFSM] 狀態轉換到 PRECISE_ALIGN")
+                self.rough_align_to_precise_align()
+            elif self.data_node.rough_align_state == "fail":
+                print("[RUNmentFSM] 粗對齊任務失敗")
+                self.fail()
+            else:
+                print("[RUNmentFSM] 等待粗對齊任務完成")
 
         elif self.state == RUNState.PRECISE_ALIGN.value:
             print("[RUNmentFSM] 精細對齊階段")
 
-            time.sleep(3)  # 等待精細對齊任務完成
-            print("[RUNmentFSM] 精細對齊任務完成")
-            print("[RUNmentFSM] 發送任務命令: pick")
-            self.send_task_cmd("pick")
-            print("[RUNmentFSM] 狀態轉換到 PICK")
-            self.precise_align_to_pick()
-
-            # if self.data_node.precise_align_state == "done":
-            #     print("[RUNmentFSM] 精細對齊任務完成")
-            #     print("[RUNmentFSM] 發送任務命令: pick")
+            # time.sleep(3)  # 等待精細對齊任務完成
+            # print("[RUNmentFSM] 精細對齊任務完成")
+            # if self.data_node.target_mode == "assembly":
+            #     print("[RUNmentFSM] 目標模式為組裝，直接跳過拾取階段")
+            #     self.send_task_cmd("assembly")
+            #     self.precise_align_to_assembly()
+            # elif self.data_node.target_mode == "pick":
+            #     print("[RUNmentFSM] 目標模式為拾取，進入拾取階段")
             #     self.send_task_cmd("pick")
-            #     print("[RUNmentFSM] 狀態轉換到 PICK")
             #     self.precise_align_to_pick()
-            # elif self.data_node.precise_align_state == "fail":
-            #     print("[RUNmentFSM] 精細對齊任務失敗")
-            #     self.fail()
             # else:
-            #     print("[RUNmentFSM] 等待精細對齊任務完成")
+            #     print("[RUNmentFSM] 未知目標模式，無法進行精細對齊後的操作")
+            #     self.fail()
+
+            if self.data_node.precise_align_state == "done":
+                print("[RUNmentFSM] 精細對齊任務完成")
+                if self.data_node.target_mode == "assembly":
+                    print("[RUNmentFSM] 目標模式為組裝，直接跳過拾取階段")
+                    self.send_task_cmd("assembly")
+                    self.precise_align_to_assembly()
+                elif self.data_node.target_mode == "pick":
+                    print("[RUNmentFSM] 目標模式為拾取，進入拾取階段")
+                    self.send_task_cmd("pick")
+                    self.precise_align_to_pick()
+                else:
+                    print("[RUNmentFSM] 未知目標模式，無法進行精細對齊後的操作")
+                    self.fail()
+            elif self.data_node.precise_align_state == "fail":
+                print("[RUNmentFSM] 精細對齊任務失敗")
+                self.fail()
+            else:
+                print("[RUNmentFSM] 等待精細對齊任務完成")
         
         elif self.state == RUNState.PICK.value:
             print("[RUNmentFSM] 拾取階段")
 
-            time.sleep(3)  # 等待拾取任務完成
-            print("[RUNmentFSM] 拾取任務完成")
-            print("[RUNmentFSM] 發送任務命令: assembly")
-            self.send_task_cmd("assembly")
-            print("[RUNmentFSM] 狀態轉換到 ASSEMBLY")
-            self.pick_to_assembly()
+            # time.sleep(3)  # 等待拾取任務完成
+            # print("[RUNmentFSM] 拾取任務完成")
+            # print("[RUNmentFSM] 發送任務命令: done")
+            # self.send_task_cmd("done")
+            # self.pick_to_done()
 
-            # if self.data_node.pick_state == "done":
-            #     print("[RUNmentFSM] 拾取任務完成")
-            #     print("[RUNmentFSM] 發送任務命令: assembly")
-            #     self.send_task_cmd("assembly")
-            #     print("[RUNmentFSM] 狀態轉換到 ASSEMBLY")
-            #     self.pick_to_assembly()
-            # elif self.data_node.pick_state == "fail":
-            #     print("[RUNmentFSM] 拾取任務失敗")
-            #     self.fail()
-            # else:
-            #     print("[RUNmentFSM] 等待拾取任務完成")
+            if self.data_node.pick_state == "done":
+                print("[RUNmentFSM] 拾取任務完成")
+                print("[RUNmentFSM] 發送任務命令: done")
+                self.send_task_cmd("done")
+                print("[RUNmentFSM] 狀態轉換到 DONE")
+                self.pick_to_done()
+            elif self.data_node.pick_state == "fail":
+                print("[RUNmentFSM] 拾取任務失敗")
+                self.fail()
+            else:
+                print("[RUNmentFSM] 等待拾取任務完成")
         
         elif self.state == RUNState.ASSEMBLY.value:
             print("[RUNmentFSM] 組裝階段")
 
-            time.sleep(3)  # 等待組裝任務完成
-            print("[RUNmentFSM] 組裝任務完成")
-            print("[RUNmentFSM] 發送任務命令: done")
-            self.send_task_cmd("done")
-            print("[RUNmentFSM] 狀態轉換到 DONE")
-            self.assembly_to_done()
+            # time.sleep(3)  # 等待組裝任務完成
+            # print("[RUNmentFSM] 組裝任務完成")
+            # print("[RUNmentFSM] 發送任務命令: done")
+            # self.send_task_cmd("done")
+            # print("[RUNmentFSM] 狀態轉換到 DONE")
+            # self.assembly_to_done()
 
-            # if self.data_node.assembly_state == "done":
-            #     print("[RUNmentFSM] 組裝任務完成")
-            #     print("[RUNmentFSM] 發送任務命令: done")
-            #     self.send_task_cmd("done")
-            #     print("[RUNmentFSM] 狀態轉換到 DONE")
-            #     self.assembly_to_done()
-            # elif self.data_node.assembly_state == "fail":
-            #     print("[RUNmentFSM] 組裝任務失敗")
-            #     self.fail()
-            # else:
-            #     print("[RUNmentFSM] 等待組裝任務完成")
+            if self.data_node.assembly_state == "done":
+                print("[RUNmentFSM] 組裝任務完成")
+                print("[RUNmentFSM] 發送任務命令: done")
+                self.send_task_cmd("done")
+                print("[RUNmentFSM] 狀態轉換到 DONE")
+                self.assembly_to_done()
+            elif self.data_node.assembly_state == "fail":
+                print("[RUNmentFSM] 組裝任務失敗")
+                self.fail()
+            else:
+                print("[RUNmentFSM] 等待組裝任務完成")
         
         elif self.state == RUNState.DONE.value:
             print("[RUNmentFSM] 任務完成")

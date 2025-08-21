@@ -70,7 +70,7 @@ QLabel {
        </property>
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>16</pointsize>
         </font>
        </property>
        <property name="layoutDirection">
@@ -87,6 +87,12 @@ Settings</string>
         <iconset>
          <normaloff>icons/white/settings.svg</normaloff>icons/white/settings.svg</iconset>
        </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
        <property name="checkable">
         <bool>true</bool>
        </property>
@@ -100,7 +106,7 @@ Settings</string>
          <x>10</x>
          <y>90</y>
          <width>221</width>
-         <height>81</height>
+         <height>101</height>
         </rect>
        </property>
        <property name="styleSheet">
@@ -111,24 +117,24 @@ Settings</string>
          <number>22</number>
         </property>
         <property name="topMargin">
-         <number>22</number>
+         <number>0</number>
         </property>
         <property name="rightMargin">
          <number>22</number>
         </property>
         <property name="bottomMargin">
-         <number>22</number>
+         <number>0</number>
         </property>
         <item>
          <widget class="QLabel" name="RedSignal">
           <property name="maximumSize">
            <size>
-            <width>30</width>
-            <height>30</height>
+            <width>50</width>
+            <height>50</height>
            </size>
           </property>
           <property name="styleSheet">
-           <string notr="true">background-color: #660000; border-radius: 10px;</string>
+           <string notr="true">background-color: #660000;  border-radius: 25px;</string>
           </property>
           <property name="text">
            <string/>
@@ -139,15 +145,18 @@ Settings</string>
          <widget class="QLabel" name="YellowSignal">
           <property name="maximumSize">
            <size>
-            <width>30</width>
-            <height>30</height>
+            <width>50</width>
+            <height>50</height>
            </size>
           </property>
           <property name="styleSheet">
-           <string notr="true">background-color: #666633; border-radius: 10px;</string>
+           <string notr="true">background-color: #666633;  border-radius: 25px;</string>
           </property>
           <property name="text">
            <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -155,12 +164,12 @@ Settings</string>
          <widget class="QLabel" name="GreenSignal">
           <property name="maximumSize">
            <size>
-            <width>30</width>
-            <height>30</height>
+            <width>50</width>
+            <height>50</height>
            </size>
           </property>
           <property name="styleSheet">
-           <string notr="true">background-color: #336633; border-radius: 10px;</string>
+           <string notr="true">background-color: #336633;  border-radius: 25px;</string>
           </property>
           <property name="text">
            <string/>
@@ -214,7 +223,7 @@ Settings</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>170</y>
+         <y>190</y>
          <width>221</width>
          <height>461</height>
         </rect>
@@ -230,7 +239,7 @@ Settings</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>12</pointsize>
+            <pointsize>16</pointsize>
            </font>
           </property>
           <property name="autoFillBackground">
@@ -245,6 +254,12 @@ Settings</string>
           <property name="icon">
            <iconset>
             <normaloff>icons/white/home-simple-door.svg</normaloff>icons/white/home-simple-door.svg</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
           </property>
           <property name="checkable">
            <bool>true</bool>
@@ -267,7 +282,7 @@ Settings</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>12</pointsize>
+            <pointsize>16</pointsize>
            </font>
           </property>
           <property name="styleSheet">
@@ -280,6 +295,12 @@ Control</string>
           <property name="icon">
            <iconset>
             <normaloff>icons/white/dimmer-switch.svg</normaloff>icons/white/dimmer-switch.svg</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
           </property>
           <property name="checkable">
            <bool>true</bool>
@@ -299,7 +320,7 @@ Control</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>12</pointsize>
+            <pointsize>16</pointsize>
            </font>
           </property>
           <property name="styleSheet">
@@ -312,6 +333,12 @@ Record</string>
           <property name="icon">
            <iconset>
             <normaloff>icons/white/page.svg</normaloff>icons/white/page.svg</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
           </property>
           <property name="checkable">
            <bool>true</bool>
@@ -331,7 +358,7 @@ Record</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>12</pointsize>
+            <pointsize>16</pointsize>
            </font>
           </property>
           <property name="styleSheet">
@@ -343,6 +370,12 @@ Record</string>
           <property name="icon">
            <iconset>
             <normaloff>icons/white/multiple-pages.svg</normaloff>icons/white/multiple-pages.svg</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
           </property>
           <property name="checkable">
            <bool>true</bool>
@@ -375,34 +408,6 @@ Record</string>
         <number>0</number>
        </property>
        <widget class="QWidget" name="MainPagePage">
-        <widget class="QWidget" name="CameraWidget" native="true">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>701</width>
-           <height>491</height>
-          </rect>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: #000000;</string>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QLabel" name="VisionText">
-            <property name="styleSheet">
-             <string notr="true">color:white;</string>
-            </property>
-            <property name="text">
-             <string>Vision</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
         <widget class="QWidget" name="AutoAndManualWidget" native="true">
          <property name="geometry">
           <rect>
@@ -435,7 +440,7 @@ Record</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>12</pointsize>
+                 <pointsize>14</pointsize>
                 </font>
                </property>
                <property name="styleSheet">
@@ -471,7 +476,7 @@ Record</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>12</pointsize>
+                 <pointsize>14</pointsize>
                 </font>
                </property>
                <property name="styleSheet">
@@ -514,7 +519,7 @@ Record</string>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>12</pointsize>
+                  <pointsize>16</pointsize>
                  </font>
                 </property>
                 <property name="styleSheet">
@@ -539,17 +544,81 @@ QPushButton#INITButton:pressed {
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>12</pointsize>
+                  <pointsize>16</pointsize>
                  </font>
                 </property>
                 <property name="styleSheet">
                  <string notr="true">
 QPushButton#RunButton:pressed {
-    background-color: transparent;
+    background-color: #1E7E34;
 }</string>
                 </property>
                 <property name="text">
                  <string>RUN</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>Height</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="HeightRecipeInput">
+                <property name="styleSheet">
+                 <string notr="true">color: white;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_12">
+                <property name="text">
+                 <string>Depth</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="DepthRecipeInput">
+                <property name="styleSheet">
+                 <string notr="true">color: white;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="PickRecipeButton">
+                <property name="text">
+                 <string>Pick</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">RecipeModeGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="AssemblyRecipeButton">
+                <property name="text">
+                 <string>Assembly</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">RecipeModeGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="SaveRecipeButton">
+                <property name="text">
+                 <string>Publish Recipe</string>
+                </property>
+                <property name="checkable">
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -715,12 +784,12 @@ QPushButton#RunButton:pressed {
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>80</height>
+                <height>60</height>
                </size>
               </property>
               <property name="font">
                <font>
-                <pointsize>12</pointsize>
+                <pointsize>16</pointsize>
                </font>
               </property>
               <property name="styleSheet">
@@ -745,12 +814,12 @@ QPushButton#RunButton:pressed {
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>80</height>
+                <height>60</height>
                </size>
               </property>
               <property name="font">
                <font>
-                <pointsize>12</pointsize>
+                <pointsize>16</pointsize>
                </font>
               </property>
               <property name="styleSheet">
@@ -771,336 +840,979 @@ QPushButton#AutoStopButton:pressed {
           </item>
          </layout>
         </widget>
-        <widget class="QFrame" name="Timeline">
+        <widget class="QStackedWidget" name="MainPageAutoAndManualStackedWidget">
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>500</y>
-           <width>701</width>
-           <height>191</height>
+           <y>0</y>
+           <width>711</width>
+           <height>691</height>
           </rect>
          </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+         <property name="currentIndex">
+          <number>0</number>
          </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: #000000;</string>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::Shape::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Shadow::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="StartWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_2">
-             <item>
-              <widget class="QLabel" name="StartProcessText">
-               <property name="text">
-                <string>Start</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="StartCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="ConnectWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <item>
-              <widget class="QLabel" name="ConnectProcessText">
-               <property name="text">
-                <string>Connect</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="ConnectCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="INITWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_3">
-             <item>
-              <widget class="QLabel" name="INITProcessText">
-               <property name="text">
-                <string>INIT</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="INITCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="IdleWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_6">
-             <item>
-              <widget class="QLabel" name="IdleProcessText">
-               <property name="text">
-                <string>Idle</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="IdleCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="ManualAlignWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_7">
-             <item>
-              <widget class="QLabel" name="RoughAlignProcessText">
-               <property name="text">
-                <string>Rough Align</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="RoughAlignCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="AutoAlignWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_8">
-             <item>
-              <widget class="QLabel" name="PreciseAlignProcessText">
-               <property name="text">
-                <string>Precise Align</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="PreciseAlignCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="AutoPickWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_9">
-             <item>
-              <widget class="QLabel" name="PickProcessText">
-               <property name="text">
-                <string>Pick</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter">
-              <widget class="QLabel" name="PickCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignmentFlag::AlignVCenter">
-           <widget class="QWidget" name="AssemblyWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_4">
-             <item alignment="Qt::AlignmentFlag::AlignTop">
-              <widget class="QLabel" name="AssemblyProcessText">
-               <property name="text">
-                <string>Assembly</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignVCenter">
-              <widget class="QLabel" name="AssemblyCircle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>icons/white/timeline-circle.svg</pixmap>
-               </property>
-               <property name="scaledContents">
-                <bool>true</bool>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QWidget" name="VisionAndTimelinePage">
+          <widget class="QWidget" name="CameraWidget" native="true">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>701</width>
+             <height>491</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: #000000; </string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignVCenter">
+             <widget class="QLabel" name="VisionText">
+              <property name="styleSheet">
+               <string notr="true">color:white;</string>
+              </property>
+              <property name="text">
+               <string>Vision</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QFrame" name="Timeline">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>500</y>
+             <width>701</width>
+             <height>181</height>
+            </rect>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: #000000;</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::Shape::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Raised</enum>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item alignment="Qt::AlignmentFlag::AlignVCenter">
+             <widget class="QWidget" name="StartWidget" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <item>
+                <widget class="QLabel" name="StartProcessText">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Start</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                <widget class="QLabel" name="StartCircle">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>icons/white/timeline-circle.svg</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item alignment="Qt::AlignmentFlag::AlignVCenter">
+             <widget class="QWidget" name="ConnectWidget" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout">
+               <item>
+                <widget class="QLabel" name="ConnectProcessText">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Connect</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                <widget class="QLabel" name="ConnectCircle">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>icons/white/timeline-circle.svg</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item alignment="Qt::AlignmentFlag::AlignVCenter">
+             <widget class="QWidget" name="INITWidget" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <item>
+                <widget class="QLabel" name="INITProcessText">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>INIT</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                <widget class="QLabel" name="INITCircle">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>icons/white/timeline-circle.svg</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item alignment="Qt::AlignmentFlag::AlignVCenter">
+             <widget class="QWidget" name="IdleWidget" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_6">
+               <item>
+                <widget class="QLabel" name="IdleProcessText">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Idle</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                <widget class="QLabel" name="IdleCircle">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>icons/white/timeline-circle.svg</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item alignment="Qt::AlignmentFlag::AlignVCenter">
+             <widget class="QWidget" name="ManualAlignWidget" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <widget class="QLabel" name="RoughAlignProcessText">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Rough Align</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                <widget class="QLabel" name="RoughAlignCircle">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>icons/white/timeline-circle.svg</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item alignment="Qt::AlignmentFlag::AlignVCenter">
+             <widget class="QWidget" name="AutoAlignWidget" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_8">
+               <item>
+                <widget class="QLabel" name="PreciseAlignProcessText">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Precise Align</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                <widget class="QLabel" name="PreciseAlignCircle">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>icons/white/timeline-circle.svg</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item alignment="Qt::AlignmentFlag::AlignVCenter">
+             <widget class="QWidget" name="AutoPickWidget" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_9">
+               <item>
+                <widget class="QLabel" name="PickProcessText">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Pick</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                <widget class="QLabel" name="PickCircle">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>icons/white/timeline-circle.svg</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item alignment="Qt::AlignmentFlag::AlignVCenter">
+             <widget class="QWidget" name="AssemblyWidget" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+               <item alignment="Qt::AlignmentFlag::AlignTop">
+                <widget class="QLabel" name="AssemblyProcessText">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Assembly</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignVCenter">
+                <widget class="QLabel" name="AssemblyCircle">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>icons/white/timeline-circle.svg</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="CabinetPage">
+          <widget class="QWidget" name="widget" native="true">
+           <property name="geometry">
+            <rect>
+             <x>40</x>
+             <y>30</y>
+             <width>641</width>
+             <height>631</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <layout class="QGridLayout" name="gridLayout_2">
+              <item row="0" column="1">
+               <widget class="QPushButton" name="C12">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1-2</string>
+                </property>
+                <property name="checkable">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="C21">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2-1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QPushButton" name="C32">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3-2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QPushButton" name="C13">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1-3</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="3">
+               <widget class="QPushButton" name="C34">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3-4</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QPushButton" name="C52">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C5-2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="0">
+               <widget class="QPushButton" name="C91">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C9-1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QPushButton" name="C33">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3-3</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <widget class="QPushButton" name="C71">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C7-1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="0">
+               <widget class="QPushButton" name="C81">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C8-1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QPushButton" name="C14">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1-4</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QPushButton" name="C61">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C6-1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QPushButton" name="C31">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3-1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QPushButton" name="C11">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1-1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="2">
+               <widget class="QPushButton" name="C53">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C5-3</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QPushButton" name="C51">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C5-1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QPushButton" name="C41">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4-1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QPushButton" name="C22">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2-2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QPushButton" name="C23">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2-3</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QPushButton" name="C24">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2-4</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QPushButton" name="C42">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4-2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2">
+               <widget class="QPushButton" name="C43">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4-3</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="3">
+               <widget class="QPushButton" name="C44">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4-4</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QPushButton" name="C62">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C6-2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="2">
+               <widget class="QPushButton" name="C63">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C6-3</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="3">
+               <widget class="QPushButton" name="C54">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C5-4</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="3">
+               <widget class="QPushButton" name="C64">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C6-4</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="1">
+               <widget class="QPushButton" name="C72">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C7-2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="2">
+               <widget class="QPushButton" name="C73">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C7-3</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="3">
+               <widget class="QPushButton" name="C74">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C7-4</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="1">
+               <widget class="QPushButton" name="C82">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C8-2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="2">
+               <widget class="QPushButton" name="C83">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C8-3</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="3">
+               <widget class="QPushButton" name="C84">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C8-4</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="1">
+               <widget class="QPushButton" name="C92">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C9-2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="2">
+               <widget class="QPushButton" name="C93">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C9-3</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="3">
+               <widget class="QPushButton" name="C94">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C9-4</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QLabel" name="CabinetLabel">
+           <property name="geometry">
+            <rect>
+             <x>320</x>
+             <y>0</y>
+             <width>101</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>16</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Assembly</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="SaveCabinet">
+           <property name="geometry">
+            <rect>
+             <x>240</x>
+             <y>670</y>
+             <width>95</width>
+             <height>25</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Save</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="CancelCabinet">
+           <property name="geometry">
+            <rect>
+             <x>390</x>
+             <y>670</y>
+             <width>95</width>
+             <height>25</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Cancel</string>
+           </property>
+          </widget>
+         </widget>
         </widget>
        </widget>
        <widget class="QWidget" name="ComponentControlPage">
@@ -1298,7 +2010,7 @@ QPushButton#AutoStopButton:pressed {
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="MotorPage">
             <widget class="QStackedWidget" name="MotorStackedWidget">
@@ -6377,244 +7089,6 @@ border: none;</string>
         </widget>
        </widget>
       </widget>
-      <widget class="QWidget" name="WorkOrderWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>470</x>
-         <y>0</y>
-         <width>141</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: white;</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_17">
-        <item>
-         <widget class="QLabel" name="WorkOrderText">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>工單:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="WorkOrderNumberInput">
-          <property name="text">
-           <string>12345678</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="RecipeWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>450</x>
-         <y>30</y>
-         <width>171</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: white;</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_18">
-        <item>
-         <widget class="QLabel" name="RecipeText">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Recipe:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="RecipeNameInput">
-          <property name="text">
-           <string>Battery ASSY</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="QuantityWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>620</x>
-         <y>0</y>
-         <width>181</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: white;</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_20">
-        <item>
-         <widget class="QLabel" name="QuantityText">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Quantity:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="QuantityNumberInput">
-          <property name="text">
-           <string>200</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="WorkerNameWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>620</x>
-         <y>30</y>
-         <width>171</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: white;</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_21">
-        <item>
-         <widget class="QLabel" name="WorkerNameText">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>組裝人員:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="WorkerNameInput">
-          <property name="text">
-           <string>Carlos</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="CartHeightWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>240</x>
-         <y>30</y>
-         <width>221</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: white;</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_23">
-        <item>
-         <widget class="QLabel" name="CartHeightText">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Cart Height:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="CartHeightInput">
-          <property name="text">
-           <string>153.3 mm</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="CartDepthWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>240</x>
-         <y>0</y>
-         <width>221</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: white;</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_24">
-        <item>
-         <widget class="QLabel" name="CartDepthText">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Cart Depth:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="CartDepthInput">
-          <property name="text">
-           <string>200.1 mm</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="DateWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>770</x>
-         <y>0</y>
-         <width>151</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: white;</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_26">
-        <item>
-         <widget class="QLabel" name="DateText">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Date:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="DateInput">
-          <property name="text">
-           <string>7/25/2025</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
       <widget class="QPushButton" name="ServoONOFFButton">
        <property name="geometry">
         <rect>
@@ -6676,22 +7150,335 @@ border: none;</string>
         <string>Reset</string>
        </property>
       </widget>
-      <zorder>ParentStackedWidgetToChangeMenuOptions</zorder>
+      <widget class="QWidget" name="widget_3" native="true">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>0</y>
+         <width>741</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_9">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <item row="3" column="0">
+         <widget class="QWidget" name="QuantityWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: white;</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_22">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="QuantityText">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Quantity:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="QuantityNumberInput">
+             <property name="text">
+              <string>200</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QWidget" name="DateWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: white;</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_26">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="DateText">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Date:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="DateInput">
+             <property name="text">
+              <string>7/25/2025</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QWidget" name="CartHeightWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: white;</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_23">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="CartHeightText">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Cart Height:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="CartHeightInput">
+             <property name="text">
+              <string>153.3 mm</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QWidget" name="CartDepthWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: white;</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_24">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="CartDepthText">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Cart Depth:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="CartDepthInput">
+             <property name="text">
+              <string>200.1 mm</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QWidget" name="WorkerNameWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: white;</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_25">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="WorkerNameText">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>組裝人員:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="WorkerNameInput">
+             <property name="text">
+              <string>Carlos</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QWidget" name="WorkOrderWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: white;</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_17">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item alignment="Qt::AlignmentFlag::AlignLeft">
+            <widget class="QLabel" name="WorkOrderText">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>工單:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="WorkOrderNumberInput">
+             <property name="text">
+              <string>12345678</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QWidget" name="RecipeWidget" native="true">
+          <property name="styleSheet">
+           <string notr="true">color: white;</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_21">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="leftMargin">
+            <number>9</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>9</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item alignment="Qt::AlignmentFlag::AlignLeft">
+            <widget class="QLabel" name="RecipeText_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Recipe:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="RecipeNameInput_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Battery ASSY (C1-1)</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <zorder>Line</zorder>
       <zorder>SystemSettingsButton</zorder>
       <zorder>SignalLightsWidget</zorder>
       <zorder>MenuButtons</zorder>
-      <zorder>WorkOrderWidget</zorder>
-      <zorder>RecipeWidget</zorder>
-      <zorder>QuantityWidget</zorder>
-      <zorder>WorkerNameWidget</zorder>
-      <zorder>CartHeightWidget</zorder>
-      <zorder>CartDepthWidget</zorder>
-      <zorder>DateWidget</zorder>
       <zorder>DeltaLogo</zorder>
       <zorder>ServoONOFFButton</zorder>
       <zorder>AlarmButton</zorder>
       <zorder>ResetButton</zorder>
+      <zorder>ParentStackedWidgetToChangeMenuOptions</zorder>
+      <zorder>widget_3</zorder>
      </widget>
     </item>
    </layout>
@@ -6700,22 +7487,23 @@ border: none;</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="VisionButtonGroup">
-   <property name="exclusive">
-    <bool>false</bool>
-   </property>
-  </buttongroup>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="ManualButtons">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
-  <buttongroup name="buttonGroup"/>
-  <buttongroup name="LanguageButtonGroup"/>
+  <buttongroup name="VisionButtonGroup">
+   <property name="exclusive">
+    <bool>false</bool>
+   </property>
+  </buttongroup>
   <buttongroup name="ThemeButtonGroup"/>
-  <buttongroup name="AutoAndManualButtonGroup"/>
-  <buttongroup name="MenuButtonGroup"/>
   <buttongroup name="FontSizeButtonGroup"/>
+  <buttongroup name="LanguageButtonGroup"/>
+  <buttongroup name="MenuButtonGroup"/>
+  <buttongroup name="AutoAndManualButtonGroup"/>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="RecipeModeGroup"/>
  </buttongroups>
 </ui>
