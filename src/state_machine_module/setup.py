@@ -26,6 +26,7 @@ setup(
             'fsm_magiccube = state_machine_module.fsm_magiccube:main',
             'fsm_logic = state_machine_module.fsm_logic:main',
             'manual_align = state_machine_module.manual_align:main',
+            'run = state_machine_module.run:main',
         ],
     },
 )

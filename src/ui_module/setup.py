@@ -26,6 +26,7 @@ setup(
             "ui_motor_control = ui_module.ui_motor_control:main",
             "ui_fsm_logic = ui_module.ui_fsm_logic:main",
             "ui_forklift = ui_module.ui_forklift:main",
+            "ui_recipe = ui_module.ui_recipe:main",
         ],
     },
 )

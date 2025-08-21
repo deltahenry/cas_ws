@@ -34,8 +34,7 @@ class DataNode(Node):
         self.point_dist = 1000.0
         self.forkstate = "idle"
 
-        self.target_mode = "idle" # idle,pick,assembly  
-        self.target_height = 80.0
+        self.target_mode = "assembly" # idle,pick,assembly  
        
         # 初始化 ROS2 Node
         #subscriber
@@ -145,7 +144,6 @@ class DataNode(Node):
 
     def recipe_callback(self, msg: Recipe):
         self.target_mode = msg.mode
-        self.target_height = msg.height
         # 在這裡可以添加更多的處理邏輯
         # 例如，根據接收到的 recipe 更新其他狀態或觸發其他操作
 
@@ -227,8 +225,8 @@ class RoughAlignFSM(Machine):
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
-        pick_height = 150.0  # pick模式下的初始高度
-        assem_height = 250.0
+        pick_height = 80.0  # pick模式下的初始高度
+        assem_height = 150.0
         tolerance = 5.0  # 容差值
 
         if self.state == RoughAlignState.IDLE.value:
@@ -280,26 +278,28 @@ class RoughAlignFSM(Machine):
             print("[RoughAlignmentFSM] 深度檢查階段")
             #open_guide_laser
             self.laser_cmd("laser_open")  # 開啟雷射
-            # 檢查深度數據
-            depth_ref = self.depth_ref(self.run_mode)
+            self.check_depth_to_rough_align()
+            # # 檢查深度數據
+            # depth_ref = self.depth_ref(self.run_mode)
 
-            if self.data_node.depth_data[0] < depth_ref:
-                print("depth_data 小於參考深度，進入粗對齊階段")
-                self.check_depth_to_rough_align()
-            else:
-                print("depth_data 大於或等於參考深度，waiting for human push")
+            # if self.data_node.depth_data[0] < depth_ref:
+            #     print("depth_data 小於參考深度，進入粗對齊階段")
+            #     self.check_depth_to_rough_align()
+            # else:
+            #     print("depth_data 大於或等於參考深度，waiting for human push")
         
         elif self.state == RoughAlignState.ROUGH_ALIGN.value:
             print("[RoughAlignmentFSM] 粗對齊階段")
-            #open rough aligh check
-            self.data_node.detection_cmd_publisher.publish(String(data='icp_fit'))
-            if self.data_node.point_dist < 0.05:  # 假設 0.05 是粗對齊的閾值
-                print("粗對齊完成，進入完成階段")
-                self.rough_align_to_done()
-                #close rough aligh check
-                self.data_node.detection_cmd_publisher.publish(String(data='idle'))
-            else:
-                print("粗對齊未完成，等待人為調整")
+            self.rough_align_to_done()
+            # #open rough aligh check
+            # self.data_node.detection_cmd_publisher.publish(String(data='icp_fit'))
+            # if self.data_node.point_dist < 0.05:  # 假設 0.05 是粗對齊的閾值
+            #     print("粗對齊完成，進入完成階段")
+            #     self.rough_align_to_done()
+            #     #close rough aligh check
+            #     self.data_node.detection_cmd_publisher.publish(String(data='idle'))
+            # else:
+            #     print("粗對齊未完成，等待人為調整")
         
         elif self.state == RoughAlignState.DONE.value:
             print("[RoughAlignmentFSM] 對齊完成階段")

@@ -13,6 +13,7 @@ class RecipeNode(Node):
 
         self.mode = "assembly"
         self.target_height = 150.0
+        self.target_depth = 0.0
         
 
         # 初始化 ROS2 Node
@@ -34,8 +35,9 @@ class RecipeNode(Node):
 
     def recipe_callback(self, msg: Recipe):
         print(f"Received recipe: {msg}")
-        self.mode = msg.mode
+        self.mode = msg.mode 
         self.target_height = msg.height
+        self.target_depth = msg.depth
         # 在這裡可以添加更多的處理邏輯
         # 例如，根據接收到的 recipe 更新其他狀態或觸發其他操作
 
@@ -55,6 +57,7 @@ def main():
             recipe_msg = Recipe()
             recipe_msg.mode = data.mode
             recipe_msg.height = data.target_height
+            recipe_msg.depth = data.target_depth
             data.recipe_publisher.publish(recipe_msg)
             # print(f"Published recipe: {recipe_msg}")
 

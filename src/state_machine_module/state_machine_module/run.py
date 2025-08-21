@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray,Int32
-from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,ForkCmd,ForkState,Recipe,CurrentPose,ClipperCmd
+from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState
 import numpy as np
 
 #parameters
@@ -28,19 +28,15 @@ class DataNode(Node):
 
         self.task_cmd = "idle"  # rough align,precise align,pick,RUN
      
-        self.forkstate = "idle"
-
-        self.current_pose = [0.0, 0.0, 0.0]
-
-        self.current_height = 0.0
-
-        self.target_depth = 500.0
-
-
+        self.rough_align_state = "idle"  # rough align task state
+        self.precise_align_state = "idle"  # precise align task state
+        self.pick_state = "idle"  # pick task state
+        self.assembly_state = "idle"  # assembly task state
        
         # 初始化 ROS2 Node
         #subscriber
         super().__init__('data_node')
+
         self.state_cmd_subscriber = self.create_subscription(
             StateCmd,
             '/state_cmd',
@@ -48,107 +44,77 @@ class DataNode(Node):
             10
         )
 
-        self.task_cmd_subscriber = self.create_subscription(
+        self.rough_align_state_subscriber = self.create_subscription(
+            TaskState,
+            '/task_state_rough_align',
+            self.task_state_rough_align_callback,
+            10
+        )
+
+        self.precise_align_state_subscriber = self.create_subscription(
+            TaskState,
+            '/task_state_precise_align',
+            self.task_state_precise_align_callback,
+            10
+        )
+
+        self.pick_state_subscriber = self.create_subscription(
+            TaskState,
+            '/task_state_pick',
+            self.task_state_pick_callback,
+            10
+        )
+
+        self.assembly_state_subscriber = self.create_subscription(
+            TaskState,
+            '/task_state_assembly',
+            self.task_state_assembly_callback,
+            10
+        )
+
+        #publisher 
+        #task "rough_align","precise_align","pick","assembly","idle"
+        self.run_state_publisher = self.create_publisher(
+            TaskState,
+            '/task_state_run',
+            10
+        )
+        self.task_cmd_publisher = self.create_publisher(
             TaskCmd,
             '/task_cmd',
-            self.task_cmd_callback,
             10
         )
-        
-        self.depth_data_subscriber = self.create_subscription(
-            Float32MultiArray,
-            "/depth_data",
-            self.depth_data_callback,
-            10
-        )
-
-        self.height_info_subscriber = self.create_subscription(
-            Int32,
-            'lr_distance',
-            self.height_info_callback,
-            10
-        )
-
-        self.fork_state_subscriber = self.create_subscription(
-            ForkState,
-            'fork_state',
-            self.fork_state_callback,
-            10
-        )
-
-        self.recipe_data_subscriber = self.create_subscription(
-            Recipe,
-            'recipe_data',
-            self.recipe_callback,
-            10
-        )
-
-        self.current_pose_subscriber = self.create_subscription(    
-            CurrentPose,
-            'current_pose',
-            self.current_pose_callback,
-            10
-        )
-
-        #publisher
-        self.RUN_state_publisher = self.create_publisher(TaskState, '/task_state_RUN', 10)
-        self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
-        self.detection_cmd_publisher = self.create_publisher(String,'/detection_task',10)
-        self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
-        self.clipper_cmd_publisher = self.create_publisher(ClipperCmd, 'clipper_cmd', 10)
-        
-    def publish_fork_cmd(self, mode, speed, direction, distance):
-        msg = ForkCmd()
-        msg.mode = mode
-        msg.speed = speed
-        msg.direction = direction
-        msg.distance = distance
-        self.fork_cmd_publisher.publish(msg)
-        self.get_logger().info(f"Published ForkCmd: mode={mode}, speed={speed}, direction={direction}, distance={distance}")
 
     def state_cmd_callback(self, msg: StateCmd):
         print(f"接收到狀態命令: {msg}")
         # 在這裡可以處理狀態命令
         self.state_cmd = {
+            'init_button': msg.init_button,
+            'run_button': msg.run_button,
             'pause_button': msg.pause_button,
+            'stop_button': msg.stop_button,
         }
 
-    def task_cmd_callback(self, msg: TaskCmd):
-        print(f"接收到任務命令: {msg.mode}")
-        # 在這裡可以處理任務命令
-        self.task_cmd = msg.mode
+    def task_state_rough_align_callback(self, msg: TaskState):
+        print(f"接收到粗對齊任務狀態: {msg}")
+        # 在這裡可以處理粗對齊任務狀態
+        self.rough_align_state = msg.state  
 
-    def depth_data_callback(self, msg: Float32MultiArray):
-        print(f"接收到深度數據: {msg.data}")
-        # 在這裡可以處理深度數據
-        self.depth_data = msg.data      
-        # 更新深度數據
-        if len(self.depth_data) >= 2:
-            self.depth_data[0] = msg.data[0]
-            self.depth_data[1] = msg.data[1]        
-        else:
-            self.get_logger().warn("接收到的深度數據長度不足，無法更新。")
-
-    def height_info_callback(self,msg: Int32):
-        """接收來自LR Sensor的高度信息"""
-        self.get_logger().info(f"Received height info: {msg.data} mm")
-        self.current_height = msg.data
-
-    def fork_state_callback(self, msg: ForkState):
-        self.forkstate = msg.state  # 假設 ForkState 有個 .state 屬性
-
-    def recipe_callback(self, msg: Recipe):
-        self.target_mode = msg.mode
-        self.target_height = msg.height
-        # 在這裡可以添加更多的處理邏輯
-        # 例如，根據接收到的 recipe 更新其他狀態或觸發其他操作
-
-    def current_pose_callback(self, msg: CurrentPose):
-        """接收當前機器人位置"""
-        self.get_logger().info(f"Received current pose: {msg.pose_data}")
-        self.current_pose[0] = msg.pose_data[0]
-        self.current_pose[1] = msg.pose_data[1]
-        self.current_pose[2] = msg.pose_data[2]
+    def task_state_precise_align_callback(self, msg: TaskState):
+        print(f"接收到精細對齊任務狀態: {msg}")
+        # 在這裡可以處理精細對齊任務狀態
+        self.precise_align_state = msg.state
+    
+    def task_state_pick_callback(self, msg: TaskState):
+        print(f"接收到拾取任務狀態: {msg}")
+        # 在這裡可以處理拾取任務狀態
+        self.pick_state = msg.state
+    
+    def task_state_assembly_callback(self, msg: TaskState):
+        print(f"接收到組裝任務狀態: {msg}")
+        # 在這裡可以處理組裝任務狀態
+        self.assembly_state = msg.state
+    
 
 
 class RUNState(Enum):
@@ -165,8 +131,7 @@ class RUNFSM(Machine):
     def __init__(self, data_node: DataNode):
         self.phase = RUNState.IDLE  # 初始狀態
         self.data_node = data_node
-        self.motor_cmd_sent = False
-        self.send_fork_cmd = False
+
 
         states = [
             RUNState.IDLE.value,
@@ -181,8 +146,15 @@ class RUNFSM(Machine):
         
         transitions = [
             {'trigger': 'idle_to_init', 'source': RUNState.IDLE.value, 'dest': RUNState.INIT.value},
-            
-
+            {'trigger': 'init_to_rough_align', 'source': RUNState.INIT.value, 'dest': RUNState.ROUGH_ALIGN.value},
+            {'trigger': 'rough_align_to_precise_align', 'source': RUNState.ROUGH_ALIGN.value, 'dest': RUNState.PRECISE_ALIGN.value},
+            {'trigger': 'precise_align_to_pick', 'source': RUNState.PRECISE_ALIGN.value, 'dest': RUNState.PICK.value},
+            {'trigger': 'pick_to_assembly', 'source': RUNState.PICK.value, 'dest': RUNState.ASSEMBLY.value},
+            {'trigger': 'assembly_to_done', 'source': RUNState.ASSEMBLY.value, 'dest': RUNState.DONE.value},
+            # {'trigger': 'precise_align_to_assembly', 'source': RUNState.PRECISE_ALIGN.value, 'dest': RUNState.ASSEMBLY.value},
+            # {'trigger': 'assembly_to_pick', 'source': RUNState.ASSEMBLY.value, 'dest': RUNState.PICK.value},
+            # {'trigger': 'pick_to_done', 'source': RUNState.PICK.value, 'dest': RUNState.DONE.value},
+            {'trigger': 'done_to_idle', 'source': RUNState.DONE.value, 'dest': RUNState.IDLE.value},
             {'trigger': 'fail', 'source': '*', 'dest': RUNState.FAIL.value},
             {'trigger': 'return_to_idle', 'source': '*', 'dest': RUNState.IDLE.value},
         ]
@@ -202,19 +174,30 @@ class RUNFSM(Machine):
 
     def reset_parameters(self):
         """重置參數"""
-        self.motor_cmd_sent = False
-        self.send_fork_cmd = False
-        
+        self.data_node.state_cmd = {
+            'init_button': False,
+            'run_button': False,
+            'pause_button': False,
+            'stop_button': False,
+        }
+        self.data_node.task_cmd = "idle"  # 重置任務命令
+
 
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
             print("[RUNmentFSM] 被暫停中")
+
+        elif self.data_node.state_cmd.get("stop_button", False):
+            print("[RUNmentFSM] 被停止中")
+            self.send_task_cmd("idle")  # 發送任務命令回到空閒狀態
+            self.reset_parameters()
+            self.return_to_idle()  # 返回到空閒狀態
         
-        elif self.data_node.task_cmd == "RUN":
-            print("[RUNmentFSM] 開始手動對齊任務")
+        elif self.data_node.state_cmd.get("run_button", False):
+            print("[RUNmentFSM] 被啟動中")
             self.run()
         else:
-            print("[RUNmentFSM] 手動對齊任務未啟動，等待中")
+            print("[RUNmentFSM] 等待啟動")
             self.reset_parameters()  # 重置參數
             self.return_to_idle()  # 返回到空閒狀態
             self.run()
@@ -223,116 +206,131 @@ class RUNFSM(Machine):
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
-        push_pose_cmd = [0.0,500.0,0.0]  # 推進階段的目標位置
-        back_pose_cmd = [0.0, 0.0, 0.0]  # 回到家位置的目標位置
-
         if self.state == RUNState.IDLE.value:
-            print("[RUNmentFSM] 等待開始")
-            if self.data_node.task_cmd == "RUN":
+            print("[RUNmentFSM] 等待啟動")
+            if self.data_node.state_cmd.get('run_button', False):
                 self.idle_to_init()
-                print("[RUNmentFSM] 進入初始化階段")
-            
+                print("[RUNmentFSM] 狀態轉換到 INIT")
+            else:
+                print("[RUNmentFSM] 等待啟動")
+        
         elif self.state == RUNState.INIT.value:
             print("[RUNmentFSM] 初始化階段")
-            self.init_to_push()
-        
-        elif self.state == RUNState.PUSH.value:
-            print("[RUNmentFSM] 推進階段")
-            if not self.motor_cmd_sent:
-                self.sent_motor_cmd(push_pose_cmd)
-                self.motor_cmd_sent = True  # 標記已發送初始化命令
-            else:
-                print("[RUNmentFSM] 馬達命令已發送，等待完成")
-                push_arrive = self.check_pose(push_pose_cmd)
-                if push_arrive:
-                    print("[RUNmentFSM] 馬達已到達推進位置")
-                    self.motor_cmd_sent = False  # 重置標記
-                    self.push_to_open_clipper()
-                else:
-                    print("[RUNmentFSM] 馬達尚未到達推進位置，繼續等待")
-        
-        elif self.state == RUNState.OPEN_CLIPPER.value:
-            print("[RUNmentFSM] 開啟夾爪階段")
-            self.send_clipper_cmd("open_clipper")
-            time.sleep(10)  # 等待夾爪開啟
-            self.open_clipper_to_back_home()
 
-        elif self.state == RUNState.BACK_HOME.value:
-            print("[RUNmentFSM] 回到家位置階段")
-            if not self.motor_cmd_sent:
-                self.sent_motor_cmd(back_pose_cmd)
-                self.motor_cmd_sent = True
-            else:
-                print("[RUNmentFSM] 馬達命令已發送，等待完成")
-                back_arrive = self.check_pose(back_pose_cmd)
-                if back_arrive:
-                    print("[RUNmentFSM] 馬達已到達家位置")
-                    self.back_home_to_move_forklift()
-                else:
-                    print("[RUNmentFSM] 馬達尚未到達家位置，繼續等待")
-        
-        elif self.state == RUNState.MOVE_FORKLIFT.value:
-            print("[RUNmentFSM] 移動叉車階段")
-            if not self.send_fork_cmd:
-                height_cmd = 100.0
-                tolerance = 5.0
+            print("[RUNmentFSM] 發送任務命令: rough_align")
+            self.send_task_cmd("rough_align")
 
-                if abs(self.data_node.current_height - height_cmd) < tolerance:
-                    print("[RUNmentFSM] 叉車已到達目標高度")
-                    self.move_forklift_to_done()
-                else:
-                    print(f"[RUNmentFSM] 叉車尚未到達目標高度，當前高度: {self.data_node.current_height}, 目標高度: {height_cmd}")
-                    self.fork_cmd(mode="run", speed="slow", direction="down", distance= height_cmd)
-                    self.send_fork_cmd = True
-            else:
-                print("[RUNmentFSM] 叉車命令已發送，等待完成")
+            print("[RUNmentFSM] 狀態轉換到 ROUGH_ALIGN")
+            self.init_to_rough_align()
+
+        elif self.state == RUNState.ROUGH_ALIGN.value:
+            print("[RUNmentFSM] 粗對齊階段")
+
+            time.sleep(3)  # 等待粗對齊任務完成
+            print("[RUNmentFSM] 粗對齊任務完成")
+            print("[RUNmentFSM] 發送任務命令: precise_align")
+            self.send_task_cmd("precise_align")
+            print("[RUNmentFSM] 狀態轉換到 PRECISE_ALIGN")
+            self.rough_align_to_precise_align()
+
+            # if self.data_node.rough_align_state == "done":
+            #     print("[RUNmentFSM] 粗對齊任務完成")
+            #     print("[RUNmentFSM] 發送任務命令: precise_align")
+            #     self.send_task_cmd("precise_align")
+            #     print("[RUNmentFSM] 狀態轉換到 PRECISE_ALIGN")
+            #     self.rough_align_to_precise_align()
+            # elif self.data_node.rough_align_state == "fail":
+            #     print("[RUNmentFSM] 粗對齊任務失敗")
+            #     self.fail()
+            # else:
+            #     print("[RUNmentFSM] 等待粗對齊任務完成")
+
+        elif self.state == RUNState.PRECISE_ALIGN.value:
+            print("[RUNmentFSM] 精細對齊階段")
+
+            time.sleep(3)  # 等待精細對齊任務完成
+            print("[RUNmentFSM] 精細對齊任務完成")
+            print("[RUNmentFSM] 發送任務命令: pick")
+            self.send_task_cmd("pick")
+            print("[RUNmentFSM] 狀態轉換到 PICK")
+            self.precise_align_to_pick()
+
+            # if self.data_node.precise_align_state == "done":
+            #     print("[RUNmentFSM] 精細對齊任務完成")
+            #     print("[RUNmentFSM] 發送任務命令: pick")
+            #     self.send_task_cmd("pick")
+            #     print("[RUNmentFSM] 狀態轉換到 PICK")
+            #     self.precise_align_to_pick()
+            # elif self.data_node.precise_align_state == "fail":
+            #     print("[RUNmentFSM] 精細對齊任務失敗")
+            #     self.fail()
+            # else:
+            #     print("[RUNmentFSM] 等待精細對齊任務完成")
+        
+        elif self.state == RUNState.PICK.value:
+            print("[RUNmentFSM] 拾取階段")
+
+            time.sleep(3)  # 等待拾取任務完成
+            print("[RUNmentFSM] 拾取任務完成")
+            print("[RUNmentFSM] 發送任務命令: assembly")
+            self.send_task_cmd("assembly")
+            print("[RUNmentFSM] 狀態轉換到 ASSEMBLY")
+            self.pick_to_assembly()
+
+            # if self.data_node.pick_state == "done":
+            #     print("[RUNmentFSM] 拾取任務完成")
+            #     print("[RUNmentFSM] 發送任務命令: assembly")
+            #     self.send_task_cmd("assembly")
+            #     print("[RUNmentFSM] 狀態轉換到 ASSEMBLY")
+            #     self.pick_to_assembly()
+            # elif self.data_node.pick_state == "fail":
+            #     print("[RUNmentFSM] 拾取任務失敗")
+            #     self.fail()
+            # else:
+            #     print("[RUNmentFSM] 等待拾取任務完成")
+        
+        elif self.state == RUNState.ASSEMBLY.value:
+            print("[RUNmentFSM] 組裝階段")
+
+            time.sleep(3)  # 等待組裝任務完成
+            print("[RUNmentFSM] 組裝任務完成")
+            print("[RUNmentFSM] 發送任務命令: done")
+            self.send_task_cmd("done")
+            print("[RUNmentFSM] 狀態轉換到 DONE")
+            self.assembly_to_done()
+
+            # if self.data_node.assembly_state == "done":
+            #     print("[RUNmentFSM] 組裝任務完成")
+            #     print("[RUNmentFSM] 發送任務命令: done")
+            #     self.send_task_cmd("done")
+            #     print("[RUNmentFSM] 狀態轉換到 DONE")
+            #     self.assembly_to_done()
+            # elif self.data_node.assembly_state == "fail":
+            #     print("[RUNmentFSM] 組裝任務失敗")
+            #     self.fail()
+            # else:
+            #     print("[RUNmentFSM] 等待組裝任務完成")
         
         elif self.state == RUNState.DONE.value:
             print("[RUNmentFSM] 任務完成")
-            self.data_node.task_cmd = "idle"
-            self.return_to_idle()
+            # 在這裡可以添加任務完成後的處理邏輯
         
         elif self.state == RUNState.FAIL.value:
             print("[RUNmentFSM] 任務失敗")
-            self.data_node.task_cmd = "idle"
-            self.return_to_idle()
-        
-        else:
-            print(f"[RUNmentFSM] 未知狀態: {self.state}")
-            self.data_node.task_cmd = "idle"
+            # 在這裡可以添加任務失敗後的處理邏輯
+            print("[RUNmentFSM] 發送任務命令: idle")
+            self.send_task_cmd("idle")
+            print("[RUNmentFSM] 狀態轉換到 IDLE")
             self.return_to_idle()
 
-    def fork_cmd(self, mode, speed, direction, distance):
-        msg = ForkCmd()
-        msg.mode = mode
-        msg.speed = speed
-        msg.direction = direction
-        msg.distance = distance
-        self.data_node.fork_cmd_publisher.publish(msg)
-        print(f"Published ForkCmd: mode={mode}, speed={speed}, direction={direction}, distance={distance}")
 
-    def sent_motor_cmd(self,pose_cmd):
-        """發送馬達初始化命令"""
-        msg = MotionCmd()
-        msg.command_type = MotionCmd.TYPE_Y_MOVE
-        msg.pose_data = [pose_cmd[0], pose_cmd[1], pose_cmd[2]]
-        msg.speed = 30.0
-        self.data_node.motion_cmd_publisher.publish(msg)
-    
-    def check_pose(self,pose_cmd):
-        print(f"[RUNmentFSM] 檢查Y位置: {pose_cmd[1]}")
-        if abs(self.data_node.current_pose[1] - pose_cmd[1]) < 2.0:
-            print("馬達已經到位置")
-            return True
-        else:
-            print("馬達尚未到位置")
-            return False
+    def send_task_cmd(self, task):
+        """發送任務命令"""
+        msg = TaskCmd()
+        msg.mode = task
+        self.data_node.task_cmd_publisher.publish(msg)
+        print(f"[RUNmentFSM] 發送任務命令: {task}")
 
-    def send_clipper_cmd(self, mode):
-        msg = ClipperCmd()
-        msg.mode = mode
-        self.data_node.clipper_cmd_publisher.publish(msg)
-        print(f"[Clipper] Published: {mode}")
 
 
 def main():
@@ -349,8 +347,8 @@ def main():
             system.step()
             print(f"[現在狀態] {system.state}")
             # 更新狀態發布
-            data.RUN_state_publisher.publish(
-                TaskState(mode="RUN", state=system.state)
+            data.run_state_publisher.publish(
+                TaskState(mode="run", state=system.state)
             )
             time.sleep(timer_period)
 

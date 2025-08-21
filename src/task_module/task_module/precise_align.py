@@ -7,7 +7,7 @@ from enum import Enum, auto
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String,Float32MultiArray,Int32
+from std_msgs.msg import String,Float32MultiArray,Int32,Int32MultiArray
 from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,MotionState,ForkCmd,ForkState,Recipe
 
 #parameters
@@ -38,7 +38,7 @@ class DataNode(Node):
         self.forkstate = "idle"
 
         self.target_mode = "idle" # idle,pick,assembly  
-        self.target_height = 80.0
+        self.target_height = 150.0
        
         # 初始化 ROS2 Node
         #subscriber
@@ -98,6 +98,7 @@ class DataNode(Node):
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
         self.detection_cmd_publisher = self.create_publisher(String,'/detection_task',10)
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
+        self.laser_cmd_publisher = self.create_publisher(Int32MultiArray,'/laser_io_cmd',10)
         
     def publish_fork_cmd(self, mode, speed, direction, distance):
         msg = ForkCmd()
@@ -131,7 +132,12 @@ class DataNode(Node):
             'rough_pos_finish': msg.rough_pos_finish,
             'auto_pos_finish': msg.auto_pos_finish,
             'system_error': msg.system_error
-        }
+        }   
+    
+    def recipe_callback(self, msg: Recipe):
+        self.target_mode = msg.mode
+        self.target_height = msg.height
+    
 
     def depth_data_callback(self, msg: Float32MultiArray):
         print(f"接收到深度數據: {msg.data}")
@@ -257,6 +263,7 @@ class PreciseAlignFSM(Machine):
                 print("[PreciseAlignmentFSM] 對齊任務未啟動，等待中")
         
         elif self.state == PreciseAlignState.INIT.value:   
+            self.laser_cmd("laser_open")  # 開啟雷射
             print("[PreciseAlignmentFSM] 初始化階段")
             if self.data_node.func_cmd.get("pick_button", False):
                 self.run_mode = "pick"
@@ -369,6 +376,7 @@ class PreciseAlignFSM(Machine):
             #     self.data_node.publish_fork_cmd(mode="stop", speed="slow", direction="down", distance = height_cmd)
             
         elif self.state == PreciseAlignState.DONE.value:
+            self.laser_cmd("laser_close")  # 開啟雷射
             print("[PreciseAlignmentFSM] 對齊任務完成")
             
         elif self.state == PreciseAlignState.FAIL.value:
@@ -402,6 +410,17 @@ class PreciseAlignFSM(Machine):
         #     print("馬達尚未到位置")
         #     return False
 
+    def laser_cmd(self, cmd: str):
+        """發送雷射命令"""
+        if cmd == "laser_open":
+            value = [1,1]
+            value = Int32MultiArray(data=value)  # 封裝為 Int32MultiArray
+            self.data_node.laser_cmd_publisher.publish(value)
+        elif cmd == "laser_close":
+            value = [0,0]
+            value = Int32MultiArray(data=value)  # 封裝為 Int32MultiArray
+            self.data_node.laser_cmd_publisher.publish(value)
+        print(f"[RoughAlignmentFSM] 發送雷射命令: {cmd}")
 
 
 def main():

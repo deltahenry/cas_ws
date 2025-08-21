@@ -7,7 +7,7 @@ from enum import Enum, auto
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String,Float32MultiArray,Int32
+from std_msgs.msg import String,Float32MultiArray,Int32,Int32MultiArray
 from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,ForkCmd,ForkState,Recipe,CurrentPose,ClipperCmd
 import numpy as np
 
@@ -93,6 +93,7 @@ class DataNode(Node):
         self.detection_cmd_publisher = self.create_publisher(String,'/detection_task',10)
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
         self.clipper_cmd_publisher = self.create_publisher(ClipperCmd, 'clipper_cmd', 10)
+        self.laser_cmd_publisher = self.create_publisher(Int32MultiArray,'/laser_io_cmd',10)
         
     def publish_fork_cmd(self, mode, speed, direction, distance):
         msg = ForkCmd()
@@ -135,8 +136,7 @@ class DataNode(Node):
         self.forkstate = msg.state  # 假設 ForkState 有個 .state 屬性
 
     def recipe_callback(self, msg: Recipe):
-        self.target_mode = msg.mode
-        self.target_height = msg.height
+        self.target_depth = msg.depth
         # 在這裡可以添加更多的處理邏輯
         # 例如，根據接收到的 recipe 更新其他狀態或觸發其他操作
 
@@ -223,7 +223,7 @@ class AssemblyFSM(Machine):
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
-        push_pose_cmd = [0.0,500.0,0.0]  # 推進階段的目標位置
+        push_pose_cmd = [0.0,self.data_node.target_depth,0.0]  # 推進階段的目標位置
         back_pose_cmd = [0.0, 0.0, 0.0]  # 回到家位置的目標位置
 
         if self.state == AssemblyState.IDLE.value:
@@ -233,6 +233,7 @@ class AssemblyFSM(Machine):
                 print("[AssemblymentFSM] 進入初始化階段")
             
         elif self.state == AssemblyState.INIT.value:
+            self.laser_cmd("laser_open")  # 開啟雷射
             print("[AssemblymentFSM] 初始化階段")
             self.init_to_push()
         
@@ -273,7 +274,7 @@ class AssemblyFSM(Machine):
         
         elif self.state == AssemblyState.MOVE_FORKLIFT.value:
             print("[AssemblymentFSM] 移動叉車階段")
-            height_cmd = 100.0
+            height_cmd = 80.0
             tolerance = 5.0
             
             if not self.send_fork_cmd:
@@ -289,7 +290,7 @@ class AssemblyFSM(Machine):
         
         elif self.state == AssemblyState.DONE.value:
             print("[AssemblymentFSM] 任務完成")
-            # self.return_to_idle()
+            self.laser_cmd("laser_close")  # 關閉雷射
         
         elif self.state == AssemblyState.FAIL.value:
             print("[AssemblymentFSM] 任務失敗")
@@ -332,6 +333,18 @@ class AssemblyFSM(Machine):
         msg.mode = mode
         self.data_node.clipper_cmd_publisher.publish(msg)
         print(f"[Clipper] Published: {mode}")
+
+    def laser_cmd(self, cmd: str):
+        """發送雷射命令"""
+        if cmd == "laser_open":
+            value = [1,1]
+            value = Int32MultiArray(data=value)  # 封裝為 Int32MultiArray
+            self.data_node.laser_cmd_publisher.publish(value)
+        elif cmd == "laser_close":
+            value = [0,0]
+            value = Int32MultiArray(data=value)  # 封裝為 Int32MultiArray
+            self.data_node.laser_cmd_publisher.publish(value)
+        print(f"[RoughAlignmentFSM] 發送雷射命令: {cmd}")
 
 
 def main():
