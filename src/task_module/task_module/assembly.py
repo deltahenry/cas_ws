@@ -275,7 +275,7 @@ class AssemblyFSM(Machine):
         elif self.state == AssemblyState.MOVE_FORKLIFT.value:
             print("[AssemblymentFSM] 移動叉車階段")
             height_cmd = 80.0
-            tolerance = 5.0
+            tolerance = 1.0
             
             if not self.send_fork_cmd:
                 self.fork_cmd(mode="run", speed="slow", direction="down", distance=height_cmd)

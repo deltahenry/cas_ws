@@ -321,7 +321,7 @@ class PreciseAlignFSM(Machine):
         elif self.state == PreciseAlignState.MOVE_FORKLIFT.value:
             
             height_cmd = self.data_node.target_height
-            tolerance = 5.0
+            tolerance = 1.0
 
             if not self.send_fork_cmd:
                 self.fork_cmd(mode="run", speed="slow", direction="down", distance=height_cmd)

@@ -227,7 +227,7 @@ class RoughAlignFSM(Machine):
     def run(self):
         pick_height = 80.0  # pick模式下的初始高度
         assem_height = 150.0
-        tolerance = 5.0  # 容差值
+        tolerance = 1.0  # 容差值
 
         if self.state == RoughAlignState.IDLE.value:
             print("[RoughAlignmentFSM] 等待開始手動對齊")

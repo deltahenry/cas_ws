@@ -27,6 +27,7 @@ setup(
             'pick = task_module.pick:main',
             'assembly = task_module.assembly:main',
             'recipe_node = task_module.recipe_node:main',
+            'compensate_node = task_module.compensate_node:main',
         ],
     },
 )

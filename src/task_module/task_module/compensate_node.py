@@ -23,7 +23,7 @@ class DataNode(Node):
             'pause_button': False,
         }
 
-        self.task_cmd = "idle"  # rough align,precise align,pick,assembly
+        self.compensate_cmd = "idle"  # 'l_shape','screw'
         self.depth_data = [500.0,500.0]
         self.current_height = 0.0
         self.forkstate = "idle"
@@ -53,8 +53,8 @@ class DataNode(Node):
 
         self.task_cmd_subscriber = self.create_subscription(
             TaskCmd,
-            '/task_cmd',
-            self.task_cmd_callback,
+            '/compensate_cmd',
+            self.compensate_cmd_callback,
             10
         )
         
@@ -93,7 +93,7 @@ class DataNode(Node):
             10
         )
 
-
+        
         #publisher
         self.rough_align_state_publisher = self.create_publisher(TaskState, '/task_state_rough_align', 10)
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
@@ -108,10 +108,10 @@ class DataNode(Node):
             'pause_button': msg.pause_button,
         }
 
-    def task_cmd_callback(self, msg: TaskCmd):
+    def compensate_cmd_callback(self, msg: TaskCmd):
         print(f"接收到任務命令: {msg.mode}")
         # 在這裡可以處理任務命令
-        self.task_cmd = msg.mode
+        self.compensate_cmd = msg.mode
 
     def depth_data_callback(self, msg: Float32MultiArray):
         print(f"接收到深度數據: {msg.data}")
@@ -178,8 +178,8 @@ class CompensateFSM(Machine):
         
         transitions = [
             {'trigger': 'idle_to_init', 'source': CompensateState.IDLE.value, 'dest': CompensateState.INIT.value},
-            {'trigger': 'init_to_detection', 'source': CompensateState.INIT.value, 'dest': CompensateState.DETECT.value},
-            {'trigger': 'dect_to_get_compensate', 'source': CompensateState.DETECT.value, 'dest': CompensateState.GET_COMPENSATE.value},
+            {'trigger': 'init_to_detect', 'source': CompensateState.INIT.value, 'dest': CompensateState.DETECT.value},
+            {'trigger': 'detect_to_get_compensate', 'source': CompensateState.DETECT.value, 'dest': CompensateState.GET_COMPENSATE.value},
             {'trigger': 'get_compensate_to_move_motor', 'source': CompensateState.GET_COMPENSATE.value, 'dest': CompensateState.MOVE_MOTOR.value},
             {'trigger': 'move_motor_to_move_forklift', 'source': CompensateState.MOVE_MOTOR.value, 'dest': CompensateState.MOVE_FORKLIFT.value},
             {'trigger': 'move_forklift_to_done', 'source': CompensateState.MOVE_FORKLIFT.value, 'dest': CompensateState.DONE.value},
@@ -202,27 +202,21 @@ class CompensateFSM(Machine):
 
     def reset_parameters(self):
         """重置參數"""
-        self.run_mode = "pick"
-        self.data_node.depth_data = [600.0, 600.0]
-        self.data_node.point_dist = 1000.0
         self.data_node.state_cmd = {
             'pause_button': False,
         }
-        self.data_node.func_cmd = {
-            'pick_button': False,
-            'push_button': True
-        }
+        self.data_node.compensate_cmd = "idle"
         self.send_fork_cmd = False  # 用於控制叉車命令的發送
         
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
             print("[CompensatementFSM] 被暫停中")
         
-        elif self.data_node.task_cmd == "rough_align":
-            print("[CompensatementFSM] 開始手動對齊任務")
+        elif self.data_node.compensate_cmd == "l_shape" or self.data_node.compensate_cmd == "screw":
+            print("[CompensatementFSM] 開始compensate")
             self.run()
         else:
-            print("[CompensatementFSM] 手動對齊任務未啟動，等待中")
+            print("[CompensatementFSM] compensate未啟動，等待中")
             self.reset_parameters()  # 重置參數
             self.return_to_idle()  # 返回到空閒狀態
             self.run()
@@ -233,24 +227,33 @@ class CompensateFSM(Machine):
     def run(self):
         """FSM的主循環"""
         if self.state == CompensateState.IDLE.value:
-            self.idle_to_init()
+            # print("[CompensatementFSM] 空閒中...")
+            # 在這裡可以添加空閒邏輯
+            if self.data_node.compensate_cmd in ["l_shape", "screw"]:
+                self.idle_to_init()
+            else:
+                print("[CompensatementFSM] 空閒中...")
+                return
         
         elif self.state == CompensateState.INIT.value:
             print("[CompensatementFSM] 初始化中...")
             # 在這裡可以添加初始化邏輯
-            self.init_to_detection()
+            self.init_to_detect()
 
         elif self.state == CompensateState.DETECT.value:
             print("[CompensatementFSM] 偵測中...")
             # 在這裡可以添加偵測邏輯
-            self.dect_to_get_compensate
+            self.detect_to_get_compensate()
 
         elif self.state == CompensateState.GET_COMPENSATE.value:
             #translate the target pose to the robot's coordinate system
             print("[CompensatementFSM] 獲取補償位置中...")
             self.data_node.pose_cmd = self.pose_to_cmd(self.data_node.target_pose)
+            print(f"[CompensatementFSM] 目標位置: {self.data_node.pose_cmd}")
         
-    def pose_to_cmd(pose: Pose):
+
+        
+    def pose_to_cmd(self,pose: Pose):
         # Extract XY position
         x = pose.position.x
         y = pose.position.y
