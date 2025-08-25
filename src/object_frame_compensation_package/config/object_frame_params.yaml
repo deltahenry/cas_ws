@@ -4,8 +4,8 @@ object_frame_compensation_node:
     camera_in_hand_tf:
       translation:
         x: 0.0   # 相機相對手臂末端的 x 偏移 (m)
-        y: 0.0  # 相機相對手臂末端的 y 偏移 (m)  
-        z: 0.3   # 相機相對手臂末端的 z 偏移 (m)
+        y: 0.249  # 相機相對手臂末端的 y 偏移 (m)  
+        z: 0.544   # 相機相對手臂末端的 z 偏移 (m)
       rotation:
         x: -0.707
         y: 0.0
@@ -15,26 +15,26 @@ object_frame_compensation_node:
     # Golden Sample 手臂抓取位置 (世界座標系)
     golden_arm_pose:
       position:
-        x: 0.0    # Golden Sample 時手臂的 x 位置 (m)
+        x: 0.028    # Golden Sample 時手臂的 x 位置 (m)
         y: 0.0    # Golden Sample 時手臂的 y 位置 (m)
         z: 0.0    # Golden Sample 時手臂的 z 位置 (m)
       orientation:
         x: 0.0
         y: 0.0  
-        z: 0.0
-        w: 1.0
+        z: -0.004
+        w: 0.999992
     
     # Golden Sample 物件位置 (相機座標系)
     golden_object_camera_pose:
       position:
-        x: 0.226    # Golden Sample 時物件在相機中的 x 位置 (m)
-        y: 0.070   # Golden Sample 時物件在相機中的 y 位置 (m)
-        z: 0.443    # Golden Sample 時物件在相機中的 z 位置 (m)
+        x: 0.245    # Golden Sample 時物件在相機中的 x 位置 (m)
+        y: 0.035   # Golden Sample 時物件在相機中的 y 位置 (m)
+        z: 0.445    # Golden Sample 時物件在相機中的 z 位置 (m)
       orientation:
         x: 0.01
         y: 0.58
         z: 0.81
-        w: -0.007
+        w: -0.005
     
     # 節點行為參數
     auto_calculate_on_startup: true      # 啟動時自動計算

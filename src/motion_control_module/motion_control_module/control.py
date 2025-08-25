@@ -275,13 +275,22 @@ class MotionController(Node):
         ))
         # 發佈當前 Arm 位置
         arm_pose = Pose()
-        arm_pose.position.x = float(self.current_cartesian_pose[0])
-        arm_pose.position.y = float(self.current_cartesian_pose[1])
+        # arm_pose.position.x = float(self.current_cartesian_pose[0])
+        # arm_pose.position.y = float(self.current_cartesian_pose[1])
+        # arm_pose.position.z = 0.0  # 假設 Z 軸為 0
+        # arm_pose.orientation.w = 1.0  # 假設沒有旋轉
+        # arm_pose.orientation.x = 0.0
+        # arm_pose.orientation.y = 0.0
+        # arm_pose.orientation.z = 0.0
+
+        #test
+        arm_pose.position.x = 0.025
+        arm_pose.position.y = 0.0
         arm_pose.position.z = 0.0  # 假設 Z 軸為 0
-        arm_pose.orientation.w = 1.0  # 假設沒有旋轉
+        arm_pose.orientation.w = 0.999992  # 假設沒有旋轉
         arm_pose.orientation.x = 0.0
         arm_pose.orientation.y = 0.0
-        arm_pose.orientation.z = 0.0
+        arm_pose.orientation.z = -0.004
         self.current_arm_pose_publisher.publish(arm_pose)
         
         # 情況 1：如果有軌跡資料（送出一個 batch）

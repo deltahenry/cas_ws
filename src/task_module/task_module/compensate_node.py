@@ -7,13 +7,14 @@ from enum import Enum, auto
 
 import math
 import rclpy
+import numpy as np
 from rclpy.node import Node
 from geometry_msgs.msg import Pose
 from std_msgs.msg import String,Float32MultiArray, Int32MultiArray, Int32
-from common_msgs.msg import StateCmd,TaskCmd, MotionCmd,MotionState,TaskState,ForkCmd,ForkState,Recipe
+from common_msgs.msg import StateCmd,TaskCmd, MotionCmd,MotionState,TaskState,ForkCmd,ForkState,Recipe,CurrentPose
 
 #parameters
-timer_period = 0.5  # seconds
+timer_period = 0.1  # seconds
 
 # --- ROS2 Node ---
 class DataNode(Node):
@@ -24,8 +25,12 @@ class DataNode(Node):
         }
 
         self.compensate_cmd = "idle"  # 'l_shape','screw'
+        self.confirm_compensate = False
+        
+
         self.depth_data = [500.0,500.0]
         self.current_height = 0.0
+        self.current_pose = [0.0, 0.0, 0.0]
         self.forkstate = "idle"
 
         self.target_mode = "idle" # idle,pick,assembly  
@@ -93,6 +98,14 @@ class DataNode(Node):
             10
         )
 
+        self.current_pose_subscriber = self.create_subscription(    
+            CurrentPose,
+            'current_pose',
+            self.current_pose_callback,
+            10
+        )
+
+        self.confirm_compensate_subscriber = self.create_subscription(String, '/confirm_cmd', self.confirm_callback, 10)
         
         #publisher
         self.rough_align_state_publisher = self.create_publisher(TaskState, '/task_state_rough_align', 10)
@@ -100,6 +113,7 @@ class DataNode(Node):
         self.detection_cmd_publisher = self.create_publisher(String,'/lshape/cmd',10)
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
         self.laser_cmd_publisher = self.create_publisher(Int32MultiArray,'/laser_io_cmd',10)
+        self.pose_pub = self.create_publisher(MotionCmd, "/current_pose_cmd", 10)
 
     def state_cmd_callback(self, msg: StateCmd):
         print(f"接收到狀態命令: {msg}")
@@ -147,7 +161,20 @@ class DataNode(Node):
         self.target_pose.orientation.z = msg.orientation.z
         self.target_pose.orientation.w = msg.orientation.w
         
+    def current_pose_callback(self, msg: CurrentPose):
+        """接收當前機器人位置"""
+        self.get_logger().info(f"Received current pose: {msg.pose_data}")
+        self.current_pose[0] = msg.pose_data[0]
+        self.current_pose[1] = msg.pose_data[1]
+        self.current_pose[2] = msg.pose_data[2]
 
+    def confirm_callback(self, msg: String):
+        print(f"接收到確認命令: {msg.data}")
+        if msg.data == "confirm":
+            self.confirm_compensate = True
+        else:
+            self.confirm_compensate = False
+            
 class CompensateState(Enum):
     IDLE = "idle"
     INIT = "init"
@@ -164,6 +191,9 @@ class CompensateFSM(Machine):
         self.data_node = data_node
         self.run_mode = "pick"
         self.send_fork_cmd = False  # 用於控制叉車命令的發送
+        self.motor_cmd_sent = False
+        self.pose_cmd_to_motion = [0.0,0.0,0.0]
+
 
         states = [
             CompensateState.IDLE.value,
@@ -193,20 +223,17 @@ class CompensateFSM(Machine):
     def _update_phase(self):
         self.phase = CompensateState(self.state)
 
-    def depth_ref(self,run_mode):
-        """根據運行模式返回參考深度"""
-        if run_mode == "pick":
-            return 90.0
-        elif run_mode == "push":
-            return 0.3
-
     def reset_parameters(self):
         """重置參數"""
+       
+        self.motor_cmd_sent = False
+        self.data_node.compensate_cmd = "idle"
+        self.send_fork_cmd = False  # 用於控制叉車命令的發送
+
         self.data_node.state_cmd = {
             'pause_button': False,
         }
-        self.data_node.compensate_cmd = "idle"
-        self.send_fork_cmd = False  # 用於控制叉車命令的發送
+
         
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
@@ -249,9 +276,53 @@ class CompensateFSM(Machine):
             #translate the target pose to the robot's coordinate system
             print("[CompensatementFSM] 獲取補償位置中...")
             self.data_node.pose_cmd = self.pose_to_cmd(self.data_node.target_pose)
-            print(f"[CompensatementFSM] 目標位置: {self.data_node.pose_cmd}")
-        
+            x, y, yaw = self.data_node.pose_cmd
 
+            x = float(x)*1000 + self.data_node.current_pose[0]  # m to mm
+            y = 0.0 # m to mm
+            yaw = self.data_node.pose_cmd[2] + self.data_node.current_pose[2]/57.2958  # rad to degree
+
+            # 發佈給 UI 顯示
+            msg = MotionCmd()
+            msg.command_type = MotionCmd.TYPE_GOTO
+            msg.pose_data = [float(x), float(y), float(yaw)]
+            msg.speed = 10.0
+            self.data_node.pose_pub.publish(msg)
+
+            if self.data_node.confirm_compensate:
+                self.data_node.confirm_compensate = False
+                self.get_compensate_to_move_motor()
+        
+        elif self.state == CompensateState.MOVE_MOTOR.value:
+            print("[CompensatementFSM] 移動機械手臂中...")
+            self.pose_cmd_to_motion[0] = self.data_node.pose_cmd[0]*1000 + self.data_node.current_pose[0]  # m to mm
+            self.pose_cmd_to_motion[1] = 0.0
+            self.pose_cmd_to_motion[2] = self.data_node.pose_cmd[2] + self.data_node.current_pose[2]/57.2958 # degree to rad
+            print(f"[CompensatementFSM] 目標位置 (mm, rad): {self.pose_cmd_to_motion}")
+
+            if not self.motor_cmd_sent:
+                self.sent_motor_cmd(self.pose_cmd_to_motion)
+                self.motor_cmd_sent = True
+            else:
+                print("[PickmentFSM] 馬達命令已發送，等待完成")
+                # arrive = self.check_pose(self.pose_cmd_to_motion)
+                arrive = True # for test
+                if arrive:
+                    print("[PickmentFSM] 馬達已到達家位置")
+                    self.motor_cmd_sent = False  # 重置標記
+                    self.move_motor_to_move_forklift()
+                else:
+                    print("[PickmentFSM] 馬達尚未到達家位置，繼續等待")
+        
+        elif self.state == CompensateState.MOVE_FORKLIFT.value:
+            self.move_forklift_to_done()
+        
+        elif self.state == CompensateState.DONE.value:
+            print("[CompensatementFSM] 補償完成!")
+            self.data_node.compensate_cmd = "idle"
+            self.return_to_idle()
+        
+            
         
     def pose_to_cmd(self,pose: Pose):
         # Extract XY position
@@ -272,6 +343,29 @@ class CompensateFSM(Machine):
 
         return [x, y, yaw]  
             
+    def sent_motor_cmd(self,pose_cmd):
+        """發送馬達初始化命令"""
+        msg = MotionCmd()
+        msg.command_type = MotionCmd.TYPE_GOTO
+        msg.pose_data = [pose_cmd[0], pose_cmd[1], pose_cmd[2]]
+        msg.speed = 10.0
+        self.data_node.motion_cmd_publisher.publish(msg)
+    
+    def check_pose(self,pose_cmd):
+        print(self.data_node.current_pose)  
+        modify_pose_cmd = pose_cmd.copy()
+        modify_pose_cmd[0] = modify_pose_cmd[0]
+        modify_pose_cmd[1] = modify_pose_cmd[1]
+        modify_pose_cmd[2] =  modify_pose_cmd[2]*57.2958  # rad to degree
+        print(modify_pose_cmd)
+
+        if np.allclose(self.data_node.current_pose, modify_pose_cmd, atol=0.05):
+            print("馬達已經到位置")
+            return True
+        else:
+            print("馬達尚未到位置")
+            return False
+
     def laser_cmd(self, cmd: str):
         """發送雷射命令"""
         if cmd == "laser_open":
