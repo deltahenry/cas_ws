@@ -53,12 +53,12 @@ class TcpRangefinderNode(Node):
                             try:
                                 parts = message.split(",")
                                 if len(parts) == 3 and parts[0].startswith("M"):
-                                    value1 = float(parts[1]) / 100.0
-                                    value2 = float(parts[2]) / 100.0
+                                    value1 = float(parts[1]) / 100.0 + 870.0
+                                    value2 = float(parts[2]) / 100.0 + 870.0
 
                                     # 儲存轉換結果
-                                    self.range1 = value1
-                                    self.range2 = value2
+                                    self.range1 = value1 
+                                    self.range2 = value2 
 
                                     self.get_logger().info(f'Parsed values: {value1:.2f}, {value2:.2f}')
                                     # 發佈到 ROS Topic

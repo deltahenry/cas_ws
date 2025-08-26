@@ -269,7 +269,7 @@ class MotionController(Node):
         # 發佈當前 Cartesian 位置
         x = self.current_cartesian_pose[0]
         y = self.current_cartesian_pose[1]
-        yaw = self.current_cartesian_pose[2] * 57.29  #
+        yaw = self.current_cartesian_pose[2]#
         pose_data = [x, y, yaw]
         self.current_cartesian_pose_publisher.publish(CurrentPose(pose_data=pose_data
         ))

@@ -49,7 +49,7 @@ class CompensateUI(Node, QWidget):
     def pose_callback(self, msg: MotionCmd):
         x, y, yaw = msg.pose_data
         self.pose_label.setText(
-            f"目標位置: x={x:.2f}, y={y:.2f}, yaw={yaw:.2f}, speed={msg.speed:.1f}"
+            f"目標位置: x={x:.2f}, y={y:.2f}, yaw={yaw*57.29:.2f}, speed={msg.speed:.1f}"
         )
 
 
