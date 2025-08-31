@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Pose, Transform
-from std_msgs.msg import String
+from std_msgs.msg import String,Int32
 from std_srvs.srv import Empty
 from tf2_ros import Buffer, TransformListener
 import time
@@ -12,6 +12,11 @@ import json
 from .object_frame_algorithms import ObjectFrameCompensation
 from .coordinate_transforms import normalize_quaternion, calculate_pose_difference
 import numpy as np
+
+from scipy.spatial.transform import Rotation as R
+import math
+from datetime import datetime
+import pandas as pd
 
 
 class ObjectFrameCompensationNode(Node):
@@ -26,12 +31,27 @@ class ObjectFrameCompensationNode(Node):
         self.tf_listener = TransformListener(self.tf_buffer, self)
         
         # 訂閱者
-        self.object_pose_sub = self.create_subscription(
+        self.object_pose_sub1 = self.create_subscription(
             Pose,
             '/object_camera_pose',
             self.object_pose_callback,
             10
         )
+
+        self.object_pose_sub2 = self.create_subscription(
+            Pose,
+            '/object_camera_pose',
+            self.get_matrix_callback,
+            10
+        )
+
+        self.ob_in_world_x = 0.0
+        self.ob_in_world_y = 0.0
+        self.ob_in_world_z = 0.0
+        self.ob_in_world_qx = 0.0
+        self.ob_in_world_qy = 0.0
+        self.ob_in_world_qz = 0.0
+        self.ob_in_world_qw = 1.0
         
         self.current_arm_sub = self.create_subscription(
             Pose,
@@ -296,6 +316,15 @@ class ObjectFrameCompensationNode(Node):
                 self.gripper_object_pub.publish(
                     self.compensation_calculator.gripper_in_object_pose
                 )
+
+            self.ob_in_world_x = object_world_pose.position.x
+            self.ob_in_world_y = object_world_pose.position.y
+            self.ob_in_world_z = object_world_pose.position.z
+            self.ob_in_world_qx = object_world_pose.orientation.x
+            self.ob_in_world_qy = object_world_pose.orientation.y
+            self.ob_in_world_qz = object_world_pose.orientation.z
+            self.ob_in_world_qw = object_world_pose.orientation.w
+
             
             # 效能監控
             end_time = time.time()
@@ -333,6 +362,156 @@ class ObjectFrameCompensationNode(Node):
         
         return response
     
+    def get_matrix_callback(self, msg:Pose):
+
+        if self.current_arm_pose is None:
+            self.get_logger().warn('尚未接收到手臂當前位置')
+            return
+        else:
+            all_data = []
+
+            # === 加入時間戳 ===
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            all_data.append([f"Timestamp: {timestamp}"])
+
+            #object to camera HTM
+            # 位置
+            obcf_x, obcf_y, obcf_z = msg.position.x, msg.position.y, msg.position.z
+            # 四元素
+            obcf_qx, obcf_qy, obcf_qz, obcf_qw = (
+                msg.orientation.x,
+                msg.orientation.y,
+                msg.orientation.z,
+                msg.orientation.w,
+            )
+            # 四元素 → 旋轉矩陣
+            obcf_r = R.from_quat([obcf_qx, obcf_qy, obcf_qz, obcf_qw])
+            Robcf_mat = obcf_r.as_matrix()
+
+            # 建立 4x4 變換矩陣
+            Tobcf = np.eye(4)
+            Tobcf[:3, :3] = Robcf_mat
+            Tobcf[:3, 3] = [obcf_x, obcf_y, obcf_z]
+
+            self.get_logger().info(f"T_ob_in_cf:\n{Tobcf}")
+
+            yaw_deg, pitch_deg, roll_deg = self.euler_zyx_from_R(Robcf_mat)
+            self.get_logger().info(f"Yaw: {yaw_deg:.2f} deg, Pitch: {pitch_deg:.2f} deg, Roll: {roll_deg:.2f} deg")
+            self.append_matrix_with_label(all_data, "T_ob_in_cf", Tobcf, (yaw_deg, pitch_deg, roll_deg))
+
+            #eye in hand HTM
+            # 位置
+            cfarm_x, cfarm_y, cfarm_z = 0.0 , 0.249, 0.544
+            # 四元素
+            cfarm_qx, cfarm_qy, cfarm_qz, cfarm_qw = (
+                -0.707,
+                0.0,
+                0.0,
+                0.707,
+            )
+            # 四元素 → 旋轉矩陣
+            cfarm_r = R.from_quat([cfarm_qx, cfarm_qy, cfarm_qz, cfarm_qw])
+            Rcfarm_mat = cfarm_r.as_matrix()   
+            # 建立 4x4 變換矩陣
+            Tcfarm = np.eye(4)
+            Tcfarm[:3, :3] = Rcfarm_mat
+            Tcfarm[:3, 3] = [cfarm_x, cfarm_y, cfarm_z]
+            
+            self.get_logger().info(f"T_cf_in_arm:\n{Tcfarm}")
+
+            yaw_deg, pitch_deg, roll_deg = self.euler_zyx_from_R(Rcfarm_mat)
+            self.get_logger().info(f"Yaw: {yaw_deg:.2f} deg, Pitch: {pitch_deg:.2f} deg, Roll: {roll_deg:.2f} deg")
+            self.append_matrix_with_label(all_data, "T_cf_in_arm", Tcfarm, (yaw_deg, pitch_deg, roll_deg))
+
+
+            #ob in world from node
+            # 位置
+            tx, ty, tz = self.ob_in_world_x, self.ob_in_world_y, self.ob_in_world_z
+            # 四元素
+            qx, qy, qz, qw = (
+                self.ob_in_world_qx,
+                self.ob_in_world_qy,
+                self.ob_in_world_qz,
+                self.ob_in_world_qw,
+            )
+            r = R.from_quat([qx, qy, qz, qw])
+            R_mat = r.as_matrix()   
+            # 建立 4x4 變換矩陣
+            Tobwf_node = np.eye(4)
+            Tobwf_node[:3, :3] = R_mat
+            Tobwf_node[:3, 3] = [tx, ty, tz]
+            
+            self.get_logger().info(f"T_ob_in_world_node:\n{Tobwf_node}")
+
+            yaw_deg, pitch_deg, roll_deg = self.euler_zyx_from_R(R_mat)
+            self.get_logger().info(f"Yaw: {yaw_deg:.2f} deg, Pitch: {pitch_deg:.2f} deg, Roll: {roll_deg:.2f} deg")
+            self.append_matrix_with_label(all_data, "T_ob_in_world_node", Tobwf_node, (yaw_deg, pitch_deg, roll_deg))
+
+
+            #current arm HTM in world
+            # 位置
+            armwf_x = self.current_arm_pose.position.x 
+            armwf_y = self.current_arm_pose.position.y 
+            armwf_z = self.current_arm_pose.position.z
+            # 四元素
+            armwf_qx, armwf_qy, armwf_qz, armwf_qw = (
+                self.current_arm_pose.orientation.x,
+                self.current_arm_pose.orientation.y,
+                self.current_arm_pose.orientation.z,
+                self.current_arm_pose.orientation.w,
+            )
+            # 四元素 → 旋轉矩陣
+            armwf_r = R.from_quat([armwf_qx, armwf_qy, armwf_qz, armwf_qw])
+            Rarmwf_mat = armwf_r.as_matrix()   
+            # 建立 4x4 變換矩陣
+            Tarmwf = np.eye(4)
+            Tarmwf[:3, :3] = Rarmwf_mat
+            Tarmwf[:3, 3] = [armwf_x, armwf_y, armwf_z]     
+            self.get_logger().info(f"T_arm_in_world:\n{Tarmwf}")
+            yaw_deg, pitch_deg, roll_deg = self.euler_zyx_from_R(Rarmwf_mat)
+            self.get_logger().info(f"Yaw: {yaw_deg:.2f} deg, Pitch: {pitch_deg:.2f} deg, Roll: {roll_deg:.2f}) deg")
+            self.append_matrix_with_label(all_data, "T_arm_in_world", Tarmwf, (yaw_deg, pitch_deg, roll_deg))
+
+
+            #計算 T_ob_in_world
+            Tobwf = Tarmwf @ Tcfarm @ Tobcf
+            self.get_logger().info(f"T_ob_in_world:\n{Tobwf}")
+            R_ob_in_world = Tobwf[:3, :3]
+            yaw_deg, pitch_deg, roll_deg = self.euler_zyx_from_R(R_ob_in_world)
+            self.get_logger().info(f"Yaw: {yaw_deg:.2f} deg, Pitch: {pitch_deg:.2f} deg, Roll: {roll_deg:.2f} deg") 
+            self.append_matrix_with_label(all_data, "T_ob_in_world", Tobwf, (yaw_deg, pitch_deg, roll_deg))
+
+            # === 存到 CSV (追加模式) ===
+            df = pd.DataFrame(all_data)
+            df.to_csv("all_matrices.csv", index=False, header=False, mode="a")
+            self.get_logger().info("矩陣 + Euler 已追加到 all_matrices.csv")
+
+
+    def append_matrix_with_label(self,matrix_list, label, matrix, euler_zyx):
+        """將矩陣加上標籤，並加上對應 Euler 角"""
+        matrix_list.append([label])  # 標籤
+        for row in matrix:
+            matrix_list.append(row.tolist())  # 每一列轉成 list
+        # Euler angles
+        yaw_deg, pitch_deg, roll_deg = euler_zyx
+        matrix_list.append([f"Euler_ZYX (deg): Yaw={yaw_deg:.2f}, Pitch={pitch_deg:.2f}, Roll={roll_deg:.2f}"])
+        matrix_list.append([])  # 空行分隔
+
+
+    def euler_zyx_from_R(self,R):
+        """R = [x̂ ŷ ẑ], return (yaw, pitch, roll) deg, ZYX order."""
+        sy = -float(R[2,0])
+        sy = max(-1.0, min(1.0, sy))
+        pitch = math.asin(sy)
+        if abs(sy) < 0.999999:
+            roll  = math.atan2(float(R[2,1]), float(R[2,2]))
+            yaw   = math.atan2(float(R[1,0]), float(R[0,0]))
+        else:
+            roll  = math.atan2(-float(R[1,2]), float(R[1,1]))
+            yaw   = 0.0
+        return (math.degrees(yaw), math.degrees(pitch), math.degrees(roll))
+
+
     def _publish_comparison_results(self, comparison):
         """發布方法比較結果"""
         try:

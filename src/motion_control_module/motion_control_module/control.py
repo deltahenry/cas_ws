@@ -6,9 +6,10 @@ from collections import deque
 from model_module.magic_cube import RobotModel  # 自訂 model.py 模組
 from copy import deepcopy
 import numpy as np
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float32MultiArray,Int32
 import math
 from geometry_msgs.msg import Pose
+from scipy.spatial.transform import Rotation as R
 
 
 time_period = 0.04  # Timer 的時間間隔，單位為秒
@@ -17,6 +18,8 @@ batch_size = 10  # 每次發送的 batch 大小
 class MotionController(Node):
     def __init__(self):
         super().__init__('motion_controller')
+
+        self.current_height = 0.0
 
         # 機器人模型
         self.robot_model = RobotModel()
@@ -27,6 +30,13 @@ class MotionController(Node):
         #Subscriber
         self.create_subscription(MotionCmd, '/motion_cmd', self.motion_cmd_callback, 10)
         self.motors_info_sub = self.create_subscription(MultipleM,'/multi_motor_info',self.motors_info_callback,10)
+        self.height_info_subscriber = self.create_subscription(
+            Int32,
+            'lr_distance',
+            self.height_info_callback,
+            10
+        )
+        
         #Publisher
         self.motor_cmd_publisher = self.create_publisher(Float32MultiArray, '/motor_position_ref', 10)
         self.motion_state_publisher = self.create_publisher(MotionState, '/motion_state', 10)
@@ -47,6 +57,11 @@ class MotionController(Node):
         self.current_cartesian_pose = [0.0,0.0,0.0]  # 初始 cartesian pose x y yaw
         self.last_sent_joint_command = [0.0, 0.0, 0.0]  # 上次發送的關節指令
         self.get_logger().info('MotionController ready.')
+
+    def height_info_callback(self,msg: Int32):
+        """接收來自LR Sensor的高度信息"""
+        self.get_logger().info(f"Received height info: {msg.data} mm")
+        self.current_height = (float(msg.data)-52.0) / 1000.0  # mm to m
 
     #--motion command callback--
     def motion_cmd_callback(self, msg=MotionCmd):
@@ -89,7 +104,6 @@ class MotionController(Node):
         else:
             self.get_logger().warn("Cannot accept new motion command while in motion.")
             
-
     def motors_info_callback(self, msg:MultipleM):
         self.current_motor_len = [msg.motor_info[0].fb_position,msg.motor_info[1].fb_position,msg.motor_info[2].fb_position]
         # print("motor_info callback",self.current_motor_len)
@@ -271,26 +285,23 @@ class MotionController(Node):
         y = self.current_cartesian_pose[1]
         yaw = self.current_cartesian_pose[2]#
         pose_data = [x, y, yaw]
-        self.current_cartesian_pose_publisher.publish(CurrentPose(pose_data=pose_data
-        ))
+        self.current_cartesian_pose_publisher.publish(CurrentPose(pose_data=pose_data))
+
         # 發佈當前 Arm 位置
         arm_pose = Pose()
-        # arm_pose.position.x = float(self.current_cartesian_pose[0])
-        # arm_pose.position.y = float(self.current_cartesian_pose[1])
-        # arm_pose.position.z = 0.0  # 假設 Z 軸為 0
-        # arm_pose.orientation.w = 1.0  # 假設沒有旋轉
-        # arm_pose.orientation.x = 0.0
-        # arm_pose.orientation.y = 0.0
-        # arm_pose.orientation.z = 0.0
+        arm_pose.position.x = float(self.current_cartesian_pose[0])/1000.0
+        arm_pose.position.y = float(self.current_cartesian_pose[1])/1000.0
+        arm_pose.position.z = self.current_height  # meter
+        #euler to quaternion
+        yaw = self.current_cartesian_pose[2]  #yaw in radian
+        r = R.from_euler('ZYX', [yaw, 0, 0])  # yaw, pitch, roll
+        q = r.as_quat()  # [x, y, z, w]
 
-        #test
-        arm_pose.position.x = 0.025
-        arm_pose.position.y = 0.0
-        arm_pose.position.z = 0.0  # 假設 Z 軸為 0
-        arm_pose.orientation.w = 0.999992  # 假設沒有旋轉
-        arm_pose.orientation.x = 0.0
-        arm_pose.orientation.y = 0.0
-        arm_pose.orientation.z = -0.004
+        arm_pose.orientation.x = q[0]
+        arm_pose.orientation.y = q[1]
+        arm_pose.orientation.z = q[2]
+        arm_pose.orientation.w = q[3] 
+
         self.current_arm_pose_publisher.publish(arm_pose)
         
         # 情況 1：如果有軌跡資料（送出一個 batch）

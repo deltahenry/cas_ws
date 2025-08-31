@@ -28,6 +28,7 @@ setup(
             "ui_forklift = ui_module.ui_forklift:main",
             "ui_recipe = ui_module.ui_recipe:main",
             "ui_comfirm = ui_module.ui_comfirm:main",
+            "ui_limit = ui_module.ui_limit:main",
         ],
     },
 )

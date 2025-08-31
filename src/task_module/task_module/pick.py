@@ -277,7 +277,7 @@ class PickFSM(Machine):
         elif self.state == PickState.MOVE_FORKLIFT.value:
             print("[PickmentFSM] 移動叉車階段")
             height_cmd = 80.0
-            tolerance = 1.0
+            tolerance = 5.0
 
             if not self.send_fork_cmd:
                 self.fork_cmd(mode="run", speed="slow", direction="down", distance=height_cmd)

@@ -27,6 +27,7 @@ class DataNode(Node):
 
         self.compensate_cmd = "idle"  # 'l_shape','screw'
         self.confirm_compensate = False
+        self.to_done = False
         
 
         self.depth_data = [500.0,500.0]
@@ -109,7 +110,7 @@ class DataNode(Node):
         self.confirm_compensate_subscriber = self.create_subscription(String, '/confirm_cmd', self.confirm_callback, 10)
         
         #publisher
-        self.rough_align_state_publisher = self.create_publisher(TaskState, '/task_state_rough_align', 10)
+        self.compensate_state_publisher = self.create_publisher(TaskState, '/task_state_compensate', 10)
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
         self.detection_cmd_publisher = self.create_publisher(String,'/lshape/cmd',10)
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
@@ -130,8 +131,6 @@ class DataNode(Node):
 
     def depth_data_callback(self, msg: Float32MultiArray):
         print(f"接收到深度數據: {msg.data}")
-        # 在這裡可以處理深度數據
-        self.depth_data = msg.data      
         # 更新深度數據
         if len(self.depth_data) >= 2:
             self.depth_data[0] = msg.data[0]
@@ -165,22 +164,22 @@ class DataNode(Node):
         self.obiect_pose_x = msg.position.x * 1000.0  # m to mm
         self.obiect_pose_z = msg.position.z * 1000.0  # m to mm
 
-
     def confirm_callback(self, msg: String):
         print(f"接收到確認命令: {msg.data}")
         if msg.data == "confirm":
             self.confirm_compensate = True
+            self.to_done = False
+        elif msg.data == "to_done":
+            self.to_done = True
+            self.confirm_compensate = False
         else:
             self.confirm_compensate = False
+            self.to_done = False
             
 class CompensateState(Enum):
     IDLE = "idle"
     INIT = "init"
-    ROUGH_COMPENSATE = "rough_compensate"
-    DEPTH_DETECT = "depth_detect"
-    YAW_COMPENSATE = "yaw_compensate"
-    VISION_DETECT = "vision_detect"
-    XZ_COMPENSATE = "XZ_compensate"
+    VISION_COMPENSATE = "vision_compensate"
     DONE = "done"
     FAIL = "fail"
 
@@ -188,35 +187,22 @@ class CompensateFSM(Machine):
     def __init__(self, data_node: DataNode):
         self.phase = CompensateState.IDLE  # 初始狀態
         self.data_node = data_node
-        self.run_mode = "pick"
-        self.send_fork_cmd = False  # 用於控制叉車命令的發送
-        self.motor_cmd_sent = False
+        self.send_compensate = False
         self.pose_cmd_to_motion = [0.0,0.0,0.0]
 
 
         states = [
             CompensateState.IDLE.value,
             CompensateState.INIT.value,
-            CompensateState.ROUGH_COMPENSATE.value,
-            CompensateState.DEPTH_DETECT.value,
-            CompensateState.YAW_COMPENSATE.value,
-            CompensateState.VISION_DETECT.value,
-            CompensateState.XZ_COMPENSATE.value,
+            CompensateState.VISION_COMPENSATE.value,
             CompensateState.DONE.value,
             CompensateState.FAIL.value
         ]
         
         transitions = [
             {'trigger': 'idle_to_init', 'source': CompensateState.IDLE.value, 'dest': CompensateState.INIT.value},
-            {'trigger': 'init_to_rough_compensate', 'source': CompensateState.INIT.value, 'dest': CompensateState.ROUGH_COMPENSATE.value},
-            {'trigger': 'rough_compensate_to_depth_detect', 'source': CompensateState.ROUGH_COMPENSATE.value, 'dest': CompensateState.DEPTH_DETECT.value},
-            {'trigger': 'depth_detect_to_yaw_compensate', 'source': CompensateState.DEPTH_DETECT.value, 'dest': CompensateState.YAW_COMPENSATE.value},
-            # {'trigger': 'depth_detect_to_vision_detect', 'source': CompensateState.DEPTH_DETECT.value, 'dest': CompensateState.VISION_DETECT.value},
-            # {'trigger': 'yaw_compensate_check', 'source': CompensateState.YAW_COMPENSATE.value, 'dest': CompensateState.DEPTH_DETECT.value},
-            {'trigger': 'yaw_compensate_to_vision_detect', 'source': CompensateState.YAW_COMPENSATE.value, 'dest': CompensateState.VISION_DETECT.value},
-            {'trigger': 'vision_detect_to_xz_compensate', 'source': CompensateState.VISION_DETECT.value, 'dest': CompensateState.XZ_COMPENSATE.value},
-            {'trigger': 'xz_compensate_to_done', 'source': CompensateState.XZ_COMPENSATE.value, 'dest': CompensateState.DONE.value},
-            {'trigger': 'done_to_idle', 'source': CompensateState.DONE.value, 'dest': CompensateState.IDLE.value},
+            {'trigger': 'init_to_vision_compensate', 'source': CompensateState.INIT.value, 'dest': CompensateState.VISION_COMPENSATE.value},
+            {'trigger': 'vision_compensate_to_done', 'source': CompensateState.VISION_COMPENSATE.value, 'dest': CompensateState.DONE.value},
             {'trigger': 'fail', 'source': '*', 'dest': CompensateState.FAIL.value},  
             {'trigger': 'return_to_idle', 'source': '*', 'dest': CompensateState.IDLE.value},
         ]
@@ -229,10 +215,17 @@ class CompensateFSM(Machine):
 
     def reset_parameters(self):
         """重置參數"""
-       
-        self.motor_cmd_sent = False
         self.data_node.compensate_cmd = "idle"
-        self.send_fork_cmd = False  # 用於控制叉車命令的發送
+
+        self.data_node.confirm_compensate = False
+
+        self.data_node.to_done = False
+
+        self.send_compensate = False
+
+        self.pose_cmd_to_motion = [0.0,0.0,0.0]
+
+        self.target_height = 80.0
 
         self.data_node.state_cmd = {
             'pause_button': False,
@@ -258,6 +251,7 @@ class CompensateFSM(Machine):
     def run(self):
         print(self.data_node.confirm_compensate)
         """FSM的主循環"""
+
         if self.state == CompensateState.IDLE.value:
             # print("[CompensatementFSM] 空閒中...")
             # 在這裡可以添加空閒邏輯
@@ -270,108 +264,27 @@ class CompensateFSM(Machine):
         elif self.state == CompensateState.INIT.value:
             print("[CompensatementFSM] 初始化中...")
             # 在這裡可以添加初始化邏輯
-            self.init_to_rough_compensate()
+            self.init_to_vision_compensate()
 
-        elif self.state == CompensateState.ROUGH_COMPENSATE.value:
+        elif self.state == CompensateState.VISION_COMPENSATE.value:
             print("[CompensatementFSM] 粗略補償中...")
             x_compensate =  self.data_node.obiect_pose_x - self.data_node.golden_pose_x
             z_compensate =  self.data_node.obiect_pose_z - self.data_node.golden_pose_z
-            
-            x_cmd = self.data_node.current_pose[0] + x_compensate
-            y_cmd = self.data_node.current_pose[1]            
-            yaw_cmd = self.data_node.current_pose[2]
-            z_cmd = self.data_node.current_height + z_compensate
 
-            print("x_cmd",x_cmd)
-            print("y_cmd",y_cmd)
-            print("yaw_cmd",yaw_cmd)
-            print("z_cmd",z_cmd)
-
-            if self.data_node.confirm_compensate:
-                print("[CompensatementFSM] 使用者確認補償，進行補償動作")
-                self.rough_compensate_to_depth_detect()
-                self.data_node.confirm_compensate = False  # 重置確認標誌
-            else:
-                print("[CompensatementFSM] 等待使用者確認補償...")
-                
-        elif self.state == CompensateState.DEPTH_DETECT.value:
-            print("[CompensatementFSM] 深度檢測中...")
-            self.depth_detect_to_yaw_compensate()
-            # left_depth = copy.deepcopy(self.data_node.depth_data[0])
-            # right_depth = copy.deepcopy(self.data_node.depth_data[1])
-            # yaw_compensate = math.atan2((right_depth - left_depth), 480.0)  # 480mm是兩雷射間距
-
-            # # 在這裡可以添加深度檢測邏輯
-            # if self.data_node.depth_data[0] > 1000.0 or self.data_node.depth_data[1] > 1000.0:
-            #     print("too far,waiting")
-            # else:
-            #     if abs(yaw_compensate) > 0.005  and abs(yaw_compensate) < 0.174:
-            #         self.depth_detect_to_yaw_compensate()
-            #     else:
-            #         print("yaw angle small,skip to vision detect")
-            #         self.depth_detect_to_vision_detect()
-        
-        elif self.state == CompensateState.YAW_COMPENSATE.value:
             left_depth = copy.deepcopy(self.data_node.depth_data[0])
             right_depth = copy.deepcopy(self.data_node.depth_data[1])
             yaw_compensate = math.atan2((right_depth - left_depth), 480.0)  # 480mm是兩雷射間距
+
+            if yaw_compensate > 0.05236:
+                yaw_compensate = 0.0
+            elif yaw_compensate < -0.05236:
+                yaw_compensate = 0.0
+                
             print(f"[CompensatementFSM] 偏航補償角度 (deg): {yaw_compensate*57.2958}")
-
-            x_cmd = self.data_node.current_pose[0]
-            y_cmd = self.data_node.current_pose[1]            
-            yaw_cmd = self.data_node.current_pose[2] + yaw_compensate
-            z_cmd = self.data_node.current_height
-
-            print("x_cmd",x_cmd)
-            print("y_cmd",y_cmd)
-            print("yaw_cmd(deg)",yaw_cmd*57.2958)
-            print("z_cmd",z_cmd)
-
-            #for ui display
-            # pose_cmd_to_ui = copy.deepcopy(self.data_node.current_pose) #xy yaw(radian)
-            # pose_cmd_to_ui[2]  = pose_cmd_to_ui[2] + yaw_compensate
-            # msg = MotionCmd()
-            # msg.command_type = MotionCmd.TYPE_GOTO
-            # msg.pose_data = [pose_cmd_to_ui[0], pose_cmd_to_ui[1], pose_cmd_to_ui[2]]
-            # msg.speed = 10.0
-            # self.data_node.pose_pub.publish(msg)
-            
-            # 等待使用者確認補償
-            if not self.data_node.confirm_compensate:
-                print("[CompensatementFSM] 等待使用者確認補償...")
-                return
-            else:
-                print("[CompensatementFSM] 使用者確認補償，進行補償動作")
-                self.data_node.confirm_compensate = False  # 重置確認標誌
-                self.yaw_compensate_to_vision_detect()
-
-            # if self.data_node.confirm_compensate:
-            #     print("[CompensatementFSM] 使用者確認補償，進行補償動作")
-            #     if not self.motor_cmd_sent:
-            #         self.pose_cmd_to_motion = copy.deepcopy(self.data_node.current_pose) #xy yaw(radian)
-            #         self.pose_cmd_to_motion[2]  = pose_cmd_to_ui[2] + yaw_compensate
-            #         self.sent_motor_cmd(self.pose_cmd_to_motion)
-            #         self.motor_cmd_sent = True
-            #     else:
-            #         if self.check_pose(self.pose_cmd_to_motion):
-            #             self.yaw_compensate_check()
-            #             self.motor_cmd_sent = False
-            #             self.data_node.confirm_compensate = False  # 重置確認標誌
-            #         else:
-            #             print("[CompensatementFSM] 等待馬達到位...")
-            # else:
-            #     print("[CompensatementFSM] 等待使用者確認補償...")
-               
-        elif self.state == CompensateState.VISION_DETECT.value:
-            self.vision_detect_to_xz_compensate()
-        
-        elif self.state == CompensateState.XZ_COMPENSATE.value:
-            x_compensate =  self.data_node.obiect_pose_x - self.data_node.golden_pose_x
-            z_compensate =  self.data_node.obiect_pose_z - self.data_node.golden_pose_z
             
             x_cmd = self.data_node.current_pose[0] + x_compensate
             y_cmd = self.data_node.current_pose[1]            
-            yaw_cmd = self.data_node.current_pose[2]
+            yaw_cmd = self.data_node.current_pose[2] + yaw_compensate
             z_cmd = self.data_node.current_height + z_compensate
 
             print("x_cmd",x_cmd)
@@ -380,17 +293,51 @@ class CompensateFSM(Machine):
             print("z_cmd",z_cmd)
 
             if self.data_node.confirm_compensate:
-                print("[CompensatementFSM] 使用者確認補償，進行補償動作")
-                self.xz_compensate_to_done()
-                self.data_node.confirm_compensate = False  # 重置確認標誌
+                if not self.send_compensate:
+                    self.compensate(x_cmd,y_cmd,yaw_cmd,z_cmd)
+                    print("[CompensatementFSM] 使用者確認補償，進行補償動作")
+                    self.send_compensate = True
+                else:
+                    if self.check_compensate_done():
+                        print("[CompensatementFSM] 補償完成")
+                        self.send_compensate = False
+                        self.data_node.confirm_compensate = False
+                    else:
+                        print("[CompensatementFSM] 補償中，等待完成...")
+
+            elif self.data_node.to_done:
+                print("[CompensatementFSM] 使用者強制結束補償")
+                self.vision_compensate_to_done()
+                self.data_node.to_done = False
+
             else:
                 print("[CompensatementFSM] 等待使用者確認補償...")
-
+                
         elif self.state == CompensateState.DONE.value:
             print("[CompensatementFSM] 補償完成!")
-            self.data_node.compensate_cmd = "idle"
-            self.return_to_idle()
-        
+
+
+    def compensate(self,x_cmd,y_cmd,yaw_cmd,z_cmd):
+        print(f"[CompensatementFSM] 開始補償動作")
+        self.pose_cmd_to_motion = [x_cmd,y_cmd,yaw_cmd]
+        self.sent_motor_cmd(self.pose_cmd_to_motion)
+
+        self.target_height = z_cmd
+        self.fork_cmd("run", 'slow', "down", z_cmd)
+
+    def check_compensate_done(self):
+        tolerance = 5.0  # 容差值 mm
+        if not self.send_compensate:
+            return False
+        if not self.check_pose(self.pose_cmd_to_motion):
+            print("[CompensatementFSM] 等待馬達到位...")
+            return False
+        if abs(self.data_node.current_height - self.target_height) > tolerance and self.data_node.forkstate != "idle":
+            print("[CompensatementFSM] 馬達到位，等待叉車下降...")
+            return False
+        print("[CompensatementFSM] 補償完成，進入下一步")
+        return True
+
     def pose_to_cmd(self,pose: Pose):
         # Extract XY position
         x = pose.position.x
@@ -416,7 +363,7 @@ class CompensateFSM(Machine):
         msg.command_type = MotionCmd.TYPE_GOTO
         msg.pose_data = [pose_cmd[0], pose_cmd[1], pose_cmd[2]]
         msg.speed = 10.0
-        # self.data_node.motion_cmd_publisher.publish(msg)
+        self.data_node.motion_cmd_publisher.publish(msg)
     
     def check_pose(self,pose_cmd):
         """檢查馬達是否到位"""
@@ -464,8 +411,8 @@ def main():
             system.step()
             print(f"[現在狀態] {system.state}")
             # 更新狀態發布
-            data.rough_align_state_publisher.publish(
-                TaskState(mode="rough_align", state=system.state)
+            data.compensate_state_publisher.publish(
+                TaskState(mode="compensate", state=system.state)
             )
             time.sleep(timer_period)
 

@@ -39,6 +39,13 @@ class DataNode(Node):
             10
         )
 
+        self.limit_cmd_subscriber = self.create_subscription(
+            Int32MultiArray,
+            'limit_io_cmd',
+            self.limit_cmd_callback,  # 使用同一個回調函數處理不同命令
+            10
+        )
+
         self.laser_cmd_subscriber = self.create_subscription(
             Int32MultiArray,
             'laser_io_cmd',
@@ -84,9 +91,11 @@ class DataNode(Node):
         self.J2_error = np.zeros(16, dtype=int)  # 對應位址 0x014D
         self.J3_error = np.zeros(16, dtype=int)  # 對應位址 0x014E
 
-        self.DO_1 = np.zeros(16, dtype=int)  # 初始化16個DO端口
-        self.DO_2 = np.zeros(16, dtype=int)  # 初始化16個DO端口
-        self.DO_3 = np.zeros(16, dtype=int)  # 初始化16個DO端口
+        self.DI_1 = np.zeros(16, dtype=int)  # 初始化16個DI端口 對應位址 0x9810
+
+        self.DO_1 = np.zeros(16, dtype=int)  # 初始化16個DO端口 對應位址 0x9C18
+        self.DO_2 = np.zeros(16, dtype=int)  # 初始化16個DO端口 對應位址 0x9C20
+        self.DO_3 = np.zeros(16, dtype=int)  # 初始化16個DO端口 對應位址 0x9C28
 
     def fork_io_cmd_callback(self, msg: Int32MultiArray):
         print(f"接收到叉車IO命令: {msg.data}")
@@ -106,7 +115,22 @@ class DataNode(Node):
         self.DO_2[5] = msg.data[3]
         self.DO_2[7] = msg.data[4]
         self.DO_2[8] = msg.data[5]
-        
+    
+    def limit_cmd_callback(self, msg: Int32MultiArray):
+        print(f"接收到限位IO命令: {msg.data}")
+        """處理限位IO命令"""
+        self.DO_3[5] = msg.data[0]
+        self.DO_3[6] = msg.data[1]
+        self.DO_3[7] = msg.data[2]
+        self.DO_3[8] = msg.data[3]
+        self.DO_3[9] = msg.data[4]
+
+        self.DO_3[10] = msg.data[5]
+        self.DO_3[11] = msg.data[6]
+        self.DO_3[12] = msg.data[7]
+        self.DO_3[13] = msg.data[8]
+        self.DO_3[14] = msg.data[9]
+
     def laser_cmd_callback(self, msg: Int32MultiArray):
         print(f"接收到雷射IO命令: {msg.data}")
         """處理雷射IO命令"""
@@ -182,6 +206,7 @@ class ForkliftControl(Machine):
                 {"slave_id": 2,"address": 0x014C, "array": self.data_node.J1_error},
                 {"slave_id": 2,"address": 0x014D, "array": self.data_node.J2_error},
                 {"slave_id": 2,"address": 0x014E, "array": self.data_node.J3_error},
+                {"slave_id": 2,"address": 0x9810, "array": self.data_node.DI_1},
             ]
 
             for item in di_map:
@@ -213,6 +238,9 @@ class ForkliftControl(Machine):
         J1_error_int = self.bits_to_int(self.data_node.J1_error)
         J2_error_int = self.bits_to_int(self.data_node.J2_error)
         J3_error_int = self.bits_to_int(self.data_node.J3_error)
+        DI_1_int = self.bits_to_int(self.data_node.DI_1)
+        print("DI_1_int",DI_1_int)
+
 
         # 發佈 MH2 狀態
         mh2_state = MH2State()

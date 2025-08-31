@@ -27,7 +27,7 @@ class DataNode(Node):
     def __init__(self):
         super().__init__('Limit_control')
 
-        self.mode = "open"  
+        self.mode = "idle"  
        
         self.limit_cmd_subscriber = self.create_subscription(
             LimitCmd,
@@ -56,15 +56,6 @@ class LimitControl(Machine):
 
         self.phase = LimitControlState.IDLE  # 初始狀態
         self.data_node = data_node
-
-        self.D17 = 0  # 控制right_receipt
-        self.D19 = 0  # 控制right_move
-        self.D20 = 0  # 控制right_stop
-        
-        self.D22 = 0  # 控制left_receipt
-        self.D24 = 0  # 控制left_move
-        self.D25 = 0  # 控制left_stop
-
 
         states = [
             LimitControlState.IDLE.value,
@@ -124,24 +115,26 @@ class LimitControl(Machine):
         result = 'waiting'
 
         if mode == "open":
-            value = Int32MultiArray(data=[0, 0, 0, 0, 0, 0])  # 封裝為 Int32MultiArray
-            self.data_node.Limit_io_cmd_publisher.publish(value)  #change receipt
-            value = Int32MultiArray(data=[0, 1, 0, 0, 1, 0])  # 封裝為 Int32MultiArray
-            self.data_node.Limit_io_cmd_publisher.publish(value)#open move
+            value = Int32MultiArray(data=[1, 0, 0, 0, 0, 1, 0, 0, 0, 0])  # 封裝為 Int32MultiArray
+            self.data_node.limit_io_cmd_publisher.publish(value)  #change receipt
+            value = Int32MultiArray(data=[1, 0, 1, 0, 0, 1, 0, 1, 0, 0])  # 封裝為 Int32MultiArray
+            self.data_node.limit_io_cmd_publisher.publish(value)#open move
             time.sleep(1)  # 等待Limit開啟完成
             result = 'done'
 
         elif mode == "close":
-            value = Int32MultiArray(data=[1, 0, 0, 1, 0, 0])  # 封裝為 Int32MultiArray
-            self.data_node.Limit_io_cmd_publisher.publish(value)#change receipt
-            value = Int32MultiArray(data=[1, 1, 0, 1, 1, 0])  # 封裝為 Int32MultiArray
-            self.data_node.Limit_io_cmd_publisher.publish(value)  #close move
+            value = Int32MultiArray(data=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0])  # 封裝為 Int32MultiArray
+            self.data_node.limit_io_cmd_publisher.publish(value)#change receipt
+            value = Int32MultiArray(data=[0, 0, 1, 0, 0, 0, 0, 1, 0, 0])  # 封裝為 Int32MultiArray
+            self.data_node.limit_io_cmd_publisher.publish(value)  #close move
             time.sleep(1)  # 等待Limit關閉完成
             result = 'done'
 
         elif mode == "stop":
-            value = Int32MultiArray(data=[0, 0, 1, 0, 0, 1])    # 封裝為 Int32MultiArray
-            self.data_node.Limit_io_cmd_publisher.publish(value)  #stop move
+            value = Int32MultiArray(data=[0, 0, 0, 1, 0, 0, 0, 0, 1, 0])    # 封裝為 Int32MultiArray
+            self.data_node.limit_io_cmd_publisher.publish(value)  #stop move
+            value = Int32MultiArray(data=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0])    # 封裝為 Int32MultiArray
+            self.data_node.limit_io_cmd_publisher.publish(value)  #stop move
             time.sleep(1)  # 等待Limit停止完成
             result = 'done'
         
@@ -160,6 +153,8 @@ class LimitControl(Machine):
             elif self.data_node.mode == "close_Limit":
                 print("[LimitControl] 開始關閉Limit")
                 self.closing()
+            else:
+                print("[LimitControl] 保持空閒狀態")
             return
         
         elif self.state == LimitControlState.OPENING.value:

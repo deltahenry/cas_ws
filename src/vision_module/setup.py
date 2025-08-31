@@ -46,7 +46,8 @@ setup(
             'icp_fitter = vision_module.icp_fitter:main',
             'realsense_capture_node = vision_module.realsense_capture_node:main',
             'roi_preview_node = vision_module.roi_preview_node:main',
-            'dectionL_node = vision_module.dectionL_node:main',
+            'get_matrix = vision_module.get_matrix:main',
+            'detection_origin = vision_module.detection_origin:main',
         ],
     },
 )
