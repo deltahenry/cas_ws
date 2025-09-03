@@ -246,7 +246,6 @@ class PreciseAlignFSM(Machine):
                 return
 
         elif self.state == PreciseAlignState.MOVE_DETECT.value:
-
             height_cmd = self.data_node.target_height
             tolerance = 5.0
 
@@ -259,12 +258,12 @@ class PreciseAlignFSM(Machine):
                     self.send_fork_cmd = False
                     print("[PreciseAlignmentFSM] 叉車已到達目標高度，進入電池檢測階段")
                     self.move_detect_to_align()
+                    #open rough align
+                    self.data_node.compensate_cmd_publisher.publish(TaskCmd(mode='l_shape'))
                 else:
                     print("waiting")
                             
         elif self.state == PreciseAlignState.ALIGN.value:
-            #open rough align
-            self.data_node.compensate_cmd_publisher.publish(TaskCmd(mode='l_shape'))
 
             if self.data_node.compensate_state == "done":
                 print("粗對齊完成，進入深度檢查階段")

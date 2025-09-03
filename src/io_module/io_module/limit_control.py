@@ -147,10 +147,10 @@ class LimitControl(Machine):
         """執行狀態機的邏輯"""
         if self.state == LimitControlState.IDLE.value:
             print("[LimitControl] 狀態機處於空閒狀態")
-            if self.data_node.mode == "open_Limit":
+            if self.data_node.mode == "open_limit":
                 print("[LimitControl] 開始開啟Limit")
                 self.opening()
-            elif self.data_node.mode == "close_Limit":
+            elif self.data_node.mode == "close_limit":
                 print("[LimitControl] 開始關閉Limit")
                 self.closing()
             else:
@@ -170,10 +170,10 @@ class LimitControl(Machine):
         
         elif self.state == LimitControlState.OPEN.value:
             print("[LimitControl] 狀態機處於Limit開啟狀態")
-            if self.data_node.mode == "close_Limit":
+            if self.data_node.mode == "close_limit":
                 print("[LimitControl] 開始關閉Limit")
                 self.closing()
-            elif self.data_node.mode == "stop_Limit":
+            elif self.data_node.mode == "stop_limit":
                 print("[LimitControl] 停止Limit操作")
                 self.stop()
             return
@@ -191,10 +191,10 @@ class LimitControl(Machine):
         
         elif self.state == LimitControlState.CLOSED.value:
             print("[LimitControl] 狀態機處於Limit關閉狀態")
-            if self.data_node.mode == "open_Limit":
+            if self.data_node.mode == "open_limit":
                 print("[LimitControl] 開始開啟Limit")
                 self.opening()
-            elif self.data_node.mode == "stop_Limit":
+            elif self.data_node.mode == "stop_limit":
                 print("[LimitControl] 停止Limit操作")
                 self.stop()
             return

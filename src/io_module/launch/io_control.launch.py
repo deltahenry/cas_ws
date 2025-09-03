@@ -37,6 +37,12 @@ def generate_launch_description():
             name='clipper_control',
             output='screen'
         ), 
+        Node(
+            package='io_module',
+            executable='limit_control',
+            name='limit_control',
+            output='screen'
+        ), 
         
       
     ])

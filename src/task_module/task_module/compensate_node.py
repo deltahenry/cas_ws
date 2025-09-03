@@ -44,8 +44,8 @@ class DataNode(Node):
         self.obiect_pose_x = 0.0 
         self.obiect_pose_z = 0.0
 
-        self.golden_pose_x = 258.0 
-        self.golden_pose_z = 465.0
+        self.golden_pose_x = 273.0 
+        self.golden_pose_z = 97.0
 
        
         # 初始化 ROS2 Node
@@ -115,7 +115,7 @@ class DataNode(Node):
         self.detection_cmd_publisher = self.create_publisher(String,'/lshape/cmd',10)
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
         self.laser_cmd_publisher = self.create_publisher(Int32MultiArray,'/laser_io_cmd',10)
-        self.pose_pub = self.create_publisher(MotionCmd, "/current_pose_cmd", 10)
+        self.compensate_pose_publisher = self.create_publisher(Float32MultiArray,'/compensate_pose_cmd',10)
 
     def state_cmd_callback(self, msg: StateCmd):
         print(f"接收到狀態命令: {msg}")
@@ -162,7 +162,7 @@ class DataNode(Node):
     def object_pose_callback(self, msg: Pose):
         print(f"接收到目標物體姿態: {msg}")
         self.obiect_pose_x = msg.position.x * 1000.0  # m to mm
-        self.obiect_pose_z = msg.position.z * 1000.0  # m to mm
+        self.obiect_pose_z = msg.position.y * 1000.0  # m to mm
 
     def confirm_callback(self, msg: String):
         print(f"接收到確認命令: {msg.data}")
@@ -179,7 +179,8 @@ class DataNode(Node):
 class CompensateState(Enum):
     IDLE = "idle"
     INIT = "init"
-    VISION_COMPENSATE = "vision_compensate"
+    VISION_DETECT = "vision_detect"
+    COMPENSATE = "compensate"
     DONE = "done"
     FAIL = "fail"
 
@@ -189,20 +190,27 @@ class CompensateFSM(Machine):
         self.data_node = data_node
         self.send_compensate = False
         self.pose_cmd_to_motion = [0.0,0.0,0.0]
+        self.x_cmd = 0.0
+        self.y_cmd = 0.0
+        self.yaw_cmd = 0.0
+        self.z_cmd = 80.0
 
 
         states = [
             CompensateState.IDLE.value,
             CompensateState.INIT.value,
-            CompensateState.VISION_COMPENSATE.value,
+            CompensateState.VISION_DETECT.value,
+            CompensateState.COMPENSATE.value,
             CompensateState.DONE.value,
             CompensateState.FAIL.value
         ]
         
         transitions = [
             {'trigger': 'idle_to_init', 'source': CompensateState.IDLE.value, 'dest': CompensateState.INIT.value},
-            {'trigger': 'init_to_vision_compensate', 'source': CompensateState.INIT.value, 'dest': CompensateState.VISION_COMPENSATE.value},
-            {'trigger': 'vision_compensate_to_done', 'source': CompensateState.VISION_COMPENSATE.value, 'dest': CompensateState.DONE.value},
+            {'trigger': 'init_to_vision_detect', 'source': CompensateState.INIT.value, 'dest': CompensateState.VISION_DETECT.value},
+            {'trigger': 'vision_detect_to_compensate', 'source': CompensateState.VISION_DETECT.value, 'dest': CompensateState.COMPENSATE.value},
+            {'trigger': 'compensate_to_vision_detect', 'source': CompensateState.COMPENSATE.value, 'dest': CompensateState.VISION_DETECT.value},
+            {'trigger': 'compensate_to_done', 'source': CompensateState.COMPENSATE.value, 'dest': CompensateState.DONE.value},
             {'trigger': 'fail', 'source': '*', 'dest': CompensateState.FAIL.value},  
             {'trigger': 'return_to_idle', 'source': '*', 'dest': CompensateState.IDLE.value},
         ]
@@ -217,6 +225,11 @@ class CompensateFSM(Machine):
         """重置參數"""
         self.data_node.compensate_cmd = "idle"
 
+        self.x_cmd = 0.0
+        self.y_cmd = 0.0
+        self.yaw_cmd = 0.0
+        self.z_cmd = 80.0
+
         self.data_node.confirm_compensate = False
 
         self.data_node.to_done = False
@@ -230,6 +243,7 @@ class CompensateFSM(Machine):
         self.data_node.state_cmd = {
             'pause_button': False,
         }
+
 
         
     def step(self):
@@ -264,10 +278,10 @@ class CompensateFSM(Machine):
         elif self.state == CompensateState.INIT.value:
             print("[CompensatementFSM] 初始化中...")
             # 在這裡可以添加初始化邏輯
-            self.init_to_vision_compensate()
+            self.init_to_vision_detect()
 
-        elif self.state == CompensateState.VISION_COMPENSATE.value:
-            print("[CompensatementFSM] 粗略補償中...")
+        elif self.state == CompensateState.VISION_DETECT.value:
+            print("[CompensatementFSM] 視覺檢測中...")
             x_compensate =  self.data_node.obiect_pose_x - self.data_node.golden_pose_x
             z_compensate =  self.data_node.obiect_pose_z - self.data_node.golden_pose_z
 
@@ -282,19 +296,20 @@ class CompensateFSM(Machine):
                 
             print(f"[CompensatementFSM] 偏航補償角度 (deg): {yaw_compensate*57.2958}")
             
-            x_cmd = self.data_node.current_pose[0] + x_compensate
-            y_cmd = self.data_node.current_pose[1]            
-            yaw_cmd = self.data_node.current_pose[2] + yaw_compensate
-            z_cmd = self.data_node.current_height + z_compensate
+            self.x_cmd = self.data_node.current_pose[0] + x_compensate
+            self.y_cmd = self.data_node.current_pose[1]            
+            self.yaw_cmd = self.data_node.current_pose[2] + yaw_compensate
+            self.z_cmd = self.data_node.current_height + z_compensate
+        
+            self.vision_detect_to_compensate()
 
-            print("x_cmd",x_cmd)
-            print("y_cmd",y_cmd)
-            print("yaw_cmd",yaw_cmd)
-            print("z_cmd",z_cmd)
+        elif self.state == CompensateState.COMPENSATE.value:
+            print("[CompensatementFSM] 補償中...")
+            self.data_node.compensate_pose_publisher.publish(Float32MultiArray(data=[self.x_cmd,self.y_cmd,self.yaw_cmd*57.2958,self.z_cmd]))
 
             if self.data_node.confirm_compensate:
                 if not self.send_compensate:
-                    self.compensate(x_cmd,y_cmd,yaw_cmd,z_cmd)
+                    self.compensate(self.x_cmd,self.y_cmd,self.yaw_cmd,self.z_cmd)
                     print("[CompensatementFSM] 使用者確認補償，進行補償動作")
                     self.send_compensate = True
                 else:
@@ -307,11 +322,14 @@ class CompensateFSM(Machine):
 
             elif self.data_node.to_done:
                 print("[CompensatementFSM] 使用者強制結束補償")
-                self.vision_compensate_to_done()
+                self.compensate_to_done()
                 self.data_node.to_done = False
 
             else:
                 print("[CompensatementFSM] 等待使用者確認補償...")
+                # time.sleep(2)
+                # print("time out return to vision_detect")
+                # self.compensate_to_vision_detect()
                 
         elif self.state == CompensateState.DONE.value:
             print("[CompensatementFSM] 補償完成!")

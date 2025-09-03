@@ -244,8 +244,8 @@ class RoughAlignFSM(Machine):
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
-        pick_height = 90.0  # pick模式下的初始高度
-        assem_height = 150.0
+        pick_height = 112.0  # pick模式下的初始高度
+        assem_height = 112.0
         tolerance = 5.0  # 容差值
 
         if self.state == RoughAlignState.IDLE.value:
@@ -257,6 +257,7 @@ class RoughAlignFSM(Machine):
                 print("[RoughAlignmentFSM] 手動對齊任務未啟動，等待中")
         
         elif self.state == RoughAlignState.INIT.value:
+
             #open_guide_laser
             self.laser_cmd("laser_open")  # 開啟雷射
             print("[RoughAlignmentFSM] 初始化階段")
@@ -272,6 +273,10 @@ class RoughAlignFSM(Machine):
                         print("[RoughAlignmentFSM] 推模式下，叉車已在初始位置")
                         self.send_fork_cmd = False
                         self.init_to_rough_align()
+
+                        #open rough align
+                        self.data_node.compensate_cmd_publisher.publish(TaskCmd(mode='l_shape'))
+
                     else:
                         print("waiting")
 
@@ -285,6 +290,10 @@ class RoughAlignFSM(Machine):
                         print("[RoughAlignmentFSM] pick模式下，叉車已在初始位置")
                         self.send_fork_cmd = False
                         self.init_to_rough_align()
+
+                        #open rough align
+                        self.data_node.compensate_cmd_publisher.publish(TaskCmd(mode='l_shape'))
+
                     else:
                         print("waiting")
 
@@ -295,9 +304,6 @@ class RoughAlignFSM(Machine):
         elif self.state == RoughAlignState.ROUGH_ALIGN.value:
             print("[RoughAlignmentFSM] 粗對齊階段")
             
-            #open rough align
-            self.data_node.compensate_cmd_publisher.publish(TaskCmd(mode='l_shape'))
-
             if self.data_node.compensate_state == "done":
                 print("粗對齊完成，進入深度檢查階段")
                 self.rough_align_to_check_depth()
@@ -325,6 +331,7 @@ class RoughAlignFSM(Machine):
                 self.check_depth_to_done()
             else:
                 print("depth_data 大於或等於參考深度，waiting for human push")
+                self.to_fail()
           
         elif self.state == RoughAlignState.DONE.value:
             print("[RoughAlignmentFSM] 對齊完成階段")

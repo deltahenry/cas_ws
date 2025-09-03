@@ -225,7 +225,7 @@ class PickFSM(Machine):
 
     def run(self):
         move_forward_cmd = [0.0,self.data_node.target_depth,0.0]  # 推進階段的目標位置
-        back_pose_cmd = [0.0, 0.0, 0.0]  # 回到家位置的目標位置
+        back_pose_cmd = [0.0, -45.0, 0.0]  # 回到家位置的目標位置
 
         if self.state == PickState.IDLE.value:
             print("[PickmentFSM] 等待開始")

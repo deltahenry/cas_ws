@@ -194,7 +194,6 @@ class ForkliftControl(Machine):
             )
             print(f"[Slave {slave_id}] 寫入位址 {hex(address)} 的值: {value} (0b{value:016b})")
 
-
     def read_di(self):
         """從多個 Modbus 暫存器讀取 DI 狀態到各自陣列"""
         try:
@@ -266,7 +265,6 @@ class ForkliftControl(Machine):
         for i, bit in enumerate(bits):
             value |= (bit & 1) << i
         return value
-
 
 
 

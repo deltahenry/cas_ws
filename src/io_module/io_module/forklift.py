@@ -210,6 +210,7 @@ class ForkliftControl(Machine):
         else:
             des_direction = "stop"
             des_speed = "slow"
+            result = "done"  # 任務完成
 
 
         # value_to_write = self.encode(des_speed, des_direction)
