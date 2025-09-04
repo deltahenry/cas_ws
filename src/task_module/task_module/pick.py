@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray,Int32,Int32MultiArray
-from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,ForkCmd,ForkState,Recipe,CurrentPose,ClipperCmd,LimitCmd
+from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,ForkCmd,ForkState,Recipe,CurrentPose,GripperCmd,LimitCmd
 import numpy as np
 
 #parameters
@@ -31,7 +31,7 @@ class DataNode(Node):
 
         self.current_height = 0.0
 
-        self.target_depth = 500.0
+        self.target_depth = 20.0
 
 
        
@@ -92,7 +92,7 @@ class DataNode(Node):
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
         self.detection_cmd_publisher = self.create_publisher(String,'/detection_task',10)
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
-        self.clipper_cmd_publisher = self.create_publisher(ClipperCmd, 'clipper_cmd', 10)
+        self.gripper_cmd_publisher = self.create_publisher(GripperCmd, 'gripper_cmd', 10)
         self.laser_cmd_publisher = self.create_publisher(Int32MultiArray,'/laser_io_cmd',10)
         self.limit_pub = self.create_publisher(LimitCmd, "/limit_cmd", 10)
         
@@ -154,7 +154,7 @@ class PickState(Enum):
     IDLE = "idle"
     INIT = "init"
     MOVE_FORWARD = 'move_forward'
-    CLOSE_CLIPPER = "close_clipper"
+    CLOSE_GRIPPER = "close_gripper"
     PULL_READY = "pull_ready"
     OPEN_LIMIT = "open_limit"
     PULL_HOME = "pull_home"
@@ -173,7 +173,7 @@ class PickFSM(Machine):
             PickState.IDLE.value,
             PickState.INIT.value,       
             PickState.MOVE_FORWARD.value,
-            PickState.CLOSE_CLIPPER.value,
+            PickState.CLOSE_GRIPPER.value,
             PickState.PULL_READY.value,
             PickState.OPEN_LIMIT.value,
             PickState.PULL_HOME.value,
@@ -185,8 +185,8 @@ class PickFSM(Machine):
         transitions = [
             {'trigger': 'idle_to_init', 'source': PickState.IDLE.value, 'dest': PickState.INIT.value},
             {'trigger': 'init_to_move_forward', 'source': PickState.INIT.value, 'dest': PickState.MOVE_FORWARD.value},
-            {'trigger': 'move_forward_to_close_clipper', 'source': PickState.MOVE_FORWARD.value, 'dest': PickState.CLOSE_CLIPPER.value},
-            {'trigger': 'close_clipper_to_pull_ready', 'source': PickState.CLOSE_CLIPPER.value, 'dest': PickState.PULL_READY.value},
+            {'trigger': 'move_forward_to_close_gripper', 'source': PickState.MOVE_FORWARD.value, 'dest': PickState.CLOSE_GRIPPER.value},
+            {'trigger': 'close_gripper_to_pull_ready', 'source': PickState.CLOSE_GRIPPER.value, 'dest': PickState.PULL_READY.value},
             {'trigger': 'pull_ready_to_open_limit', 'source': PickState.PULL_READY.value, 'dest': PickState.OPEN_LIMIT.value},
             {'trigger': 'open_limit_to_pull_home', 'source': PickState.OPEN_LIMIT.value, 'dest': PickState.PULL_HOME.value},
             {'trigger': 'pull_home_to_move_forklift', 'source': PickState.PULL_HOME.value, 'dest': PickState.MOVE_FORKLIFT.value},
@@ -232,7 +232,7 @@ class PickFSM(Machine):
 
     def run(self):
         move_forward_cmd = [0.0,self.data_node.target_depth,0.0]  # 推進階段的目標位置
-        ready_pose_cmd = [0.0,150, 0.0]  # 拉取準備位置
+        ready_pose_cmd = [0.0,150.0, 0.0]  # 拉取準備位置
         home_pose_cmd = [0.0, -45.0, 0.0]  # 回到家位置的目標位置
 
         if self.state == PickState.IDLE.value:
@@ -257,15 +257,15 @@ class PickFSM(Machine):
                 if forward_arrive:
                     print("[PickmentFSM] 馬達已到達推進位置")
                     self.motor_cmd_sent = False  # 重置標記
-                    self.move_forward_to_close_clipper()
+                    self.move_forward_to_close_gripper()
                 else:
                     print("[PickmentFSM] 馬達尚未到達推進位置，繼續等待")
         
-        elif self.state == PickState.CLOSE_CLIPPER.value:
+        elif self.state == PickState.CLOSE_GRIPPER.value:
             print("[PickmentFSM] 關閉夾爪階段")
-            self.send_clipper_cmd("close_clipper")
+            self.send_gripper_cmd("close_gripper")
             time.sleep(10)  # 等待夾爪開啟
-            self.close_clipper_to_pull()
+            self.close_gripper_to_pull_ready()
 
         elif self.state == PickState.PULL_READY.value:
             print("[PickmentFSM] 拉取階段")
@@ -299,7 +299,7 @@ class PickFSM(Machine):
                 if back_arrive:
                     print("[PickmentFSM] 馬達已到達home位置")
                     self.motor_cmd_sent = False  # 重置標記
-                    self.pull_to_move_forklift()
+                    self.pull_home_to_move_forklift()
                 else:
                     print("[PickmentFSM] 馬達尚未到達home位置，繼續等待")
         
@@ -361,11 +361,11 @@ class PickFSM(Machine):
             print("馬達尚未到位置")
             return False
 
-    def send_clipper_cmd(self, mode):
-        msg = ClipperCmd()
+    def send_gripper_cmd(self, mode):
+        msg = GripperCmd()
         msg.mode = mode
-        self.data_node.clipper_cmd_publisher.publish(msg)
-        print(f"[Clipper] Published: {mode}")
+        self.data_node.gripper_cmd_publisher.publish(msg)
+        print(f"[Gripper] Published: {mode}")
 
     def laser_cmd(self, cmd: str):
         """發送雷射命令"""

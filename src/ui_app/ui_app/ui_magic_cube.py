@@ -56,6 +56,12 @@ class Ui_MainWindow(object):
 "    border: 1px solid #0B76A0;\n"
 "}\n"
 "\n"
+"QPushButton:disabled {\n"
+"    background-color: #BDBDBD;       /* Gray when disabled */\n"
+"    border: 2px solid #9E9E9E;\n"
+"    color: #616161;\n"
+"}\n"
+"\n"
 "QLabel {\n"
 "	color:white;\n"
 "}")
@@ -247,6 +253,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_12.setObjectName(u"verticalLayout_12")
         self.INITButton = QPushButton(self.ActionButtonsPage)
         self.INITButton.setObjectName(u"INITButton")
+        self.INITButton.setEnabled(True)
         sizePolicy.setHeightForWidth(self.INITButton.sizePolicy().hasHeightForWidth())
         self.INITButton.setSizePolicy(sizePolicy)
         self.INITButton.setFont(font)
@@ -397,14 +404,39 @@ class Ui_MainWindow(object):
 
         self.AutoStopButton = QPushButton(self.AutoAndManualWidget)
         self.AutoStopButton.setObjectName(u"AutoStopButton")
+        self.AutoStopButton.setEnabled(True)
         sizePolicy.setHeightForWidth(self.AutoStopButton.sizePolicy().hasHeightForWidth())
         self.AutoStopButton.setSizePolicy(sizePolicy)
         self.AutoStopButton.setMinimumSize(QSize(0, 60))
-        self.AutoStopButton.setFont(font)
-        self.AutoStopButton.setStyleSheet(u"\n"
+        font4 = QFont()
+        font4.setPointSize(16)
+        font4.setBold(True)
+        self.AutoStopButton.setFont(font4)
+        self.AutoStopButton.setStyleSheet(u"QPushButton {\n"
+"    background-color: #D32F2F;       /* Material Red 700 */\n"
+"    color: white;\n"
+"    border: 2px solid #9A0007;       /* Darker red border */\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: #E53935;       /* Slightly brighter red */\n"
+"}\n"
+"QPushButton:pressed {\n"
+"    background-color: #B71C1C;       /* Darker pressed red */\n"
+"    border: 2px inset #7F0000;       /* Inset border for \"sunken\" effect */\n"
+"}\n"
+"QPushButton:disabled {\n"
+"    background-color: #BDBDBD;       /* Gray when disabled */\n"
+"    border: 2px solid #9E9E9E;\n"
+"    color: #616161;\n"
+"}\n"
+"\n"
+"/*\n"
 "QPushButton#AutoStopButton:pressed {\n"
-"    background-color: #990000;       /* darker red when pressed */\n"
-"}")
+"    background-color: #990000; \n"
+"}\n"
+"*/\n"
+"")
         self.AutoStopButton.setCheckable(False)
 
         self.verticalLayoutAutoPauseAndStop.addWidget(self.AutoStopButton)
@@ -445,6 +477,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.StartWidget = QWidget(self.Timeline)
         self.StartWidget.setObjectName(u"StartWidget")
+        self.StartWidget.setMinimumSize(QSize(0, 0))
         self.verticalLayout_2 = QVBoxLayout(self.StartWidget)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.StartProcessText = QLabel(self.StartWidget)
@@ -461,7 +494,8 @@ class Ui_MainWindow(object):
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.StartCircle.sizePolicy().hasHeightForWidth())
         self.StartCircle.setSizePolicy(sizePolicy3)
-        self.StartCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.StartCircle.setMinimumSize(QSize(30, 30))
+        self.StartCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.StartCircle.setScaledContents(True)
         self.StartCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -485,7 +519,8 @@ class Ui_MainWindow(object):
         self.ConnectCircle.setObjectName(u"ConnectCircle")
         sizePolicy3.setHeightForWidth(self.ConnectCircle.sizePolicy().hasHeightForWidth())
         self.ConnectCircle.setSizePolicy(sizePolicy3)
-        self.ConnectCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.ConnectCircle.setMinimumSize(QSize(30, 30))
+        self.ConnectCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.ConnectCircle.setScaledContents(True)
         self.ConnectCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -509,7 +544,8 @@ class Ui_MainWindow(object):
         self.INITCircle.setObjectName(u"INITCircle")
         sizePolicy3.setHeightForWidth(self.INITCircle.sizePolicy().hasHeightForWidth())
         self.INITCircle.setSizePolicy(sizePolicy3)
-        self.INITCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.INITCircle.setMinimumSize(QSize(30, 30))
+        self.INITCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.INITCircle.setScaledContents(True)
         self.INITCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -533,7 +569,8 @@ class Ui_MainWindow(object):
         self.IdleCircle.setObjectName(u"IdleCircle")
         sizePolicy3.setHeightForWidth(self.IdleCircle.sizePolicy().hasHeightForWidth())
         self.IdleCircle.setSizePolicy(sizePolicy3)
-        self.IdleCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.IdleCircle.setMinimumSize(QSize(30, 30))
+        self.IdleCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.IdleCircle.setScaledContents(True)
         self.IdleCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -557,7 +594,8 @@ class Ui_MainWindow(object):
         self.RoughAlignCircle.setObjectName(u"RoughAlignCircle")
         sizePolicy3.setHeightForWidth(self.RoughAlignCircle.sizePolicy().hasHeightForWidth())
         self.RoughAlignCircle.setSizePolicy(sizePolicy3)
-        self.RoughAlignCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.RoughAlignCircle.setMinimumSize(QSize(30, 30))
+        self.RoughAlignCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.RoughAlignCircle.setScaledContents(True)
         self.RoughAlignCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -581,7 +619,8 @@ class Ui_MainWindow(object):
         self.PreciseAlignCircle.setObjectName(u"PreciseAlignCircle")
         sizePolicy3.setHeightForWidth(self.PreciseAlignCircle.sizePolicy().hasHeightForWidth())
         self.PreciseAlignCircle.setSizePolicy(sizePolicy3)
-        self.PreciseAlignCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.PreciseAlignCircle.setMinimumSize(QSize(30, 30))
+        self.PreciseAlignCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.PreciseAlignCircle.setScaledContents(True)
         self.PreciseAlignCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -605,7 +644,8 @@ class Ui_MainWindow(object):
         self.PickCircle.setObjectName(u"PickCircle")
         sizePolicy3.setHeightForWidth(self.PickCircle.sizePolicy().hasHeightForWidth())
         self.PickCircle.setSizePolicy(sizePolicy3)
-        self.PickCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.PickCircle.setMinimumSize(QSize(30, 30))
+        self.PickCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.PickCircle.setScaledContents(True)
         self.PickCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -629,7 +669,8 @@ class Ui_MainWindow(object):
         self.AssemblyCircle.setObjectName(u"AssemblyCircle")
         sizePolicy3.setHeightForWidth(self.AssemblyCircle.sizePolicy().hasHeightForWidth())
         self.AssemblyCircle.setSizePolicy(sizePolicy3)
-        self.AssemblyCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.AssemblyCircle.setMinimumSize(QSize(30, 30))
+        self.AssemblyCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.AssemblyCircle.setScaledContents(True)
         self.AssemblyCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -654,19 +695,21 @@ class Ui_MainWindow(object):
         self.C12.setObjectName(u"C12")
         self.C12.setMinimumSize(QSize(65, 65))
         self.C12.setSizeIncrement(QSize(2, 0))
-        self.C12.setCheckable(False)
+        self.C12.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C12, 0, 1, 1, 1)
 
         self.C21 = QPushButton(self.widget)
         self.C21.setObjectName(u"C21")
         self.C21.setMinimumSize(QSize(65, 65))
+        self.C21.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C21, 1, 0, 1, 1)
 
         self.C32 = QPushButton(self.widget)
         self.C32.setObjectName(u"C32")
         self.C32.setMinimumSize(QSize(65, 65))
+        self.C32.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C32, 2, 1, 1, 1)
 
@@ -674,60 +717,70 @@ class Ui_MainWindow(object):
         self.C13.setObjectName(u"C13")
         self.C13.setMinimumSize(QSize(65, 65))
         self.C13.setSizeIncrement(QSize(2, 0))
+        self.C13.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C13, 0, 2, 1, 1)
 
         self.C34 = QPushButton(self.widget)
         self.C34.setObjectName(u"C34")
         self.C34.setMinimumSize(QSize(65, 65))
+        self.C34.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C34, 2, 3, 1, 1)
 
         self.C52 = QPushButton(self.widget)
         self.C52.setObjectName(u"C52")
         self.C52.setMinimumSize(QSize(65, 65))
+        self.C52.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C52, 5, 1, 1, 1)
 
         self.C91 = QPushButton(self.widget)
         self.C91.setObjectName(u"C91")
         self.C91.setMinimumSize(QSize(65, 65))
+        self.C91.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C91, 9, 0, 1, 1)
 
         self.C33 = QPushButton(self.widget)
         self.C33.setObjectName(u"C33")
         self.C33.setMinimumSize(QSize(65, 65))
+        self.C33.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C33, 2, 2, 1, 1)
 
         self.C71 = QPushButton(self.widget)
         self.C71.setObjectName(u"C71")
         self.C71.setMinimumSize(QSize(65, 65))
+        self.C71.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C71, 7, 0, 1, 1)
 
         self.C81 = QPushButton(self.widget)
         self.C81.setObjectName(u"C81")
         self.C81.setMinimumSize(QSize(65, 65))
+        self.C81.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C81, 8, 0, 1, 1)
 
         self.C14 = QPushButton(self.widget)
         self.C14.setObjectName(u"C14")
         self.C14.setMinimumSize(QSize(65, 65))
+        self.C14.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C14, 0, 3, 1, 1)
 
         self.C61 = QPushButton(self.widget)
         self.C61.setObjectName(u"C61")
         self.C61.setMinimumSize(QSize(65, 65))
+        self.C61.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C61, 6, 0, 1, 1)
 
         self.C31 = QPushButton(self.widget)
         self.C31.setObjectName(u"C31")
         self.C31.setMinimumSize(QSize(65, 65))
+        self.C31.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C31, 2, 0, 1, 1)
 
@@ -736,138 +789,161 @@ class Ui_MainWindow(object):
         sizePolicy2.setHeightForWidth(self.C11.sizePolicy().hasHeightForWidth())
         self.C11.setSizePolicy(sizePolicy2)
         self.C11.setMinimumSize(QSize(65, 65))
+        self.C11.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C11, 0, 0, 1, 1)
 
         self.C53 = QPushButton(self.widget)
         self.C53.setObjectName(u"C53")
         self.C53.setMinimumSize(QSize(65, 65))
+        self.C53.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C53, 5, 2, 1, 1)
 
         self.C51 = QPushButton(self.widget)
         self.C51.setObjectName(u"C51")
         self.C51.setMinimumSize(QSize(65, 65))
+        self.C51.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C51, 5, 0, 1, 1)
 
         self.C41 = QPushButton(self.widget)
         self.C41.setObjectName(u"C41")
         self.C41.setMinimumSize(QSize(65, 65))
+        self.C41.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C41, 3, 0, 1, 1)
 
         self.C22 = QPushButton(self.widget)
         self.C22.setObjectName(u"C22")
         self.C22.setMinimumSize(QSize(65, 65))
+        self.C22.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C22, 1, 1, 1, 1)
 
         self.C23 = QPushButton(self.widget)
         self.C23.setObjectName(u"C23")
         self.C23.setMinimumSize(QSize(65, 65))
+        self.C23.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C23, 1, 2, 1, 1)
 
         self.C24 = QPushButton(self.widget)
         self.C24.setObjectName(u"C24")
         self.C24.setMinimumSize(QSize(65, 65))
+        self.C24.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C24, 1, 3, 1, 1)
 
         self.C42 = QPushButton(self.widget)
         self.C42.setObjectName(u"C42")
         self.C42.setMinimumSize(QSize(65, 65))
+        self.C42.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C42, 3, 1, 1, 1)
 
         self.C43 = QPushButton(self.widget)
         self.C43.setObjectName(u"C43")
         self.C43.setMinimumSize(QSize(65, 65))
+        self.C43.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C43, 3, 2, 1, 1)
 
         self.C44 = QPushButton(self.widget)
         self.C44.setObjectName(u"C44")
         self.C44.setMinimumSize(QSize(65, 65))
+        self.C44.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C44, 3, 3, 1, 1)
 
         self.C62 = QPushButton(self.widget)
         self.C62.setObjectName(u"C62")
         self.C62.setMinimumSize(QSize(65, 65))
+        self.C62.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C62, 6, 1, 1, 1)
 
         self.C63 = QPushButton(self.widget)
         self.C63.setObjectName(u"C63")
         self.C63.setMinimumSize(QSize(65, 65))
+        self.C63.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C63, 6, 2, 1, 1)
 
         self.C54 = QPushButton(self.widget)
         self.C54.setObjectName(u"C54")
         self.C54.setMinimumSize(QSize(65, 65))
+        self.C54.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C54, 5, 3, 1, 1)
 
         self.C64 = QPushButton(self.widget)
         self.C64.setObjectName(u"C64")
         self.C64.setMinimumSize(QSize(65, 65))
+        self.C64.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C64, 6, 3, 1, 1)
 
         self.C72 = QPushButton(self.widget)
         self.C72.setObjectName(u"C72")
         self.C72.setMinimumSize(QSize(65, 65))
+        self.C72.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C72, 7, 1, 1, 1)
 
         self.C73 = QPushButton(self.widget)
         self.C73.setObjectName(u"C73")
         self.C73.setMinimumSize(QSize(65, 65))
+        self.C73.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C73, 7, 2, 1, 1)
 
         self.C74 = QPushButton(self.widget)
         self.C74.setObjectName(u"C74")
         self.C74.setMinimumSize(QSize(65, 65))
+        self.C74.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C74, 7, 3, 1, 1)
 
         self.C82 = QPushButton(self.widget)
         self.C82.setObjectName(u"C82")
         self.C82.setMinimumSize(QSize(65, 65))
+        self.C82.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C82, 8, 1, 1, 1)
 
         self.C83 = QPushButton(self.widget)
         self.C83.setObjectName(u"C83")
         self.C83.setMinimumSize(QSize(65, 65))
+        self.C83.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C83, 8, 2, 1, 1)
 
         self.C84 = QPushButton(self.widget)
         self.C84.setObjectName(u"C84")
         self.C84.setMinimumSize(QSize(65, 65))
+        self.C84.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C84, 8, 3, 1, 1)
 
         self.C92 = QPushButton(self.widget)
         self.C92.setObjectName(u"C92")
         self.C92.setMinimumSize(QSize(65, 65))
+        self.C92.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C92, 9, 1, 1, 1)
 
         self.C93 = QPushButton(self.widget)
         self.C93.setObjectName(u"C93")
         self.C93.setMinimumSize(QSize(65, 65))
+        self.C93.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C93, 9, 2, 1, 1)
 
         self.C94 = QPushButton(self.widget)
         self.C94.setObjectName(u"C94")
         self.C94.setMinimumSize(QSize(65, 65))
+        self.C94.setCheckable(True)
 
         self.gridLayout_2.addWidget(self.C94, 9, 3, 1, 1)
 
@@ -876,7 +952,7 @@ class Ui_MainWindow(object):
 
         self.CabinetLabel = QLabel(self.CabinetPage)
         self.CabinetLabel.setObjectName(u"CabinetLabel")
-        self.CabinetLabel.setGeometry(QRect(320, 0, 101, 21))
+        self.CabinetLabel.setGeometry(QRect(330, 0, 101, 21))
         self.CabinetLabel.setFont(font)
         self.SaveCabinet = QPushButton(self.CabinetPage)
         self.SaveCabinet.setObjectName(u"SaveCabinet")
@@ -919,13 +995,13 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_27.addWidget(self.ChooseVision)
 
-        self.ChooseClipper = QPushButton(self.ChooseListOptionsWidget)
-        self.ChooseClipper.setObjectName(u"ChooseClipper")
-        sizePolicy.setHeightForWidth(self.ChooseClipper.sizePolicy().hasHeightForWidth())
-        self.ChooseClipper.setSizePolicy(sizePolicy)
-        self.ChooseClipper.setStyleSheet(u"")
+        self.ChooseGripper = QPushButton(self.ChooseListOptionsWidget)
+        self.ChooseGripper.setObjectName(u"ChooseGripper")
+        sizePolicy.setHeightForWidth(self.ChooseGripper.sizePolicy().hasHeightForWidth())
+        self.ChooseGripper.setSizePolicy(sizePolicy)
+        self.ChooseGripper.setStyleSheet(u"")
 
-        self.verticalLayout_27.addWidget(self.ChooseClipper)
+        self.verticalLayout_27.addWidget(self.ChooseGripper)
 
         self.ChooseForklift = QPushButton(self.ChooseListOptionsWidget)
         self.ChooseForklift.setObjectName(u"ChooseForklift")
@@ -1607,37 +1683,69 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.zVisionLabel, 4, 1, 1, 1)
 
         self.ChangeComponentControlStackedWidget.addWidget(self.VisionPage)
-        self.ClipperPage = QWidget()
-        self.ClipperPage.setObjectName(u"ClipperPage")
-        self.OpenClipper = QPushButton(self.ClipperPage)
-        self.OpenClipper.setObjectName(u"OpenClipper")
-        self.OpenClipper.setGeometry(QRect(40, 70, 111, 79))
-        sizePolicy.setHeightForWidth(self.OpenClipper.sizePolicy().hasHeightForWidth())
-        self.OpenClipper.setSizePolicy(sizePolicy)
-        self.OpenClipper.setStyleSheet(u"")
-        self.OpenClipper.setCheckable(False)
-        self.CloseClipper = QPushButton(self.ClipperPage)
-        self.CloseClipper.setObjectName(u"CloseClipper")
-        self.CloseClipper.setGeometry(QRect(170, 70, 111, 79))
-        sizePolicy.setHeightForWidth(self.CloseClipper.sizePolicy().hasHeightForWidth())
-        self.CloseClipper.setSizePolicy(sizePolicy)
-        self.CloseClipper.setStyleSheet(u"")
-        self.CloseClipper.setCheckable(False)
-        self.StopClipper = QPushButton(self.ClipperPage)
-        self.StopClipper.setObjectName(u"StopClipper")
-        self.StopClipper.setGeometry(QRect(40, 190, 111, 79))
-        sizePolicy.setHeightForWidth(self.StopClipper.sizePolicy().hasHeightForWidth())
-        self.StopClipper.setSizePolicy(sizePolicy)
-        self.StopClipper.setStyleSheet(u"")
-        self.StopClipper.setCheckable(False)
-        self.ResetClipper = QPushButton(self.ClipperPage)
-        self.ResetClipper.setObjectName(u"ResetClipper")
-        self.ResetClipper.setGeometry(QRect(170, 190, 111, 79))
-        sizePolicy.setHeightForWidth(self.ResetClipper.sizePolicy().hasHeightForWidth())
-        self.ResetClipper.setSizePolicy(sizePolicy)
-        self.ResetClipper.setStyleSheet(u"")
-        self.ResetClipper.setCheckable(False)
-        self.ChangeComponentControlStackedWidget.addWidget(self.ClipperPage)
+        self.GripperPage = QWidget()
+        self.GripperPage.setObjectName(u"GripperPage")
+        self.OpenGripper = QPushButton(self.GripperPage)
+        self.OpenGripper.setObjectName(u"OpenGripper")
+        self.OpenGripper.setGeometry(QRect(40, 70, 111, 79))
+        sizePolicy.setHeightForWidth(self.OpenGripper.sizePolicy().hasHeightForWidth())
+        self.OpenGripper.setSizePolicy(sizePolicy)
+        self.OpenGripper.setStyleSheet(u"")
+        self.OpenGripper.setCheckable(False)
+        self.CloseGripper = QPushButton(self.GripperPage)
+        self.CloseGripper.setObjectName(u"CloseGripper")
+        self.CloseGripper.setGeometry(QRect(170, 70, 111, 79))
+        sizePolicy.setHeightForWidth(self.CloseGripper.sizePolicy().hasHeightForWidth())
+        self.CloseGripper.setSizePolicy(sizePolicy)
+        self.CloseGripper.setStyleSheet(u"")
+        self.CloseGripper.setCheckable(False)
+        self.StopGripper = QPushButton(self.GripperPage)
+        self.StopGripper.setObjectName(u"StopGripper")
+        self.StopGripper.setGeometry(QRect(40, 190, 111, 79))
+        sizePolicy.setHeightForWidth(self.StopGripper.sizePolicy().hasHeightForWidth())
+        self.StopGripper.setSizePolicy(sizePolicy)
+        self.StopGripper.setStyleSheet(u"")
+        self.StopGripper.setCheckable(False)
+        self.ResetGripper = QPushButton(self.GripperPage)
+        self.ResetGripper.setObjectName(u"ResetGripper")
+        self.ResetGripper.setGeometry(QRect(170, 190, 111, 79))
+        sizePolicy.setHeightForWidth(self.ResetGripper.sizePolicy().hasHeightForWidth())
+        self.ResetGripper.setSizePolicy(sizePolicy)
+        self.ResetGripper.setStyleSheet(u"")
+        self.ResetGripper.setCheckable(False)
+        self.LimitOpen = QPushButton(self.GripperPage)
+        self.LimitOpen.setObjectName(u"LimitOpen")
+        self.LimitOpen.setGeometry(QRect(30, 340, 271, 79))
+        sizePolicy.setHeightForWidth(self.LimitOpen.sizePolicy().hasHeightForWidth())
+        self.LimitOpen.setSizePolicy(sizePolicy)
+        self.LimitOpen.setStyleSheet(u"")
+        self.LimitOpen.setCheckable(False)
+        self.LimitClose = QPushButton(self.GripperPage)
+        self.LimitClose.setObjectName(u"LimitClose")
+        self.LimitClose.setGeometry(QRect(30, 420, 271, 79))
+        sizePolicy.setHeightForWidth(self.LimitClose.sizePolicy().hasHeightForWidth())
+        self.LimitClose.setSizePolicy(sizePolicy)
+        self.LimitClose.setStyleSheet(u"")
+        self.LimitClose.setCheckable(False)
+        self.LimitStop = QPushButton(self.GripperPage)
+        self.LimitStop.setObjectName(u"LimitStop")
+        self.LimitStop.setGeometry(QRect(30, 500, 271, 79))
+        sizePolicy.setHeightForWidth(self.LimitStop.sizePolicy().hasHeightForWidth())
+        self.LimitStop.setSizePolicy(sizePolicy)
+        self.LimitStop.setStyleSheet(u"")
+        self.LimitStop.setCheckable(False)
+        self.label_13 = QLabel(self.GripperPage)
+        self.label_13.setObjectName(u"label_13")
+        self.label_13.setGeometry(QRect(100, 310, 121, 20))
+        font5 = QFont()
+        font5.setPointSize(14)
+        font5.setBold(True)
+        self.label_13.setFont(font5)
+        self.label_14 = QLabel(self.GripperPage)
+        self.label_14.setObjectName(u"label_14")
+        self.label_14.setGeometry(QRect(100, 40, 151, 20))
+        self.label_14.setFont(font5)
+        self.ChangeComponentControlStackedWidget.addWidget(self.GripperPage)
         self.ForkliftPage = QWidget()
         self.ForkliftPage.setObjectName(u"ForkliftPage")
         self.LiftUp = QPushButton(self.ForkliftPage)
@@ -1719,7 +1827,7 @@ class Ui_MainWindow(object):
         self.ChangeComponentControlStackedWidget.addWidget(self.DIDOPage)
         self.ListOptionsWidget = QWidget(self.ComponentControlMain)
         self.ListOptionsWidget.setObjectName(u"ListOptionsWidget")
-        self.ListOptionsWidget.setGeometry(QRect(10, 100, 291, 571))
+        self.ListOptionsWidget.setGeometry(QRect(10, 100, 291, 581))
         sizePolicy2.setHeightForWidth(self.ListOptionsWidget.sizePolicy().hasHeightForWidth())
         self.ListOptionsWidget.setSizePolicy(sizePolicy2)
         self.verticalLayout_5 = QVBoxLayout(self.ListOptionsWidget)
@@ -1740,13 +1848,13 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_5.addWidget(self.VisionOption)
 
-        self.ClipperOption = QPushButton(self.ListOptionsWidget)
-        self.ClipperOption.setObjectName(u"ClipperOption")
-        sizePolicy.setHeightForWidth(self.ClipperOption.sizePolicy().hasHeightForWidth())
-        self.ClipperOption.setSizePolicy(sizePolicy)
-        self.ClipperOption.setStyleSheet(u"")
+        self.GripperOption = QPushButton(self.ListOptionsWidget)
+        self.GripperOption.setObjectName(u"GripperOption")
+        sizePolicy.setHeightForWidth(self.GripperOption.sizePolicy().hasHeightForWidth())
+        self.GripperOption.setSizePolicy(sizePolicy)
+        self.GripperOption.setStyleSheet(u"")
 
-        self.verticalLayout_5.addWidget(self.ClipperOption)
+        self.verticalLayout_5.addWidget(self.GripperOption)
 
         self.ForkliftOption = QPushButton(self.ListOptionsWidget)
         self.ForkliftOption.setObjectName(u"ForkliftOption")
@@ -1806,10 +1914,10 @@ class Ui_MainWindow(object):
         self.gridLayout_4.setContentsMargins(-1, 6, -1, -1)
         self.CartesianPoseText_2 = QLabel(self.CartesianPoseWidget_2)
         self.CartesianPoseText_2.setObjectName(u"CartesianPoseText_2")
-        font4 = QFont()
-        font4.setPointSize(11)
-        font4.setBold(False)
-        self.CartesianPoseText_2.setFont(font4)
+        font6 = QFont()
+        font6.setPointSize(11)
+        font6.setBold(False)
+        self.CartesianPoseText_2.setFont(font6)
         self.CartesianPoseText_2.setStyleSheet(u"QLabel#CartesianPoseText_2 {\n"
 "    border-bottom: 1px solid white;\n"
 "}")
@@ -1826,7 +1934,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_16.setContentsMargins(-1, -1, -1, 14)
         self.z_2 = QLabel(self.zPosFrame_2)
         self.z_2.setObjectName(u"z_2")
-        self.z_2.setFont(font4)
+        self.z_2.setFont(font6)
 
         self.verticalLayout_16.addWidget(self.z_2)
 
@@ -1847,7 +1955,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_14.setContentsMargins(-1, -1, -1, 3)
         self.y_2 = QLabel(self.yPosFrame_2)
         self.y_2.setObjectName(u"y_2")
-        self.y_2.setFont(font4)
+        self.y_2.setFont(font6)
 
         self.verticalLayout_14.addWidget(self.y_2)
 
@@ -1868,7 +1976,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_17.setContentsMargins(-1, -1, -1, 14)
         self.yaw_2 = QLabel(self.yawPosFrame_2)
         self.yaw_2.setObjectName(u"yaw_2")
-        self.yaw_2.setFont(font4)
+        self.yaw_2.setFont(font6)
 
         self.verticalLayout_17.addWidget(self.yaw_2)
 
@@ -1882,9 +1990,9 @@ class Ui_MainWindow(object):
 
         self.xPosFrame_2 = QFrame(self.CartesianPoseWidget_2)
         self.xPosFrame_2.setObjectName(u"xPosFrame_2")
-        font5 = QFont()
-        font5.setPointSize(9)
-        self.xPosFrame_2.setFont(font5)
+        font7 = QFont()
+        font7.setPointSize(9)
+        self.xPosFrame_2.setFont(font7)
         self.xPosFrame_2.setFrameShape(QFrame.Shape.StyledPanel)
         self.xPosFrame_2.setFrameShadow(QFrame.Shadow.Raised)
         self.verticalLayout_13 = QVBoxLayout(self.xPosFrame_2)
@@ -1892,7 +2000,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_13.setContentsMargins(9, -1, -1, 3)
         self.x_2 = QLabel(self.xPosFrame_2)
         self.x_2.setObjectName(u"x_2")
-        self.x_2.setFont(font4)
+        self.x_2.setFont(font6)
 
         self.verticalLayout_13.addWidget(self.x_2)
 
@@ -1919,9 +2027,9 @@ class Ui_MainWindow(object):
         self.gridLayout_5.setContentsMargins(-1, 6, 9, 9)
         self.MotorInfoText_2 = QLabel(self.MotorInfoWidget_2)
         self.MotorInfoText_2.setObjectName(u"MotorInfoText_2")
-        font6 = QFont()
-        font6.setPointSize(11)
-        self.MotorInfoText_2.setFont(font6)
+        font8 = QFont()
+        font8.setPointSize(11)
+        self.MotorInfoText_2.setFont(font8)
         self.MotorInfoText_2.setStyleSheet(u"QLabel#MotorInfoText_2 {\n"
 "    border-bottom: 1px solid white;\n"
 "}")
@@ -1939,7 +2047,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_15.setContentsMargins(-1, 9, -1, 9)
         self.Position_2 = QLabel(self.PositionFrame_2)
         self.Position_2.setObjectName(u"Position_2")
-        self.Position_2.setFont(font4)
+        self.Position_2.setFont(font6)
 
         self.verticalLayout_15.addWidget(self.Position_2)
 
@@ -1975,10 +2083,10 @@ class Ui_MainWindow(object):
         self.gridLayout_6.setContentsMargins(-1, 6, -1, -1)
         self.LaserInfoText_2 = QLabel(self.LaserInfoWidget)
         self.LaserInfoText_2.setObjectName(u"LaserInfoText_2")
-        font7 = QFont()
-        font7.setPointSize(11)
-        font7.setItalic(False)
-        self.LaserInfoText_2.setFont(font7)
+        font9 = QFont()
+        font9.setPointSize(11)
+        font9.setItalic(False)
+        self.LaserInfoText_2.setFont(font9)
         self.LaserInfoText_2.setStyleSheet(u"QLabel#LaserInfoText_2 {\n"
 "    border-bottom: 1px solid white;\n"
 "}")
@@ -1995,7 +2103,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_25.setContentsMargins(9, -1, -1, 9)
         self.h1_2 = QLabel(self.frame_8)
         self.h1_2.setObjectName(u"h1_2")
-        self.h1_2.setFont(font4)
+        self.h1_2.setFont(font6)
 
         self.verticalLayout_25.addWidget(self.h1_2)
 
@@ -2016,7 +2124,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_23.setContentsMargins(9, -1, -1, 9)
         self.d2_2 = QLabel(self.frame_7)
         self.d2_2.setObjectName(u"d2_2")
-        self.d2_2.setFont(font4)
+        self.d2_2.setFont(font6)
 
         self.verticalLayout_23.addWidget(self.d2_2)
 
@@ -2049,9 +2157,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_32.setContentsMargins(9, -1, -1, 9)
         self.h1_5 = QLabel(self.frame_13)
         self.h1_5.setObjectName(u"h1_5")
-        font8 = QFont()
-        font8.setBold(False)
-        self.h1_5.setFont(font8)
+        font10 = QFont()
+        font10.setBold(False)
+        self.h1_5.setFont(font10)
 
         self.verticalLayout_32.addWidget(self.h1_5)
 
@@ -2072,7 +2180,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_33.setContentsMargins(9, -1, -1, 9)
         self.d2_5 = QLabel(self.frame_14)
         self.d2_5.setObjectName(u"d2_5")
-        self.d2_5.setFont(font4)
+        self.d2_5.setFont(font6)
 
         self.verticalLayout_33.addWidget(self.d2_5)
 
@@ -2086,7 +2194,7 @@ class Ui_MainWindow(object):
 
         self.DepthInfoText = QLabel(self.DepthInfoWidget)
         self.DepthInfoText.setObjectName(u"DepthInfoText")
-        self.DepthInfoText.setFont(font6)
+        self.DepthInfoText.setFont(font8)
         self.DepthInfoText.setStyleSheet(u"QLabel#DepthInfoText {\n"
 "    border-bottom: 1px solid white;\n"
 "}")
@@ -2108,10 +2216,10 @@ class Ui_MainWindow(object):
         self.ScrollAreaDIDO = QScrollArea(self.DIDOContainerPage)
         self.ScrollAreaDIDO.setObjectName(u"ScrollAreaDIDO")
         self.ScrollAreaDIDO.setGeometry(QRect(0, 350, 701, 331))
-        font9 = QFont()
-        font9.setStrikeOut(False)
-        font9.setKerning(True)
-        self.ScrollAreaDIDO.setFont(font9)
+        font11 = QFont()
+        font11.setStrikeOut(False)
+        font11.setKerning(True)
+        self.ScrollAreaDIDO.setFont(font11)
         self.ScrollAreaDIDO.setTabletTracking(True)
         self.ScrollAreaDIDO.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.ScrollAreaDIDO.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
@@ -3203,9 +3311,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout_22.setContentsMargins(-1, 0, -1, 0)
         self.QuantityText = QLabel(self.QuantityWidget)
         self.QuantityText.setObjectName(u"QuantityText")
-        font10 = QFont()
-        font10.setBold(True)
-        self.QuantityText.setFont(font10)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.QuantityText.sizePolicy().hasHeightForWidth())
+        self.QuantityText.setSizePolicy(sizePolicy5)
+        font12 = QFont()
+        font12.setBold(True)
+        self.QuantityText.setFont(font12)
 
         self.horizontalLayout_22.addWidget(self.QuantityText)
 
@@ -3219,9 +3332,6 @@ class Ui_MainWindow(object):
 
         self.DateWidget = QWidget(self.widget_3)
         self.DateWidget.setObjectName(u"DateWidget")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
         sizePolicy5.setHeightForWidth(self.DateWidget.sizePolicy().hasHeightForWidth())
         self.DateWidget.setSizePolicy(sizePolicy5)
         self.DateWidget.setStyleSheet(u"color: white;")
@@ -3230,7 +3340,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_26.setContentsMargins(-1, 0, -1, 0)
         self.DateText = QLabel(self.DateWidget)
         self.DateText.setObjectName(u"DateText")
-        self.DateText.setFont(font10)
+        self.DateText.setFont(font12)
 
         self.horizontalLayout_26.addWidget(self.DateText)
 
@@ -3252,7 +3362,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_23.setContentsMargins(-1, 0, -1, 0)
         self.CartHeightText = QLabel(self.CartHeightWidget)
         self.CartHeightText.setObjectName(u"CartHeightText")
-        self.CartHeightText.setFont(font10)
+        sizePolicy5.setHeightForWidth(self.CartHeightText.sizePolicy().hasHeightForWidth())
+        self.CartHeightText.setSizePolicy(sizePolicy5)
+        self.CartHeightText.setFont(font12)
 
         self.horizontalLayout_23.addWidget(self.CartHeightText)
 
@@ -3274,14 +3386,21 @@ class Ui_MainWindow(object):
         self.horizontalLayout_24.setContentsMargins(-1, 0, -1, 0)
         self.CartDepthText = QLabel(self.CartDepthWidget)
         self.CartDepthText.setObjectName(u"CartDepthText")
-        self.CartDepthText.setFont(font10)
+        sizePolicy5.setHeightForWidth(self.CartDepthText.sizePolicy().hasHeightForWidth())
+        self.CartDepthText.setSizePolicy(sizePolicy5)
+        self.CartDepthText.setFont(font12)
 
         self.horizontalLayout_24.addWidget(self.CartDepthText)
 
-        self.CartDepthInput = QLabel(self.CartDepthWidget)
-        self.CartDepthInput.setObjectName(u"CartDepthInput")
+        self.CartDepthLeftInput = QLabel(self.CartDepthWidget)
+        self.CartDepthLeftInput.setObjectName(u"CartDepthLeftInput")
 
-        self.horizontalLayout_24.addWidget(self.CartDepthInput)
+        self.horizontalLayout_24.addWidget(self.CartDepthLeftInput)
+
+        self.CartDepthRightInput = QLabel(self.CartDepthWidget)
+        self.CartDepthRightInput.setObjectName(u"CartDepthRightInput")
+
+        self.horizontalLayout_24.addWidget(self.CartDepthRightInput)
 
 
         self.gridLayout_9.addWidget(self.CartDepthWidget, 0, 0, 1, 1)
@@ -3296,7 +3415,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_25.setContentsMargins(-1, 0, -1, 0)
         self.WorkerNameText = QLabel(self.WorkerNameWidget)
         self.WorkerNameText.setObjectName(u"WorkerNameText")
-        self.WorkerNameText.setFont(font10)
+        self.WorkerNameText.setFont(font12)
 
         self.horizontalLayout_25.addWidget(self.WorkerNameText)
 
@@ -3318,7 +3437,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_17.setContentsMargins(-1, 0, -1, 0)
         self.WorkOrderText = QLabel(self.WorkOrderWidget)
         self.WorkOrderText.setObjectName(u"WorkOrderText")
-        self.WorkOrderText.setFont(font10)
+        self.WorkOrderText.setFont(font12)
 
         self.horizontalLayout_17.addWidget(self.WorkOrderText, 0, Qt.AlignmentFlag.AlignLeft)
 
@@ -3341,7 +3460,7 @@ class Ui_MainWindow(object):
         self.RecipeText_3.setObjectName(u"RecipeText_3")
         sizePolicy.setHeightForWidth(self.RecipeText_3.sizePolicy().hasHeightForWidth())
         self.RecipeText_3.setSizePolicy(sizePolicy)
-        self.RecipeText_3.setFont(font10)
+        self.RecipeText_3.setFont(font12)
 
         self.horizontalLayout_21.addWidget(self.RecipeText_3, 0, Qt.AlignmentFlag.AlignLeft)
 
@@ -3376,8 +3495,8 @@ class Ui_MainWindow(object):
         self.ActionButtons.setCurrentIndex(0)
         self.MainPageAutoAndManualStackedWidget.setCurrentIndex(0)
         self.ComponentControlStackedWidget.setCurrentIndex(0)
-        self.ChangeComponentControlStackedWidget.setCurrentIndex(1)
-        self.MotorStackedWidget.setCurrentIndex(0)
+        self.ChangeComponentControlStackedWidget.setCurrentIndex(2)
+        self.MotorStackedWidget.setCurrentIndex(1)
         self.MiddleStackedWidget.setCurrentIndex(0)
 
 
@@ -3471,7 +3590,7 @@ class Ui_MainWindow(object):
         self.CancelCabinet.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))
         self.ChooseMotor.setText(QCoreApplication.translate("MainWindow", u"Motor", None))
         self.ChooseVision.setText(QCoreApplication.translate("MainWindow", u"Vision", None))
-        self.ChooseClipper.setText(QCoreApplication.translate("MainWindow", u"Clipper", None))
+        self.ChooseGripper.setText(QCoreApplication.translate("MainWindow", u"Gripper/Limit", None))
         self.ChooseForklift.setText(QCoreApplication.translate("MainWindow", u"Forklift", None))
         self.ChooseDIDO.setText(QCoreApplication.translate("MainWindow", u"DI/DO", None))
         self.MotorStartedButton.setText(QCoreApplication.translate("MainWindow", u"Motor", None))
@@ -3511,10 +3630,15 @@ class Ui_MainWindow(object):
         self.zVision.setText(QCoreApplication.translate("MainWindow", u"Z", None))
         self.YawVisionLabel.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.zVisionLabel.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.OpenClipper.setText(QCoreApplication.translate("MainWindow", u"open", None))
-        self.CloseClipper.setText(QCoreApplication.translate("MainWindow", u"close", None))
-        self.StopClipper.setText(QCoreApplication.translate("MainWindow", u"stop", None))
-        self.ResetClipper.setText(QCoreApplication.translate("MainWindow", u"reset", None))
+        self.OpenGripper.setText(QCoreApplication.translate("MainWindow", u"open", None))
+        self.CloseGripper.setText(QCoreApplication.translate("MainWindow", u"close", None))
+        self.StopGripper.setText(QCoreApplication.translate("MainWindow", u"stop", None))
+        self.ResetGripper.setText(QCoreApplication.translate("MainWindow", u"reset", None))
+        self.LimitOpen.setText(QCoreApplication.translate("MainWindow", u"\u958b\u555f Limit", None))
+        self.LimitClose.setText(QCoreApplication.translate("MainWindow", u"\u95dc\u9589 Limit", None))
+        self.LimitStop.setText(QCoreApplication.translate("MainWindow", u"\u505c\u6b62 Limit", None))
+        self.label_13.setText(QCoreApplication.translate("MainWindow", u"Limit Control", None))
+        self.label_14.setText(QCoreApplication.translate("MainWindow", u"Gripper Control", None))
         self.LiftUp.setText("")
         self.LowerDown.setText("")
         self.FastForktLiftButton.setText(QCoreApplication.translate("MainWindow", u"Fast", None))
@@ -3529,7 +3653,7 @@ class Ui_MainWindow(object):
         self.InputDistance.setText("")
         self.MotorOption.setText(QCoreApplication.translate("MainWindow", u"Motor", None))
         self.VisionOption.setText(QCoreApplication.translate("MainWindow", u"Vision", None))
-        self.ClipperOption.setText(QCoreApplication.translate("MainWindow", u"Clipper", None))
+        self.GripperOption.setText(QCoreApplication.translate("MainWindow", u"Gripper/Limit", None))
         self.ForkliftOption.setText(QCoreApplication.translate("MainWindow", u"Forklift", None))
         self.DIDOOption.setText(QCoreApplication.translate("MainWindow", u"DI/DO", None))
         self.VisionTextInComponentControl.setText(QCoreApplication.translate("MainWindow", u"Vision", None))
@@ -3644,10 +3768,11 @@ class Ui_MainWindow(object):
         self.QuantityNumberInput.setText(QCoreApplication.translate("MainWindow", u"200", None))
         self.DateText.setText(QCoreApplication.translate("MainWindow", u"Date:", None))
         self.DateInput.setText(QCoreApplication.translate("MainWindow", u"7/25/2025", None))
-        self.CartHeightText.setText(QCoreApplication.translate("MainWindow", u"Cart Height:", None))
-        self.CartHeightInput.setText(QCoreApplication.translate("MainWindow", u"153.3 mm", None))
-        self.CartDepthText.setText(QCoreApplication.translate("MainWindow", u"Cart Depth:", None))
-        self.CartDepthInput.setText(QCoreApplication.translate("MainWindow", u"200.1 mm", None))
+        self.CartHeightText.setText(QCoreApplication.translate("MainWindow", u"Cart Height (mm):", None))
+        self.CartHeightInput.setText(QCoreApplication.translate("MainWindow", u"153.3", None))
+        self.CartDepthText.setText(QCoreApplication.translate("MainWindow", u"Cart Depth (mm):", None))
+        self.CartDepthLeftInput.setText(QCoreApplication.translate("MainWindow", u"L: 0", None))
+        self.CartDepthRightInput.setText(QCoreApplication.translate("MainWindow", u"R: 0", None))
         self.WorkerNameText.setText(QCoreApplication.translate("MainWindow", u"\u7d44\u88dd\u4eba\u54e1:", None))
         self.WorkerNameInput.setText(QCoreApplication.translate("MainWindow", u"Carlos", None))
         self.WorkOrderText.setText(QCoreApplication.translate("MainWindow", u"\u5de5\u55ae:", None))

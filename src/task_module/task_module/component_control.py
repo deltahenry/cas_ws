@@ -109,7 +109,7 @@ class ComponentControlState(Enum):
     IDLE = "idle"
     POSE_Control = "pose_control"
     VISION_Control = "vision_control"
-    CLIPPER_Control = "clipper_control"
+    GRIPPER_Control = "gripper_control"
     FORKLIFT_Control = "forklift_control"
     DIDO_Control = "dido_control"
     FAIL = "fail"
@@ -124,7 +124,7 @@ class ComponentControlFSM(Machine):
             ComponentControlState.IDLE.value,
             ComponentControlState.POSE_Control.value,
             ComponentControlState.VISION_Control.value,
-            ComponentControlState.CLIPPER_Control.value,
+            ComponentControlState.GRIPPER_Control.value,
             ComponentControlState.FORKLIFT_Control.value,
             ComponentControlState.DIDO_Control.value,
             ComponentControlState.FAIL.value
@@ -133,7 +133,7 @@ class ComponentControlFSM(Machine):
         transitions = [
             {'trigger': 'idle_to_pose_control', 'source': ComponentControlState.IDLE.value, 'dest': ComponentControlState.POSE_Control.value},
             {'trigger': 'idle_to_vision_control', 'source': ComponentControlState.IDLE.value, 'dest': ComponentControlState.VISION_Control.value},
-            {'trigger': 'idle_to_clipper_control', 'source': ComponentControlState.IDLE.value, 'dest': ComponentControlState.CLIPPER_Control.value},
+            {'trigger': 'idle_to_clipper_control', 'source': ComponentControlState.IDLE.value, 'dest': ComponentControlState.GRIPPER_Control.value},
             {'trigger': 'idle_to_forklift_control', 'source': ComponentControlState.IDLE.value, 'dest': ComponentControlState.FORKLIFT_Control.value},
             {'trigger': 'idle_to_dido_control', 'source': ComponentControlState.IDLE.value, 'dest': ComponentControlState.DIDO_Control.value},
             {'trigger': 'return_to_idle', 'source': '*', 'dest': ComponentControlState.IDLE.value},
@@ -182,8 +182,8 @@ class ComponentControlFSM(Machine):
                     self.idle_to_pose_control()
                 elif self.data_node.component_control_cmd == "vision_control":
                     self.idle_to_vision_control()
-                elif self.data_node.component_control_cmd == "clipper_control":
-                    self.idle_to_clipper_control()
+                elif self.data_node.component_control_cmd == "gripper_control":
+                    self.idle_to_gripper_control()
                 elif self.data_node.component_control_cmd == "forklift_control":
                     self.idle_to_forklift_control()
                 elif self.data_node.component_control_cmd == "dido_control":
@@ -210,8 +210,8 @@ class ComponentControlFSM(Machine):
                 print("[ComponentControl] 退出視覺控制階段")
                 self.return_to_idle()
 
-        elif self.state == ComponentControlState.CLIPPER_Control.value:
-            if self.data_node.component_control_cmd == "clipper_control":
+        elif self.state == ComponentControlState.GRIPPER_Control.value:
+            if self.data_node.component_control_cmd == "gripper_control":
                 print("[ComponentControl] 進入夾爪控制階段")
                 # 在這裡添加夾爪控制的邏輯
             else:

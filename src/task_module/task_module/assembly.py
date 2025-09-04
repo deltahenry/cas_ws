@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray,Int32,Int32MultiArray
-from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,ForkCmd,ForkState,Recipe,CurrentPose,ClipperCmd,LimitCmd
+from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,ForkCmd,ForkState,Recipe,CurrentPose,GripperCmd,LimitCmd
 import numpy as np
 
 #parameters
@@ -31,7 +31,7 @@ class DataNode(Node):
 
         self.current_height = 0.0
 
-        self.target_depth = 500.0
+        self.target_depth = 20.0
 
 
        
@@ -92,7 +92,7 @@ class DataNode(Node):
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
         self.detection_cmd_publisher = self.create_publisher(String,'/detection_task',10)
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
-        self.clipper_cmd_publisher = self.create_publisher(ClipperCmd, 'clipper_cmd', 10)
+        self.gripper_cmd_publisher = self.create_publisher(GripperCmd, 'gripper_cmd', 10)
         self.laser_cmd_publisher = self.create_publisher(Int32MultiArray,'/laser_io_cmd',10)
         self.limit_pub = self.create_publisher(LimitCmd, "/limit_cmd", 10)
         
@@ -155,7 +155,7 @@ class AssemblyState(Enum):
     PUSH_READY = "push_ready"
     CLOSE_LIMIT = "close_limit"
     PUSH_ASSEMBLY = "push_assembly"
-    OPEN_CLIPPER = "open_clipper"
+    OPEN_GRIPPER = "open_gripper"
     BACK_HOME = "back_home"
     MOVE_FORKLIFT = "move_forklift"
     DONE = "done"
@@ -174,7 +174,7 @@ class AssemblyFSM(Machine):
             AssemblyState.PUSH_READY.value,
             AssemblyState.CLOSE_LIMIT.value,
             AssemblyState.PUSH_ASSEMBLY.value,
-            AssemblyState.OPEN_CLIPPER.value,
+            AssemblyState.OPEN_GRIPPER.value,
             AssemblyState.BACK_HOME.value,
             AssemblyState.MOVE_FORKLIFT.value,
             AssemblyState.DONE.value,
@@ -186,8 +186,8 @@ class AssemblyFSM(Machine):
             {'trigger': 'init_to_push_ready', 'source': AssemblyState.INIT.value, 'dest': AssemblyState.PUSH_READY.value},
             {'trigger': 'push_ready_to_close_limit', 'source': AssemblyState.PUSH_READY.value, 'dest': AssemblyState.CLOSE_LIMIT.value},
             {'trigger': 'close_limit_to_push_assembly', 'source': AssemblyState.CLOSE_LIMIT.value, 'dest': AssemblyState.PUSH_ASSEMBLY.value},
-            {'trigger': 'push_assembly_to_open_clipper', 'source': AssemblyState.PUSH_ASSEMBLY.value, 'dest': AssemblyState.OPEN_CLIPPER.value},
-            {'trigger': 'open_clipper_to_back_home', 'source': AssemblyState.OPEN_CLIPPER.value, 'dest': AssemblyState.BACK_HOME.value},
+            {'trigger': 'push_assembly_to_open_gripper', 'source': AssemblyState.PUSH_ASSEMBLY.value, 'dest': AssemblyState.OPEN_GRIPPER.value},
+            {'trigger': 'open_gripper_to_back_home', 'source': AssemblyState.OPEN_GRIPPER.value, 'dest': AssemblyState.BACK_HOME.value},
             {'trigger': 'back_home_to_move_forklift', 'source': AssemblyState.BACK_HOME.value, 'dest': AssemblyState.MOVE_FORKLIFT.value},
             {'trigger': 'move_forklift_to_done', 'source': AssemblyState.MOVE_FORKLIFT.value, 'dest': AssemblyState.DONE.value},
             {'trigger': 'fail', 'source': '*', 'dest': AssemblyState.FAIL.value},
@@ -230,9 +230,9 @@ class AssemblyFSM(Machine):
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
-        depth_cmd = (self.data_node.depth_data[0] + self.data_node.depth_data[1])/2.0
+        # depth_cmd = (self.data_node.depth_data[0] + self.data_node.depth_data[1])/2.0
         push_pose_cmd = [0.0,self.data_node.target_depth,0.0]  # 推進階段的目標位置
-        ready_pose_cmd = [0.0,150, 0.0]  # 拉取準備位置
+        ready_pose_cmd = [0.0,150.0, 0.0]  # 拉取準備位置
         home_pose_cmd = [0.0, -45.0, 0.0]  # 回到家位置的目標位置
 
         if self.state == AssemblyState.IDLE.value:
@@ -244,7 +244,7 @@ class AssemblyFSM(Machine):
         elif self.state == AssemblyState.INIT.value:
             self.laser_cmd("laser_open")  # 開啟雷射
             print("[AssemblymentFSM] 初始化階段")
-            self.init_to_push()
+            self.init_to_push_ready()
         
         elif self.state == AssemblyState.PUSH_READY.value:
             print("[AssemblymentFSM] 推進階段")
@@ -278,15 +278,15 @@ class AssemblyFSM(Machine):
                 if push_arrive:
                     print("[AssemblymentFSM] 馬達已到達limit準備位置")
                     self.motor_cmd_sent = False  # 重置標記
-                    self.push_assembly_to_open_clipper()
+                    self.push_assembly_to_open_gripper()
                 else:
                     print("[AssemblymentFSM] 馬達尚未到達limit準備位置，繼續等待")
         
-        elif self.state == AssemblyState.OPEN_CLIPPER.value:
+        elif self.state == AssemblyState.OPEN_GRIPPER.value:
             print("[AssemblymentFSM] 開啟夾爪階段")
-            self.send_clipper_cmd("open_clipper")
+            self.send_gripper_cmd("open_gripper")
             time.sleep(10)  # 等待夾爪開啟
-            self.open_clipper_to_back_home()
+            self.open_gripper_to_back_home()
 
         elif self.state == AssemblyState.BACK_HOME.value:
             print("[AssemblymentFSM] 回到家位置階段")
@@ -358,11 +358,11 @@ class AssemblyFSM(Machine):
             print("馬達尚未到位置")
             return False
 
-    def send_clipper_cmd(self, mode):
-        msg = ClipperCmd()
+    def send_gripper_cmd(self, mode):
+        msg = GripperCmd()
         msg.mode = mode
-        self.data_node.clipper_cmd_publisher.publish(msg)
-        print(f"[Clipper] Published: {mode}")
+        self.data_node.gripper_cmd_publisher.publish(msg)
+        print(f"[Gripper] Published: {mode}")
 
     def laser_cmd(self, cmd: str):
         """發送雷射命令"""
@@ -375,6 +375,17 @@ class AssemblyFSM(Machine):
             value = Int32MultiArray(data=value)  # 封裝為 Int32MultiArray
             self.data_node.laser_cmd_publisher.publish(value)
         print(f"[RoughAlignmentFSM] 發送雷射命令: {cmd}")
+
+    def send_limit_cmd(self, cmd: str):
+        msg = LimitCmd()
+        msg.mode = cmd
+        self.data_node.limit_pub.publish(msg)
+        if cmd == "open_limit":
+            print("[UI] 發布 LimitCmd: 開啟")
+        elif cmd == "close_limit":
+            print("[UI] 發布 LimitCmd: 關閉")
+        elif cmd == "stop_limit":
+            print("[UI] 發布 LimitCmd: 停止")
 
 
 def main():

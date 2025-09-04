@@ -558,6 +558,70 @@ QPushButton#RunButton:pressed {
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>Height</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="HeightRecipeInput">
+                <property name="styleSheet">
+                 <string notr="true">color: white;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_12">
+                <property name="text">
+                 <string>Depth</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="DepthRecipeInput">
+                <property name="styleSheet">
+                 <string notr="true">color: white;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="PickRecipeButton">
+                <property name="text">
+                 <string>Pick</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">RecipeModeGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="AssemblyRecipeButton">
+                <property name="text">
+                 <string>Assembly</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">RecipeModeGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="SaveRecipeButton">
+                <property name="text">
+                 <string>Publish Recipe</string>
+                </property>
+                <property name="checkable">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
             <widget class="QWidget" name="ManualButtonsPage">
@@ -695,49 +759,6 @@ QPushButton#RunButton:pressed {
                 <attribute name="buttonGroup">
                  <string notr="true">ManualButtons</string>
                 </attribute>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="HeightRecipeInput">
-                <property name="styleSheet">
-                 <string notr="true">color: white;</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="PickRecipeButton">
-                <property name="text">
-                 <string>Pick</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <attribute name="buttonGroup">
-                 <string notr="true">RecipeModeGroup</string>
-                </attribute>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="AssemblyRecipeButton">
-                <property name="text">
-                 <string>Assembly</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <attribute name="buttonGroup">
-                 <string notr="true">RecipeModeGroup</string>
-                </attribute>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="SaveRecipeButton">
-                <property name="text">
-                 <string>Save</string>
-                </property>
-                <property name="checkable">
-                 <bool>false</bool>
-                </property>
                </widget>
               </item>
              </layout>
@@ -887,6 +908,12 @@ QPushButton#AutoStopButton:pressed {
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item alignment="Qt::AlignmentFlag::AlignVCenter">
              <widget class="QWidget" name="StartWidget" native="true">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
                <item>
                 <widget class="QLabel" name="StartProcessText">
@@ -911,11 +938,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -954,11 +987,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -997,11 +1036,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1040,11 +1085,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1083,11 +1134,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1126,11 +1183,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1169,11 +1232,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1212,11 +1281,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1989,7 +2064,7 @@ QPushButton#AutoStopButton:pressed {
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="MotorPage">
             <widget class="QStackedWidget" name="MotorStackedWidget">
@@ -7171,6 +7246,12 @@ border: none;</string>
            </property>
            <item>
             <widget class="QLabel" name="QuantityText">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="font">
               <font>
                <bold>true</bold>
@@ -7251,20 +7332,26 @@ border: none;</string>
            </property>
            <item>
             <widget class="QLabel" name="CartHeightText">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="font">
               <font>
                <bold>true</bold>
               </font>
              </property>
              <property name="text">
-              <string>Cart Height:</string>
+              <string>Cart Height (mm):</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLabel" name="CartHeightInput">
              <property name="text">
-              <string>153.3 mm</string>
+              <string>153.3</string>
              </property>
             </widget>
            </item>
@@ -7291,20 +7378,33 @@ border: none;</string>
            </property>
            <item>
             <widget class="QLabel" name="CartDepthText">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="font">
               <font>
                <bold>true</bold>
               </font>
              </property>
              <property name="text">
-              <string>Cart Depth:</string>
+              <string>Cart Depth (mm):</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="CartDepthInput">
+            <widget class="QLabel" name="CartDepthLeftInput">
              <property name="text">
-              <string>200.1 mm</string>
+              <string>L: 0</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="CartDepthRightInput">
+             <property name="text">
+              <string>R: 0</string>
              </property>
             </widget>
            </item>
@@ -7466,23 +7566,23 @@ border: none;</string>
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="MenuButtonGroup"/>
+  <buttongroup name="RecipeModeGroup"/>
+  <buttongroup name="AutoAndManualButtonGroup"/>
+  <buttongroup name="ThemeButtonGroup"/>
   <buttongroup name="FontSizeButtonGroup"/>
   <buttongroup name="VisionButtonGroup">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
-  <buttongroup name="ThemeButtonGroup"/>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
-  <buttongroup name="MenuButtonGroup"/>
-  <buttongroup name="AutoAndManualButtonGroup"/>
+  <buttongroup name="LanguageButtonGroup"/>
   <buttongroup name="ManualButtons">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
-  <buttongroup name="LanguageButtonGroup"/>
-  <buttongroup name="RecipeModeGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

@@ -79,8 +79,10 @@ class ROSNode(Node):
         self.motor_info_update_callback_ui = None
 
         self.current_motor_len = [10.0, 0.0, 0.0]
-
         
+        self.task_state_callback_ui = None
+
+
         # publisher
         self.mode_cmd_publisher = self.create_publisher(String, '/mode_cmd', 10)
 
@@ -193,6 +195,13 @@ class ROSNode(Node):
         #     10
         # )
 
+        self.task_state_subscriber = self.create_subscription(
+            TaskState,
+            '/task_state',
+            self.task_state_callback,
+            10
+        )
+
 
         self.bridge = CvBridge()
 
@@ -211,6 +220,17 @@ class ROSNode(Node):
         
         if self.mh2_state_callback_ui:
             self.mh2_state_callback_ui(msg)  # hand off to UI layer
+
+    def task_state_callback(self, msg: TaskState):
+        # msg.mode in {"rough_align","precise_align","pick","assembly","idle", ...}
+        # msg.state in {"idle","done","fail", else->running}
+        self.get_logger().info(f"[TaskState] mode={msg.mode} state={msg.state}")
+        if self.task_state_callback_ui:
+            # Push clean strings to UI layer
+            try:
+                self.task_state_callback_ui(str(msg.mode).strip(), str(msg.state).strip())
+            except Exception as e:
+                self.get_logger().error(f"TaskState → UI error: {e}")        
 
 
     def current_pose_callback(self, msg: CurrentPose):
@@ -283,6 +303,8 @@ class MainWindow(QMainWindow):
     #GUI Threads
     ros_msg_received = Signal(str)
 
+    task_state_update = Signal(str, str)
+
     depth_data_update = Signal(float, float)
 
     compensate_pose_update = Signal(float, float, float)
@@ -292,7 +314,6 @@ class MainWindow(QMainWindow):
 
     di_update = Signal(str, bool)
     do_update = Signal(str, bool)
-
 
     image_update = Signal(object)   # carries numpy image
     vision_mode_update = Signal(str)
@@ -306,6 +327,27 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # Build circle map once
+        self._circles = {
+            # "start":         self.ui.StartCircle,
+            # "connect":       self.ui.ConnectCircle,
+            "init":          self.ui.INITCircle,
+            "idle":          self.ui.IdleCircle,
+            "rough_align":   self.ui.RoughAlignCircle,
+            "precise_align": self.ui.PreciseAlignCircle,
+            "pick":          self.ui.PickCircle,
+            "assembly":      self.ui.AssemblyCircle,
+        }
+
+        # Theme colors (match your palette if you like)
+        self._COLORS = {
+            "blue":   "#0B76A0",  # idle
+            "yellow": "#FFB300",  # running
+            "green":  "#2E7D32",  # done
+            "red":    "#C62828",  # fail
+            "off":    "#FFFFFF",  # dim/neutral
+        }
+
         # shortcut keys
         QShortcut(QKeySequence(Qt.Key_Escape), self, activated=self.close)
 
@@ -315,6 +357,12 @@ class MainWindow(QMainWindow):
         QScroller.grabGesture(self.ui.ScrollAreaDIDO.viewport(), QScroller.LeftMouseButtonGesture)
 
         self._vision_comp = {"x": float('nan'), "y": float('nan'), "yaw": float('nan')}
+
+
+        #Circles
+         # Map ROS -> Qt thread-safe signal
+        self.task_state_update.connect(self.apply_task_state)
+        self.ros_node.task_state_callback_ui = self.task_state_update.emit
 
 
         #vision ui
@@ -356,7 +404,7 @@ class MainWindow(QMainWindow):
         self.motor_info_update.connect(self.motor_controller.on_motor_info)
         self.ros_node.motor_info_update_callback_ui = \
             lambda m1, m2, m3: self.motor_info_update.emit(m1, m2, m3)
-        
+
 
         self.motion_state_update.connect(self.motor_controller.apply_motion_state)
         self.ros_node.motion_state_callback_ui = self.motion_state_update.emit
@@ -367,6 +415,10 @@ class MainWindow(QMainWindow):
         
         self.current_pose_update.connect(self.motor_controller.current_pose)
         self.ros_node.current_pose_callback_ui = self.current_pose_update.emit
+
+                # Motor → UI notifier for INIT
+        self.motor_controller.init_visual_cb = self._handle_init_visual
+
 
         #forklift ui
         self.forklift_controller = ForkliftController(self.ui, self.ros_node)
@@ -387,6 +439,7 @@ class MainWindow(QMainWindow):
         # self.ros_node.do_update_callback = lambda name, state: self.do_update.emit(name, state)
 
 
+
         # Get Today's date
         today = date.today()
         formatted_date = today.strftime("%m/%d/%Y")
@@ -394,7 +447,10 @@ class MainWindow(QMainWindow):
         
         self._recipe_mode: str | None = None     # "pick" or "assembly"
         self._recipe_height: float | None = None # mm (from HeightRecipeInput)
+        self._recipe_depth: float | None = None
 
+
+        self._all_off()
 
         # Connect Qt signal to UI handler
         self.ros_msg_received.connect(self.handle_ros_message)
@@ -414,10 +470,14 @@ class MainWindow(QMainWindow):
         #servo, alarm, reset
         self.ui.ServoONOFFButton.clicked.connect(lambda checked: self.on_servo_click(checked))
 
+
+
         # auto
         self.ui.AutoButton.toggled.connect(self.on_auto_toggled)
 
         self.ui.INITButton.clicked.connect(lambda: self.send_state_cmd("init"))
+        self.ui.INITButton.clicked.connect(self.motor_controller.on_init_commanded)
+
         self.ui.RunButton.clicked.connect(lambda: self.send_state_cmd("run"))
 
         self.ui.AutoPauseButton.toggled.connect(self.on_pause_toggled)
@@ -453,6 +513,7 @@ class MainWindow(QMainWindow):
 
         #recipe
         self.ui.HeightRecipeInput.textChanged.connect(self.on_height_recipe_input_changed)
+        self.ui.DepthRecipeInput.textChanged.connect(self.on_depth_recipe_input_changed)
         self.ui.PickRecipeButton.toggled.connect(self.on_height_recipe_mode)
         self.ui.AssemblyRecipeButton.toggled.connect(self.on_height_recipe_mode)
 
@@ -528,6 +589,30 @@ class MainWindow(QMainWindow):
             # Optionally: self.ui.HeightRecipeInput.setText("")  # to force correction
             # Leave self._recipe_height unchanged
 
+    def on_depth_recipe_input_changed(self, value: str):
+        """
+        Called whenever the user types in the height line edit.
+        Accepts blank (clears) or numeric. Stores into self._recipe_depth.
+        """
+        text = (value or "").strip()
+        if text == "":
+            self._recipe_depth = None
+            print("[Recipe] Height cleared")
+            return
+
+        try:
+            num = float(text)
+            # (Optional) basic sanity: reject NaN/inf
+            if math.isnan(num) or math.isinf(num):
+                raise ValueError("Invalid float")
+            self._recipe_depth = num
+            print(f"[Recipe] Depth set → {self._recipe_depth} mm")
+        except ValueError:
+            # Keep previous valid value but warn; you could also color the field red in UI if desired
+            print(f"[Recipe] WARNING: Non-numeric depth input: {text!r}")
+            # Optionally: self.ui.HeightRecipeInput.setText("")  # to force correction
+            # Leave self._recipe_depth unchanged
+
         
 
     def on_height_recipe_mode(self, checked: bool):
@@ -580,6 +665,9 @@ class MainWindow(QMainWindow):
         # Prefer the cached value; if missing, try to parse current text box contents
         if self._recipe_height is None:
             self.on_height_recipe_input_changed(self.ui.HeightRecipeInput.text())
+    
+        if self._recipe_depth is None:
+            self.on_depth_recipe_input_changed(self.ui.DepthRecipeInput.text())
 
         # Validate
         if not self._recipe_mode:
@@ -589,13 +677,18 @@ class MainWindow(QMainWindow):
         if self._recipe_height is None:
             print("[Recipe] ERROR: Height is empty or invalid.")
             return False
+        
+        if self._recipe_depth is None:
+            print("[Recipe] ERROR: Depth is empty or invalid.")
+            return False
 
         # Build and publish
         msg = Recipe()
         msg.mode = self._recipe_mode
         msg.height = float(self._recipe_height)
+        msg.depth = float(self._recipe_depth)
 
-        print(f"[DEBUG] Publishing Recipe → mode:{msg.mode} height:{msg.height}")
+        print(f"[DEBUG] Publishing Recipe → mode:{msg.mode} height:{msg.height} depth:{msg.depth}")
         self.ros_node.recipe_publisher.publish(msg)
         print("[UI] Sent Recipe to /recipe")
 
@@ -615,71 +708,62 @@ class MainWindow(QMainWindow):
     def go_to_next_page_motor(self, index):
         self.ui.MotorStackedWidget.setCurrentIndex(index)
 
-    def update_circle_off_style(self):
-        self.ui.OneCircleOff.setStyleSheet("""
-            QPushButton {
-                background-color: #0B76A0;
+    def _paint_only(self, stage: str, color_css: str):
+        # one-active-circle rule: clear all, then paint the chosen one
+        for lbl in self._circles.values():
+            self._paint_circle(lbl, self._COLORS["off"])
+        target = self._circles.get(stage)
+        if target:
+            self._paint_circle(target, color_css)
+
+    def _handle_init_visual(self, phase: str):
+        # phase ∈ {"running","done","fail","off"}
+        if phase == "off":
+            self._paint_only("init", self._COLORS["off"])
+        elif phase == "done":
+            self._paint_only("init", self._COLORS["green"])
+        elif phase == "fail":
+            self._paint_only("init", self._COLORS["red"])
+        else:  # "running"
+            self._paint_only("init", self._COLORS["yellow"])
+
+
+    def _paint_circle(self, label, color_css: str):
+        """Set background color; keep it round by using current size."""
+        if not label:
+            return
+        radius = max(10, min(label.width(), label.height()) // 2)
+        label.setStyleSheet(f"""
+            QLabel {{
+                background-color: {color_css};
                 border: none;
-                border-radius: 15px;
-                max-width: 30px;
-                min-height: 30px;
-                max-height: 30px;
-                padding: 0;
-            }
+                border-radius: {radius}px;
+            }}
         """)
 
-        self.ui.OneCircleOn.setStyleSheet("""
-            QPushButton {
-                background-color: white;
-                border: none;
-                border-radius: 15px;
-                max-width: 30px;
-                min-height: 30px;
-                max-height: 30px;
-                padding: 0;
-            }
-        """)
+    def _all_off(self):
+        for lbl in self._circles.values():
+            self._paint_circle(lbl, self._COLORS["off"])
 
-        self.ui.DO1Widget.setStyleSheet("""
-            QWidget {
-                background-color: #0B76A0;
-                border: none;
-                border-radius: 24px;
-            }
-        """)
+    def apply_task_state(self, mode: str, state: str):
+        mode_l = (mode or "").strip().lower()
+        state_l = (state or "").strip().lower()
 
-    def update_circle_on_style(self):
-        self.ui.OneCircleOff.setStyleSheet("""
-            QPushButton {
-                background-color: white;
-                border: none;
-                border-radius: 15px;
-                max-width: 30px;
-                min-height: 30px;
-                max-height: 30px;
-                padding: 0;
-            }
-        """)
+        if mode_l not in self._circles:
+            print(f"[TaskState/UI] Unknown mode '{mode_l}', state={state_l}")
+            return
 
-        self.ui.OneCircleOn.setStyleSheet("""
-            QPushButton {
-                background-color: #000000;
-                border: none;
-                border-radius: 15px;
-                max-width: 30px;
-                min-height: 30px;
-                max-height: 30px;
-                padding: 0;
-            }
-        """)
+        if state_l == "idle":
+            color = self._COLORS["blue"]
+        elif state_l == "done":
+            color = self._COLORS["green"]
+        elif state_l == "fail":
+            color = self._COLORS["red"]
+        else:
+            color = self._COLORS["yellow"]
 
-        self.ui.DO1Widget.setStyleSheet("""
-            QWidget {
-                background-color: #000000;
-                border: none;
-                border-radius: 24px;
-            }
-        """)
+        self._paint_only(mode_l, color)
+
 
     def on_servo_click(self, checked: bool):
         btn = self.ui.ServoONOFFButton
@@ -746,8 +830,34 @@ class MainWindow(QMainWindow):
     
 
     def update_depth_label(self, left: float, right: float):
-        self.ui.LeftDepthText.setText("—" if math.isnan(left) else f"{left:.2f}")
-        self.ui.RightDepthText.setText("—" if math.isnan(right) else f"{right:.2f}")
+
+        if math.isnan(left):
+            result_left = "-"
+        elif left > 1000:
+            result_left = "OOR"
+        else:
+            result_left = f"{left:.2f}"
+
+        self.ui.CartDepthLeftInput.setText(f"L: {result_left}")
+        self.ui.LeftDepthText.setText(result_left)
+
+        if math.isnan(right):
+            result_right = "-"
+        elif right > 1000:
+            result_right = "OOR"
+        else:
+            result_right = f"{right:.2f}"
+
+        self.ui.CartDepthRightInput.setText(f"R: {result_right}")
+        self.ui.RightDepthText.setText(result_right)
+
+
+
+        # self.ui.CartDepthLeftInput.setText("-" if math.isnan(left) else f"L: {left:.2f}")
+        # self.ui.CartDepthRightInput.setText("-" if math.isnan(right) else f"R: {right:.2f}")
+
+        # self.ui.LeftDepthText.setText("—" if math.isnan(left) else f"{left:.2f}")
+        # self.ui.RightDepthText.setText("—" if math.isnan(right) else f"{right:.2f}")
 
     def update_compensate_pose_label(self, x: float, y: float, yaw: float):
         self._vision_comp["x"] = x
@@ -1021,7 +1131,7 @@ class MainWindow(QMainWindow):
     def on_auto_toggled(self, checked):
         if checked:
             self.send_run_cmd("auto")
-            self.ui.MainPageAutoAndManualStackedWidget.setCurrentIndex(0)
+            # self.ui.MainPageAutoAndManualStackedWidget.setCurrentIndex(1)
         else:
             self.send_task_cmd("idle")
 
@@ -1041,8 +1151,8 @@ class MainWindow(QMainWindow):
     def on_manual_toggled(self, checked: bool):
         if checked:
             self.send_run_cmd("manual")
-            if not self._any_manual_task_active():
-                self.ui.MainPageAutoAndManualStackedWidget.setCurrentIndex(1)
+            # if not self._any_manual_task_active():
+            #     self.ui.MainPageAutoAndManualStackedWidget.setCurrentIndex(0)
         else:
             self.send_task_cmd("idle")
 

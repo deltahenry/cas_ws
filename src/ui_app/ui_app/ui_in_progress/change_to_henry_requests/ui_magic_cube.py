@@ -273,6 +273,50 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_12.addWidget(self.RunButton)
 
+        self.label_11 = QLabel(self.ActionButtonsPage)
+        self.label_11.setObjectName(u"label_11")
+
+        self.verticalLayout_12.addWidget(self.label_11)
+
+        self.HeightRecipeInput = QLineEdit(self.ActionButtonsPage)
+        self.HeightRecipeInput.setObjectName(u"HeightRecipeInput")
+        self.HeightRecipeInput.setStyleSheet(u"color: white;")
+
+        self.verticalLayout_12.addWidget(self.HeightRecipeInput)
+
+        self.label_12 = QLabel(self.ActionButtonsPage)
+        self.label_12.setObjectName(u"label_12")
+
+        self.verticalLayout_12.addWidget(self.label_12)
+
+        self.DepthRecipeInput = QLineEdit(self.ActionButtonsPage)
+        self.DepthRecipeInput.setObjectName(u"DepthRecipeInput")
+        self.DepthRecipeInput.setStyleSheet(u"color: white;")
+
+        self.verticalLayout_12.addWidget(self.DepthRecipeInput)
+
+        self.PickRecipeButton = QPushButton(self.ActionButtonsPage)
+        self.RecipeModeGroup = QButtonGroup(MainWindow)
+        self.RecipeModeGroup.setObjectName(u"RecipeModeGroup")
+        self.RecipeModeGroup.addButton(self.PickRecipeButton)
+        self.PickRecipeButton.setObjectName(u"PickRecipeButton")
+        self.PickRecipeButton.setCheckable(True)
+
+        self.verticalLayout_12.addWidget(self.PickRecipeButton)
+
+        self.AssemblyRecipeButton = QPushButton(self.ActionButtonsPage)
+        self.RecipeModeGroup.addButton(self.AssemblyRecipeButton)
+        self.AssemblyRecipeButton.setObjectName(u"AssemblyRecipeButton")
+        self.AssemblyRecipeButton.setCheckable(True)
+
+        self.verticalLayout_12.addWidget(self.AssemblyRecipeButton)
+
+        self.SaveRecipeButton = QPushButton(self.ActionButtonsPage)
+        self.SaveRecipeButton.setObjectName(u"SaveRecipeButton")
+        self.SaveRecipeButton.setCheckable(False)
+
+        self.verticalLayout_12.addWidget(self.SaveRecipeButton)
+
         self.ActionButtons.addWidget(self.ActionButtonsPage)
         self.ManualButtonsPage = QWidget()
         self.ManualButtonsPage.setObjectName(u"ManualButtonsPage")
@@ -331,34 +375,6 @@ class Ui_MainWindow(object):
         self.AssemblyButton.setCheckable(True)
 
         self.verticalLayout_20.addWidget(self.AssemblyButton)
-
-        self.HeightRecipeInput = QLineEdit(self.ManualButtonsPage)
-        self.HeightRecipeInput.setObjectName(u"HeightRecipeInput")
-        self.HeightRecipeInput.setStyleSheet(u"color: white;")
-
-        self.verticalLayout_20.addWidget(self.HeightRecipeInput)
-
-        self.PickRecipeButton = QPushButton(self.ManualButtonsPage)
-        self.RecipeModeGroup = QButtonGroup(MainWindow)
-        self.RecipeModeGroup.setObjectName(u"RecipeModeGroup")
-        self.RecipeModeGroup.addButton(self.PickRecipeButton)
-        self.PickRecipeButton.setObjectName(u"PickRecipeButton")
-        self.PickRecipeButton.setCheckable(True)
-
-        self.verticalLayout_20.addWidget(self.PickRecipeButton)
-
-        self.AssemblyRecipeButton = QPushButton(self.ManualButtonsPage)
-        self.RecipeModeGroup.addButton(self.AssemblyRecipeButton)
-        self.AssemblyRecipeButton.setObjectName(u"AssemblyRecipeButton")
-        self.AssemblyRecipeButton.setCheckable(True)
-
-        self.verticalLayout_20.addWidget(self.AssemblyRecipeButton)
-
-        self.SaveRecipeButton = QPushButton(self.ManualButtonsPage)
-        self.SaveRecipeButton.setObjectName(u"SaveRecipeButton")
-        self.SaveRecipeButton.setCheckable(False)
-
-        self.verticalLayout_20.addWidget(self.SaveRecipeButton)
 
         self.ActionButtons.addWidget(self.ManualButtonsPage)
 
@@ -429,6 +445,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.StartWidget = QWidget(self.Timeline)
         self.StartWidget.setObjectName(u"StartWidget")
+        self.StartWidget.setMinimumSize(QSize(0, 0))
         self.verticalLayout_2 = QVBoxLayout(self.StartWidget)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.StartProcessText = QLabel(self.StartWidget)
@@ -445,7 +462,8 @@ class Ui_MainWindow(object):
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.StartCircle.sizePolicy().hasHeightForWidth())
         self.StartCircle.setSizePolicy(sizePolicy3)
-        self.StartCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.StartCircle.setMinimumSize(QSize(30, 30))
+        self.StartCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.StartCircle.setScaledContents(True)
         self.StartCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -469,7 +487,8 @@ class Ui_MainWindow(object):
         self.ConnectCircle.setObjectName(u"ConnectCircle")
         sizePolicy3.setHeightForWidth(self.ConnectCircle.sizePolicy().hasHeightForWidth())
         self.ConnectCircle.setSizePolicy(sizePolicy3)
-        self.ConnectCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.ConnectCircle.setMinimumSize(QSize(30, 30))
+        self.ConnectCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.ConnectCircle.setScaledContents(True)
         self.ConnectCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -493,7 +512,8 @@ class Ui_MainWindow(object):
         self.INITCircle.setObjectName(u"INITCircle")
         sizePolicy3.setHeightForWidth(self.INITCircle.sizePolicy().hasHeightForWidth())
         self.INITCircle.setSizePolicy(sizePolicy3)
-        self.INITCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.INITCircle.setMinimumSize(QSize(30, 30))
+        self.INITCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.INITCircle.setScaledContents(True)
         self.INITCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -517,7 +537,8 @@ class Ui_MainWindow(object):
         self.IdleCircle.setObjectName(u"IdleCircle")
         sizePolicy3.setHeightForWidth(self.IdleCircle.sizePolicy().hasHeightForWidth())
         self.IdleCircle.setSizePolicy(sizePolicy3)
-        self.IdleCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.IdleCircle.setMinimumSize(QSize(30, 30))
+        self.IdleCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.IdleCircle.setScaledContents(True)
         self.IdleCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -541,7 +562,8 @@ class Ui_MainWindow(object):
         self.RoughAlignCircle.setObjectName(u"RoughAlignCircle")
         sizePolicy3.setHeightForWidth(self.RoughAlignCircle.sizePolicy().hasHeightForWidth())
         self.RoughAlignCircle.setSizePolicy(sizePolicy3)
-        self.RoughAlignCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.RoughAlignCircle.setMinimumSize(QSize(30, 30))
+        self.RoughAlignCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.RoughAlignCircle.setScaledContents(True)
         self.RoughAlignCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -565,7 +587,8 @@ class Ui_MainWindow(object):
         self.PreciseAlignCircle.setObjectName(u"PreciseAlignCircle")
         sizePolicy3.setHeightForWidth(self.PreciseAlignCircle.sizePolicy().hasHeightForWidth())
         self.PreciseAlignCircle.setSizePolicy(sizePolicy3)
-        self.PreciseAlignCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.PreciseAlignCircle.setMinimumSize(QSize(30, 30))
+        self.PreciseAlignCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.PreciseAlignCircle.setScaledContents(True)
         self.PreciseAlignCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -589,7 +612,8 @@ class Ui_MainWindow(object):
         self.PickCircle.setObjectName(u"PickCircle")
         sizePolicy3.setHeightForWidth(self.PickCircle.sizePolicy().hasHeightForWidth())
         self.PickCircle.setSizePolicy(sizePolicy3)
-        self.PickCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.PickCircle.setMinimumSize(QSize(30, 30))
+        self.PickCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.PickCircle.setScaledContents(True)
         self.PickCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -613,7 +637,8 @@ class Ui_MainWindow(object):
         self.AssemblyCircle.setObjectName(u"AssemblyCircle")
         sizePolicy3.setHeightForWidth(self.AssemblyCircle.sizePolicy().hasHeightForWidth())
         self.AssemblyCircle.setSizePolicy(sizePolicy3)
-        self.AssemblyCircle.setPixmap(QPixmap(u":/icons/white/timeline-circle.svg"))
+        self.AssemblyCircle.setMinimumSize(QSize(30, 30))
+        self.AssemblyCircle.setStyleSheet(u"background-color:#FFFFFF; border-radius:15px;")
         self.AssemblyCircle.setScaledContents(True)
         self.AssemblyCircle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -3187,6 +3212,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout_22.setContentsMargins(-1, 0, -1, 0)
         self.QuantityText = QLabel(self.QuantityWidget)
         self.QuantityText.setObjectName(u"QuantityText")
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.QuantityText.sizePolicy().hasHeightForWidth())
+        self.QuantityText.setSizePolicy(sizePolicy5)
         font10 = QFont()
         font10.setBold(True)
         self.QuantityText.setFont(font10)
@@ -3203,9 +3233,6 @@ class Ui_MainWindow(object):
 
         self.DateWidget = QWidget(self.widget_3)
         self.DateWidget.setObjectName(u"DateWidget")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
         sizePolicy5.setHeightForWidth(self.DateWidget.sizePolicy().hasHeightForWidth())
         self.DateWidget.setSizePolicy(sizePolicy5)
         self.DateWidget.setStyleSheet(u"color: white;")
@@ -3236,6 +3263,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_23.setContentsMargins(-1, 0, -1, 0)
         self.CartHeightText = QLabel(self.CartHeightWidget)
         self.CartHeightText.setObjectName(u"CartHeightText")
+        sizePolicy5.setHeightForWidth(self.CartHeightText.sizePolicy().hasHeightForWidth())
+        self.CartHeightText.setSizePolicy(sizePolicy5)
         self.CartHeightText.setFont(font10)
 
         self.horizontalLayout_23.addWidget(self.CartHeightText)
@@ -3258,14 +3287,21 @@ class Ui_MainWindow(object):
         self.horizontalLayout_24.setContentsMargins(-1, 0, -1, 0)
         self.CartDepthText = QLabel(self.CartDepthWidget)
         self.CartDepthText.setObjectName(u"CartDepthText")
+        sizePolicy5.setHeightForWidth(self.CartDepthText.sizePolicy().hasHeightForWidth())
+        self.CartDepthText.setSizePolicy(sizePolicy5)
         self.CartDepthText.setFont(font10)
 
         self.horizontalLayout_24.addWidget(self.CartDepthText)
 
-        self.CartDepthInput = QLabel(self.CartDepthWidget)
-        self.CartDepthInput.setObjectName(u"CartDepthInput")
+        self.CartDepthLeftInput = QLabel(self.CartDepthWidget)
+        self.CartDepthLeftInput.setObjectName(u"CartDepthLeftInput")
 
-        self.horizontalLayout_24.addWidget(self.CartDepthInput)
+        self.horizontalLayout_24.addWidget(self.CartDepthLeftInput)
+
+        self.CartDepthRightInput = QLabel(self.CartDepthWidget)
+        self.CartDepthRightInput.setObjectName(u"CartDepthRightInput")
+
+        self.horizontalLayout_24.addWidget(self.CartDepthRightInput)
 
 
         self.gridLayout_9.addWidget(self.CartDepthWidget, 0, 0, 1, 1)
@@ -3358,9 +3394,9 @@ class Ui_MainWindow(object):
 
         self.ParentStackedWidgetToChangeMenuOptions.setCurrentIndex(0)
         self.ActionButtons.setCurrentIndex(0)
-        self.MainPageAutoAndManualStackedWidget.setCurrentIndex(0)
+        self.MainPageAutoAndManualStackedWidget.setCurrentIndex(1)
         self.ComponentControlStackedWidget.setCurrentIndex(0)
-        self.ChangeComponentControlStackedWidget.setCurrentIndex(1)
+        self.ChangeComponentControlStackedWidget.setCurrentIndex(2)
         self.MotorStackedWidget.setCurrentIndex(0)
         self.MiddleStackedWidget.setCurrentIndex(0)
 
@@ -3386,13 +3422,15 @@ class Ui_MainWindow(object):
         self.ManualButton.setText(QCoreApplication.translate("MainWindow", u"Manual", None))
         self.INITButton.setText(QCoreApplication.translate("MainWindow", u"INIT", None))
         self.RunButton.setText(QCoreApplication.translate("MainWindow", u"RUN", None))
+        self.label_11.setText(QCoreApplication.translate("MainWindow", u"Height", None))
+        self.label_12.setText(QCoreApplication.translate("MainWindow", u"Depth", None))
+        self.PickRecipeButton.setText(QCoreApplication.translate("MainWindow", u"Pick", None))
+        self.AssemblyRecipeButton.setText(QCoreApplication.translate("MainWindow", u"Assembly", None))
+        self.SaveRecipeButton.setText(QCoreApplication.translate("MainWindow", u"Publish Recipe", None))
         self.RoughAlignButton.setText(QCoreApplication.translate("MainWindow", u"Rough Align", None))
         self.PreciseAlignButton.setText(QCoreApplication.translate("MainWindow", u"Precise Align", None))
         self.PickButton.setText(QCoreApplication.translate("MainWindow", u"Pick", None))
         self.AssemblyButton.setText(QCoreApplication.translate("MainWindow", u"Assembly", None))
-        self.PickRecipeButton.setText(QCoreApplication.translate("MainWindow", u"Pick", None))
-        self.AssemblyRecipeButton.setText(QCoreApplication.translate("MainWindow", u"Assembly", None))
-        self.SaveRecipeButton.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.AutoPauseButton.setText(QCoreApplication.translate("MainWindow", u"Pause", None))
         self.AutoStopButton.setText(QCoreApplication.translate("MainWindow", u"STOP", None))
         self.VisionText.setText(QCoreApplication.translate("MainWindow", u"Vision", None))
@@ -3626,10 +3664,11 @@ class Ui_MainWindow(object):
         self.QuantityNumberInput.setText(QCoreApplication.translate("MainWindow", u"200", None))
         self.DateText.setText(QCoreApplication.translate("MainWindow", u"Date:", None))
         self.DateInput.setText(QCoreApplication.translate("MainWindow", u"7/25/2025", None))
-        self.CartHeightText.setText(QCoreApplication.translate("MainWindow", u"Cart Height:", None))
-        self.CartHeightInput.setText(QCoreApplication.translate("MainWindow", u"153.3 mm", None))
-        self.CartDepthText.setText(QCoreApplication.translate("MainWindow", u"Cart Depth:", None))
-        self.CartDepthInput.setText(QCoreApplication.translate("MainWindow", u"200.1 mm", None))
+        self.CartHeightText.setText(QCoreApplication.translate("MainWindow", u"Cart Height (mm):", None))
+        self.CartHeightInput.setText(QCoreApplication.translate("MainWindow", u"153.3", None))
+        self.CartDepthText.setText(QCoreApplication.translate("MainWindow", u"Cart Depth (mm):", None))
+        self.CartDepthLeftInput.setText(QCoreApplication.translate("MainWindow", u"L: 0", None))
+        self.CartDepthRightInput.setText(QCoreApplication.translate("MainWindow", u"R: 0", None))
         self.WorkerNameText.setText(QCoreApplication.translate("MainWindow", u"\u7d44\u88dd\u4eba\u54e1:", None))
         self.WorkerNameInput.setText(QCoreApplication.translate("MainWindow", u"Carlos", None))
         self.WorkOrderText.setText(QCoreApplication.translate("MainWindow", u"\u5de5\u55ae:", None))

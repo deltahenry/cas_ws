@@ -33,8 +33,8 @@ def generate_launch_description():
         ), 
         Node(
             package='io_module',
-            executable='clipper',
-            name='clipper_control',
+            executable='gripper',
+            name='gripper_control',
             output='screen'
         ), 
         Node(

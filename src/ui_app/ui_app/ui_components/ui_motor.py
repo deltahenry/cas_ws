@@ -25,7 +25,7 @@ class MotorController:
         self.cli: Client = self.ros_node.create_client(ESMCmd, '/esm_command')
         self.waiting_for_result = False
 
-        
+        self.init_visual_cb = None
 
         self._light_colors = {
             "red_on":    "#FF4D4D",
@@ -41,32 +41,23 @@ class MotorController:
         self.num: float | None = None
         self.speed: float | None = None
 
-        # def _prepare_lamp(lbl):
-        #     lbl.setPixmap(QPixmap())                # ensure no image covers the bg
-        #     lbl.setText("")                         # no text overlay
-        #     # lbl.setAttribute(Qt.WA_StyledBackground, True)
-        #     # lbl.setFixedSize(size, size)            # consistent circle size (optional)
-        #     # lbl.setStyleSheet(f"border-radius:{size//2}px;")  # circle
+        # self._init_circle = getattr(self.ui, "INITCircle", None)
 
+        # colors
+        # self._circle_colors = {
+        #     "off":    "#FFFFFF",
+        #     "yellow": "#FFB300",
+        #     "green":  "#2E7D32",
+        #     "red":    "#C62828",
+        # }
 
-        #     lbl.setStyleSheet("border-radius:10px;")
+        self._init_in_progress = False  # UI-side flag: true after clicking INIT until MotionState says done
 
-        # # prepare once
-        # _prepare_lamp(self.ui.RedSignal)
-        # _prepare_lamp(self.ui.YellowSignal)
-        # _prepare_lamp(self.ui.GreenSignal)
+        # ensure the widget can be colored
+        # self._prepare_circle(self._init_circle)
+        # start OFF
+        # self._paint_circle(self._init_circle, self._circle_colors["off"])
 
-        # Disable buttons until service is ready
-        # self.ui.ServoON.setEnabled(False)
-        # self.ui.ServoOFF.setEnabled(False)
-
-        # # Poll for readiness (non-blocking)
-        # self._srv_timer = QTimer()
-        # self._srv_timer.timeout.connect(self._check_srv_ready)
-        # self._srv_timer.start(200)  # check 5x/sec
-
-        # Connect UI buttons to jog commands
-        # Buttons: pass only the SIGN; we’ll compute distance/angle inside.
 
         self.ui.ControlUpCP.setAutoRepeat(True)
         self.ui.ControlUpCP.setAutoRepeatDelay(300)
@@ -96,8 +87,6 @@ class MotorController:
         self.ui.ControlRightCP.clicked.connect(lambda: self.send_jog_cmd("x_axis", +1))
         self.ui.YawPlusCP.clicked.connect(    lambda: self.send_jog_cmd("yaw_axis", +1))
         self.ui.YawMinusCP.clicked.connect(   lambda: self.send_jog_cmd("yaw_axis", -1))
-        
-
 
         self.ui.HomeMotor.clicked.connect(self.send_init_cmd)
 
@@ -130,6 +119,13 @@ class MotorController:
         self.ui.MotorChooseDistance.setText("1 mm - 0.5°")
 
         self.ui.MotorChooseDistance.clicked.connect(self.on_motor_distance_clicked)
+        
+
+    def on_init_commanded(self, *args):
+        # called when the INIT button is pressed
+        self._init_in_progress = True
+        if self.init_visual_cb:
+            self.init_visual_cb("running")   # notify MainWindow instead of painting
 
 
     def on_motor_distance_clicked(self):
@@ -270,7 +266,7 @@ class MotorController:
         if hasattr(self.ui, "yPos"):
             self.ui.yPos.setText(f"{y:.2f}")
         if hasattr(self.ui, "yawPos"):
-            self.ui.yawPos.setText(f"{yaw_deg*57.29:.2f}")  # degrees with 2 decimal places
+            self.ui.yawPos.setText(f"{yaw_deg:.2f}")  # degrees with 2 decimal places
 
 
     def send_y_motor_cmd(self, flag):
@@ -356,15 +352,33 @@ class MotorController:
         
 
     def apply_motion_state(self, init_done: bool, motion_done: bool):
+        # signal lights logic
         if init_done and motion_done:
             r, y, g = False, False, True
+            self.ui.INITButton.setEnabled(False)
         elif init_done and not motion_done:
-            r, y, g = False, True,  False
+            r, y, g = False, True, False
+            self.ui.INITButton.setEnabled(False)
+
         elif not init_done and not motion_done:
-            r, y, g = True,  False, False
+            r, y, g = True, False, False
+            self.ui.INITButton.setEnabled(True)
         else:
-            r, y, g = False, True,  False
-        self._set_lights(r, y, g)  # now on GUI thread
+            r, y, g = False, True, False
+        self._set_lights(r, y, g)
+
+        # INIT circle phase -> just notify MainWindow
+        if init_done:
+            self._init_in_progress = False
+            phase = "done"
+        elif self._init_in_progress:
+            phase = "running"
+        else:
+            phase = "off"
+            
+
+        if self.init_visual_cb:
+            self.init_visual_cb(phase)
 
 
 

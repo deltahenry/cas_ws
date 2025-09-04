@@ -35,6 +35,7 @@ class ForkliftController:
         self.ui.currentHeight.setText(f"{height:.2f}")  
         self.ui.zPose.setText(f"{height:.2f}") # cartesian pose: z
         self.ui.zVisionLabel.setText(f"{height:.2f}")
+        self.ui.CartHeightInput.setText(f"{height:.2f}")
 
     def lift_up_10mm(self):
         self.on_touch_buttons(self.ui.LiftUp)

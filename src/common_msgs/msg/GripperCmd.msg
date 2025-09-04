@@ -1,0 +1,2 @@
+#open_gripper,close_gripper
+string mode

@@ -1857,7 +1857,7 @@ class Ui_MainWindow(object):
         self.ScrollAreaDIDO.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 685, 648))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 588, 648))
         self.horizontalLayout_34 = QHBoxLayout(self.scrollAreaWidgetContents_2)
         self.horizontalLayout_34.setSpacing(9)
         self.horizontalLayout_34.setObjectName(u"horizontalLayout_34")

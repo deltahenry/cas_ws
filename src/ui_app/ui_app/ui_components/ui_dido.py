@@ -88,6 +88,7 @@ class DIDOController:
         if not btn:
             return
         was_blocked = btn.blockSignals(True)   # make sure no accidental signals
+        btn.setEnabled(state)
         btn.setChecked(state)
         btn.blockSignals(was_blocked)
         # optional styling

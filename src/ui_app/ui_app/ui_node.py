@@ -2,19 +2,24 @@ import sys
 import math
 from datetime import date
 import cv2
-from PySide6.QtCore import Qt, QEvent, QTimer, Signal
+from PySide6.QtCore import Qt, QEvent, QTimer, Signal, QPropertyAnimation, QEasingCurve, QSequentialAnimationGroup, QAbstractAnimation
 from PySide6.QtGui import QIcon, QImage, QPixmap, QKeySequence, QShortcut
-from PySide6.QtWidgets import QApplication, QMainWindow, QButtonGroup, QScroller
+from PySide6.QtWidgets import QApplication, QMainWindow, QButtonGroup, QScroller, QLabel, QGraphicsOpacityEffect
 
 from ui_app.ui_magic_cube import Ui_MainWindow # Import my design made in Qt Designer (already in .py)
 import ui_app.resources_rc  # this includes the images and icons
 
 #ui components
+from ui_app.ui_components.ui_cabinets import CabinetsController
 from ui_app.ui_components.ui_forklift import ForkliftController
 from ui_app.ui_components.ui_motor import MotorController
-from ui_app.ui_components.ui_clipper import ClipperController
+from ui_app.ui_components.ui_gripper import GripperController
+from ui_app.ui_components.ui_limit import LimitController
 from ui_app.ui_components.ui_dido import DIDOController
 # from ui_app.ui_components.ui_vision import VisionController
+
+#lib
+from ui_app.libraries.fps import FPSCounter
 
 #Vision
 from sensor_msgs.msg import Image
@@ -26,7 +31,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Int32, Float32MultiArray
 
-from common_msgs.msg import StateCmd, ForkCmd, JogCmd, ComponentCmd, TaskCmd, TaskState, DIDOCmd, RunCmd, MotionCmd, MotionState, ClipperCmd, MultipleM, MH2State, CurrentPose, Recipe
+from common_msgs.msg import StateCmd, ForkCmd, JogCmd, ComponentCmd, TaskCmd, TaskState, DIDOCmd, RunCmd, MotionCmd, MotionState, GripperCmd, MultipleM, MH2State, CurrentPose, Recipe, LimitCmd
 
 from uros_interface.srv import ESMCmd
 
@@ -41,6 +46,9 @@ class ROSNode(Node):
         #     'manual': False,
         #     'component_control': False,  
         # }
+
+        self.fps_counter = FPSCounter()
+
 
         self.task_cmd = {
             'connect': False,
@@ -79,8 +87,13 @@ class ROSNode(Node):
         self.motor_info_update_callback_ui = None
 
         self.current_motor_len = [10.0, 0.0, 0.0]
-
         
+        self.task_state_callback_ui = None
+
+        #vision
+        
+
+
         # publisher
         self.mode_cmd_publisher = self.create_publisher(String, '/mode_cmd', 10)
 
@@ -104,7 +117,11 @@ class ROSNode(Node):
 
         self.y_motor_cmd_publisher = self.create_publisher(String, '/test_y_motor_cmd', 10)
 
-        self.clipper_cmd_publisher = self.create_publisher(ClipperCmd, '/clipper_cmd', 10)
+        self.gripper_cmd_publisher = self.create_publisher(GripperCmd, '/gripper_cmd', 10)
+
+        self.limit_cmd_publisher = self.create_publisher(LimitCmd, "/limit_cmd", 10)  
+
+        # self.storage_height_publisher = self.create_publisher(StorageHeight, "/storage_height", 10)
 
         self.recipe_publisher = self.create_publisher(Recipe, '/recipe_cmd', 10)
 
@@ -152,25 +169,12 @@ class ROSNode(Node):
             10
         )
 
-        # self.get_do_subscriber = self.create_subscription(
-        #     DIDOCmd,
-        #     "get_do",
-        #     self.get_do_callback,
-        #     10
-        # )
-
-        # self.motion_cmd_subscriber = self.create_subscription(
-        #     MotionCmd,
-        #     "/"
-        # )
-
         self.motors_info_sub = self.create_subscription(
             MultipleM,
             '/multi_motor_info',
             self.motors_info_callback,
             10
         )
-
 
         self.dido_control_subscriber = self.create_subscription(
             DIDOCmd,
@@ -186,13 +190,12 @@ class ROSNode(Node):
             10
         )
 
-        # self.task_state_subscriber = self.create_subscription(
-        #     TaskState,
-        #     '/task_state',
-        #     self.task_state_callback,
-        #     10
-        # )
-
+        self.task_state_subscriber = self.create_subscription(
+            TaskState,
+            '/task_state',
+            self.task_state_callback,
+            10
+        )
 
         self.bridge = CvBridge()
 
@@ -212,6 +215,17 @@ class ROSNode(Node):
         if self.mh2_state_callback_ui:
             self.mh2_state_callback_ui(msg)  # hand off to UI layer
 
+    def task_state_callback(self, msg: TaskState):
+        # msg.mode in {"rough_align","precise_align","pick","assembly","idle", ...}
+        # msg.state in {"idle","done","fail", else->running}
+        self.get_logger().info(f"[TaskState] mode={msg.mode} state={msg.state}")
+        if self.task_state_callback_ui:
+            # Push clean strings to UI layer
+            try:
+                self.task_state_callback_ui(str(msg.mode).strip(), str(msg.state).strip())
+            except Exception as e:
+                self.get_logger().error(f"TaskState → UI error: {e}")        
+
 
     def current_pose_callback(self, msg: CurrentPose):
         self.get_logger().info(f"Received CurrentPose: \n pose_data: {msg.pose_data}")
@@ -229,7 +243,10 @@ class ROSNode(Node):
         if self.height_update_callback:
             self.height_update_callback(msg.data)
 
+    #vision
     def image_callback(self, msg):
+        self.fps_counter.update() 
+
         try:
             cv_img = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
         except Exception as e:
@@ -283,6 +300,8 @@ class MainWindow(QMainWindow):
     #GUI Threads
     ros_msg_received = Signal(str)
 
+    task_state_update = Signal(str, str)
+
     depth_data_update = Signal(float, float)
 
     compensate_pose_update = Signal(float, float, float)
@@ -292,7 +311,6 @@ class MainWindow(QMainWindow):
 
     di_update = Signal(str, bool)
     do_update = Signal(str, bool)
-
 
     image_update = Signal(object)   # carries numpy image
     vision_mode_update = Signal(str)
@@ -306,6 +324,30 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        self.setWindowTitle("Magic Cube UI")
+        print("No extermal vision controller")
+
+        # Build circle map once
+        self._circles = {
+            # "start":         self.ui.StartCircle,
+            # "connect":       self.ui.ConnectCircle,
+            "init":          self.ui.INITCircle,
+            "idle":          self.ui.IdleCircle,
+            "rough_align":   self.ui.RoughAlignCircle,
+            "precise_align": self.ui.PreciseAlignCircle,
+            "pick":          self.ui.PickCircle,
+            "assembly":      self.ui.AssemblyCircle,
+        }
+
+        # Theme colors (match your palette if you like)
+        self._COLORS = {
+            "blue":   "#0B76A0",  # idle
+            "yellow": "#FFB300",  # running
+            "green":  "#2E7D32",  # done
+            "red":    "#C62828",  # fail
+            "off":    "#FFFFFF",  # dim/neutral
+        }
+
         # shortcut keys
         QShortcut(QKeySequence(Qt.Key_Escape), self, activated=self.close)
 
@@ -315,6 +357,15 @@ class MainWindow(QMainWindow):
         QScroller.grabGesture(self.ui.ScrollAreaDIDO.viewport(), QScroller.LeftMouseButtonGesture)
 
         self._vision_comp = {"x": float('nan'), "y": float('nan'), "yaw": float('nan')}
+
+
+        #cabinets
+        self.cabinets_controller = CabinetsController(self.ui, self.ros_node)
+
+        #Circles
+         # Map ROS -> Qt thread-safe signal
+        self.task_state_update.connect(self.apply_task_state)
+        self.ros_node.task_state_callback_ui = self.task_state_update.emit
 
 
         #vision ui
@@ -356,7 +407,7 @@ class MainWindow(QMainWindow):
         self.motor_info_update.connect(self.motor_controller.on_motor_info)
         self.ros_node.motor_info_update_callback_ui = \
             lambda m1, m2, m3: self.motor_info_update.emit(m1, m2, m3)
-        
+
 
         self.motion_state_update.connect(self.motor_controller.apply_motion_state)
         self.ros_node.motion_state_callback_ui = self.motion_state_update.emit
@@ -368,13 +419,20 @@ class MainWindow(QMainWindow):
         self.current_pose_update.connect(self.motor_controller.current_pose)
         self.ros_node.current_pose_callback_ui = self.current_pose_update.emit
 
+        # Motor → UI notifier for INIT
+        self.motor_controller.init_visual_cb = self._handle_init_visual
+
+
         #forklift ui
         self.forklift_controller = ForkliftController(self.ui, self.ros_node)
         self.height_update.connect(self.forklift_controller.update_height_display)
         self.ros_node.height_update_callback = lambda v: self.height_update.emit(v)
 
-        #clipper ui
-        self.clipper_controller = ClipperController(self.ui, self.ros_node)
+        #gripper ui
+        self.gripper_controller = GripperController(self.ui, self.ros_node)
+
+        #limit ui
+        self.limit_controller = LimitController(self.ui, self.ros_node)
 
         # DI/DO UI Controller
         self.dido_controller = DIDOController(self.ui, self.ros_node)
@@ -387,6 +445,7 @@ class MainWindow(QMainWindow):
         # self.ros_node.do_update_callback = lambda name, state: self.do_update.emit(name, state)
 
 
+
         # Get Today's date
         today = date.today()
         formatted_date = today.strftime("%m/%d/%Y")
@@ -394,7 +453,10 @@ class MainWindow(QMainWindow):
         
         self._recipe_mode: str | None = None     # "pick" or "assembly"
         self._recipe_height: float | None = None # mm (from HeightRecipeInput)
+        self._recipe_depth: float | None = None
 
+
+        # self._all_off()
 
         # Connect Qt signal to UI handler
         self.ros_msg_received.connect(self.handle_ros_message)
@@ -414,10 +476,25 @@ class MainWindow(QMainWindow):
         #servo, alarm, reset
         self.ui.ServoONOFFButton.clicked.connect(lambda checked: self.on_servo_click(checked))
 
+        #test animation
+
+        # effect = QGraphicsOpacityEffect(self.ui.INITCircle)
+        # self.ui.INITCircle.setGraphicsEffect(effect)
+        # self.anim = QPropertyAnimation(effect, b"opacity")
+        # self.anim.setStartValue(0)
+        # self.anim.setEndValue(1)
+        # self.anim.setDuration(7000)
+        # self.anim.start()
+
+
+
+
         # auto
         self.ui.AutoButton.toggled.connect(self.on_auto_toggled)
 
         self.ui.INITButton.clicked.connect(lambda: self.send_state_cmd("init"))
+        self.ui.INITButton.clicked.connect(self.motor_controller.on_init_commanded)
+
         self.ui.RunButton.clicked.connect(lambda: self.send_state_cmd("run"))
 
         self.ui.AutoPauseButton.toggled.connect(self.on_pause_toggled)
@@ -432,7 +509,7 @@ class MainWindow(QMainWindow):
         self.ui.AssemblyButton.toggled.connect(lambda checked: self.on_task_toggled("assembly", checked))
 
         # cabinets
-        self.ui.C11.clicked.connect(self.on_cabinet_click)
+        # self.ui.C11.clicked.connect(self.on_cabinet_click)
 
         self.ui.SaveCabinet.clicked.connect(self.on_save_cabinet)
 
@@ -440,9 +517,11 @@ class MainWindow(QMainWindow):
         self.ui.ListOptionsWidget.setVisible(False)
 
         # Touchscreen style in Main Page - Auto
-        self.ui.INITButton.clicked.connect(lambda: self.on_touch_different_color(self.ui.INITButton, "#FFB300"))
-        self.ui.RunButton.clicked.connect(lambda: self.on_touch_different_color(self.ui.RunButton, "#1E7E34"))
-        self.ui.AutoStopButton.clicked.connect(lambda: self.on_touch_different_color(self.ui.AutoStopButton, "#990000"))
+        # self.ui.INITButton.clicked.connect(lambda: self.on_touch_different_color(self.ui.INITButton, "#FFB300","#FF8F00", "#FFA000","#FF6F00"))
+        # self.ui.RunButton.clicked.connect(lambda: self.on_touch_different_color(self.ui.RunButton, "#1E7E34","#145A24","#155D27","#0B3D14"))
+        self.ui.INITButton.clicked.connect(lambda: self.on_touch_different_color(self.ui.INITButton, "#FFB300","#000000", "#000000","#000000"))
+        self.ui.RunButton.clicked.connect(lambda: self.on_touch_different_color(self.ui.RunButton, "#1E7E34","#000000","#000000","#000000"))
+        self.ui.AutoStopButton.clicked.connect(lambda: self.on_touch_different_color(self.ui.AutoStopButton, "#990000", "#9A0007", "#D32F2F", "#7F0000"))
 
         # menu
         self.ui.MainPageButton.toggled.connect(self.change_to_main_page)
@@ -466,7 +545,7 @@ class MainWindow(QMainWindow):
         #Component Control Choose Page
         self.ui.ChooseMotor.clicked.connect(lambda: self.component_control_choose_page("Motor", 0))
         self.ui.ChooseVision.clicked.connect(lambda: self.component_control_choose_page("Vision", 1))
-        self.ui.ChooseClipper.clicked.connect(lambda: self.component_control_choose_page("Clipper", 2))
+        self.ui.ChooseGripper.clicked.connect(lambda: self.component_control_choose_page("Gripper", 2))
         self.ui.ChooseForklift.clicked.connect(lambda: self.component_control_choose_page("Forklift", 3))
         self.ui.ChooseDIDO.clicked.connect(lambda: self.component_control_choose_page("DI/DO", 4))
 
@@ -475,7 +554,7 @@ class MainWindow(QMainWindow):
 
         self.ui.MotorOption.clicked.connect(lambda: self.component_control_switch_page("Motor", 0))
         self.ui.VisionOption.clicked.connect(lambda: self.component_control_switch_page("Vision", 1))
-        self.ui.ClipperOption.clicked.connect(lambda: self.component_control_switch_page("Clipper", 2))
+        self.ui.GripperOption.clicked.connect(lambda: self.component_control_switch_page("Gripper", 2))
         self.ui.ForkliftOption.clicked.connect(lambda: self.component_control_switch_page("Forklift", 3))
         self.ui.DIDOOption.clicked.connect(lambda: self.component_control_switch_page("DI/DO", 4))
 
@@ -504,6 +583,17 @@ class MainWindow(QMainWindow):
         self.ui.MotorConfigNextButton.clicked.connect(lambda: self.go_to_next_page_motor(1))
         self.ui.MotorJogNextButton.clicked.connect(lambda: self.go_to_next_page_motor(2))
         self.ui.MotorYAxisNextButton.clicked.connect(lambda: self.go_to_next_page_motor(0))
+
+        QTimer.singleShot(5000, lambda: self.add_style(self.ui.StartCircle, "background-color: green;"))
+        QTimer.singleShot(10000, lambda: self.add_style(self.ui.ConnectCircle, "background-color: green;"))
+
+
+
+    def add_style(self, widget, style):
+        current = widget.styleSheet()
+        widget.setStyleSheet(current + style)
+
+
 
     def on_height_recipe_input_changed(self, value: str):
         """
@@ -634,12 +724,12 @@ class MainWindow(QMainWindow):
 
         return True
 
-    def on_cabinet_click(self):
-        self.ui.C11.setStyleSheet("""
-            QPushButton {
-                background-color: blue;
-            }
-                                  """)
+    # def on_cabinet_click(self):
+    #     self.ui.C11.setStyleSheet("""
+    #         QPushButton {
+    #             background-color: blue;
+    #         }
+    #     """)
         
     def on_save_cabinet(self):
         self.ui.MainPageAutoAndManualStackedWidget.setCurrentIndex(0)
@@ -648,71 +738,90 @@ class MainWindow(QMainWindow):
     def go_to_next_page_motor(self, index):
         self.ui.MotorStackedWidget.setCurrentIndex(index)
 
-    def update_circle_off_style(self):
-        self.ui.OneCircleOff.setStyleSheet("""
-            QPushButton {
-                background-color: #0B76A0;
+    def _paint_only(self, stage: str, color_css: str):
+        # Clear all
+        for lbl in self._circles.values():
+            if lbl is self._circles["init"]:
+                continue
+
+            self._paint_circle(lbl, self._COLORS["off"])
+
+            # reset opacity for all
+            effect = lbl.graphicsEffect()
+            if isinstance(effect, QGraphicsOpacityEffect):
+                effect.setOpacity(1.0)
+
+        target = self._circles.get(stage)
+        self.stop_opacity_animation(target)
+
+        if target:
+            self._paint_circle(target, color_css)
+
+            if color_css == self._COLORS["yellow"]:
+                self.opacity_animation(target)
+            # else:
+            #     self.stop_opacity_animation(target)
+        
+
+    def _handle_init_visual(self, phase: str):
+        # phase ∈ {"running","done","fail","off"}
+        if phase == "off":
+            self._paint_circle(self.ui.INITCircle, self._COLORS["off"])
+        elif phase == "done":
+            # self._paint_only("init", self._COLORS["green"])
+            self._paint_circle(self.ui.INITCircle, self._COLORS["green"])
+        elif phase == "fail":
+            self._paint_only("init", self._COLORS["red"])
+        else:  # "running"
+            self._paint_only("init", self._COLORS["yellow"])
+
+
+    def _paint_circle(self, label, color_css: str):
+        """Set background color; keep it round by using current size."""
+        if not label:
+            return
+        
+        if label == self.ui.INITCircle:
+            effect = label.graphicsEffect()
+            if isinstance(effect, QGraphicsOpacityEffect):
+                effect.setOpacity(1.0)
+
+        target = self._circles.get(label)
+        self.stop_opacity_animation(target)
+
+        radius = max(10, min(label.width(), label.height()) // 2)
+        label.setStyleSheet(f"""
+            QLabel {{
+                background-color: {color_css};
                 border: none;
-                border-radius: 15px;
-                max-width: 30px;
-                min-height: 30px;
-                max-height: 30px;
-                padding: 0;
-            }
+                border-radius: {radius}px;
+            }}
         """)
 
-        self.ui.OneCircleOn.setStyleSheet("""
-            QPushButton {
-                background-color: white;
-                border: none;
-                border-radius: 15px;
-                max-width: 30px;
-                min-height: 30px;
-                max-height: 30px;
-                padding: 0;
-            }
-        """)
+    # def _all_off(self):
+    #     for lbl in self._circles.values():
+    #         self._paint_circle(lbl, self._COLORS["off"])
 
-        self.ui.DO1Widget.setStyleSheet("""
-            QWidget {
-                background-color: #0B76A0;
-                border: none;
-                border-radius: 24px;
-            }
-        """)
+    def apply_task_state(self, mode: str, state: str):
+        mode_l = (mode or "").strip().lower()
+        state_l = (state or "").strip().lower()
 
-    def update_circle_on_style(self):
-        self.ui.OneCircleOff.setStyleSheet("""
-            QPushButton {
-                background-color: white;
-                border: none;
-                border-radius: 15px;
-                max-width: 30px;
-                min-height: 30px;
-                max-height: 30px;
-                padding: 0;
-            }
-        """)
+        if mode_l not in self._circles:
+            print(f"[TaskState/UI] Unknown mode '{mode_l}', state={state_l}")
+            return
 
-        self.ui.OneCircleOn.setStyleSheet("""
-            QPushButton {
-                background-color: #000000;
-                border: none;
-                border-radius: 15px;
-                max-width: 30px;
-                min-height: 30px;
-                max-height: 30px;
-                padding: 0;
-            }
-        """)
+        if state_l == "idle":
+            color = self._COLORS["blue"]
+        elif state_l == "done":
+            color = self._COLORS["green"]
+        elif state_l == "fail":
+            color = self._COLORS["red"]
+        else:
+            color = self._COLORS["yellow"]
 
-        self.ui.DO1Widget.setStyleSheet("""
-            QWidget {
-                background-color: #000000;
-                border: none;
-                border-radius: 24px;
-            }
-        """)
+        self._paint_only(mode_l, color)
+
+
 
     def on_servo_click(self, checked: bool):
         btn = self.ui.ServoONOFFButton
@@ -759,7 +868,6 @@ class MainWindow(QMainWindow):
         qt_img = convert_cv_to_qt(cv_img)
         pixmap = QPixmap.fromImage(qt_img)
 
-
         current_index = self.ui.ParentStackedWidgetToChangeMenuOptions.currentIndex()
 
         if current_index == 0:  # Main Page
@@ -779,8 +887,26 @@ class MainWindow(QMainWindow):
     
 
     def update_depth_label(self, left: float, right: float):
-        self.ui.LeftDepthText.setText("—" if math.isnan(left) else f"{left:.2f}")
-        self.ui.RightDepthText.setText("—" if math.isnan(right) else f"{right:.2f}")
+        if math.isnan(left):
+            result_left = "-"
+        elif left > 1000:
+            result_left = "OOR"
+        else:
+            result_left = f"{left:.2f}"
+
+        self.ui.CartDepthLeftInput.setText(f"L: {result_left}")
+        self.ui.LeftDepthText.setText(result_left)
+
+        if math.isnan(right):
+            result_right = "-"
+        elif right > 1000:
+            result_right = "OOR"
+        else:
+            result_right = f"{right:.2f}"
+
+        self.ui.CartDepthRightInput.setText(f"R: {result_right}")
+        self.ui.RightDepthText.setText(result_right)
+
 
     def update_compensate_pose_label(self, x: float, y: float, yaw: float):
         self._vision_comp["x"] = x
@@ -810,10 +936,16 @@ class MainWindow(QMainWindow):
         if checked:
             # Button is pressed → machine should pause
             self.send_state_cmd("pause")
+            
+            self.ui.AutoPauseButton.setText("Paused")
+
             print("[UI] Pause engaged")
         else:
             # Button released → machine should resume running
             self.send_state_cmd("run")
+
+            self.ui.AutoPauseButton.setText("Pause")
+
             print("[UI] Pause released, resuming run")
 
     def on_task_toggled(self, task_name, checked):
@@ -841,6 +973,9 @@ class MainWindow(QMainWindow):
             msg.init_button = True
         elif flag == "run":
             msg.run_button = True
+
+            self.ui.MainPageAutoAndManualStackedWidget.setCurrentIndex(1)
+
         elif flag == "pause":
             msg.pause_button = True
         elif flag == "stop":
@@ -881,11 +1016,6 @@ class MainWindow(QMainWindow):
         self.ros_node.jog_cmd_publisher.publish(msg)
         print(f"[UI] Sent JogCmd: axis={axis}, direction={direction}")
 
-    def update_clipper_state(self, button):
-        if button.isChecked():
-            button.setText("Clipper ON")
-        else:
-            button.setText("Clipper OFF")
 
     def _on_vision_clicked(self, btn, checked):
         if checked:
@@ -1027,10 +1157,10 @@ class MainWindow(QMainWindow):
         self.ui.ChangeComponentControlStackedWidget.setCurrentIndex(1)
         self.ui.MotorStartedButton.setText("Vision")
 
-    def choose_clipper(self):
+    def choose_gripper(self):
         self.ui.ComponentControlStackedWidget.setCurrentIndex(1)
         self.ui.ChangeComponentControlStackedWidget.setCurrentIndex(2)
-        self.ui.MotorStartedButton.setText("Clipper")
+        self.ui.MotorStartedButton.setText("Gripper")
 
     def choose_forklift(self):
         self.ui.ComponentControlStackedWidget.setCurrentIndex(1)
@@ -1054,7 +1184,7 @@ class MainWindow(QMainWindow):
     def on_auto_toggled(self, checked):
         if checked:
             self.send_run_cmd("auto")
-            self.ui.MainPageAutoAndManualStackedWidget.setCurrentIndex(0)
+            # self.ui.MainPageAutoAndManualStackedWidget.setCurrentIndex(1)
         else:
             self.send_task_cmd("idle")
 
@@ -1074,13 +1204,12 @@ class MainWindow(QMainWindow):
     def on_manual_toggled(self, checked: bool):
         if checked:
             self.send_run_cmd("manual")
-            if not self._any_manual_task_active():
-                self.ui.MainPageAutoAndManualStackedWidget.setCurrentIndex(1)
+            # if not self._any_manual_task_active():
+            #     self.ui.MainPageAutoAndManualStackedWidget.setCurrentIndex(0)
         else:
             self.send_task_cmd("idle")
 
             
-
 
     #Component Control - Motor
     def toggle_menu(self):
@@ -1100,7 +1229,7 @@ class MainWindow(QMainWindow):
         elif name == "Vision":
             self.send_component_cmd("vision_control")
             self.ui.MiddleStackedWidget.setCurrentIndex(0)
-        elif name == "Clipper":
+        elif name == "Gripper":
             self.send_component_cmd("cliper_control")
             self.ui.MiddleStackedWidget.setCurrentIndex(0)
         elif name == "Forklift":
@@ -1121,7 +1250,7 @@ class MainWindow(QMainWindow):
         elif name == "Vision":
             self.send_component_cmd("vision_control")
             self.ui.MiddleStackedWidget.setCurrentIndex(0)
-        elif name == "Clipper":
+        elif name == "Gripper":
             self.send_component_cmd("cliper_control")
             self.ui.MiddleStackedWidget.setCurrentIndex(0)
         elif name == "Forklift":
@@ -1141,9 +1270,6 @@ class MainWindow(QMainWindow):
 
         # Optionally send a ROS signal to start detection (if needed)
         # self.send_detection_task("start")  # <-- if you want to publish to /detection_task
-
-    def on_ros_message(self, text):
-        self.ros_msg_received.emit(text)
 
     def handle_ros_message(self, text):
         print("ROS message:", text)
@@ -1167,6 +1293,49 @@ class MainWindow(QMainWindow):
         else:
             self.showMaximized()
             print("Only one screen, screen fullscreen anyways")
+
+
+    def opacity_animation(self, target):
+        # create effect only once per target
+        if not isinstance(target.graphicsEffect(), QGraphicsOpacityEffect):
+            effect = QGraphicsOpacityEffect(target)
+            target.setGraphicsEffect(effect)
+        else:
+            effect = target.graphicsEffect()
+
+        self.fade_in = QPropertyAnimation(effect, b"opacity")
+        self.fade_in.setStartValue(1.0)
+        self.fade_in.setEndValue(0.2)
+        self.fade_in.setDuration(1500)
+
+        # self.fade_in.setEasingCurve(QEasingCurve.InOutCubic)
+        # self.fade_in.setLoopCount(-1)
+        
+        self.fade_out = QPropertyAnimation(effect, b"opacity")
+        self.fade_out.setStartValue(0.2)
+        self.fade_out.setEndValue(1.0)
+        self.fade_out.setDuration(1500)
+
+        self.opacity_group = QSequentialAnimationGroup()
+        self.opacity_group.addAnimation(self.fade_in)
+        self.opacity_group.addAnimation(self.fade_out)
+
+        self.opacity_group.setLoopCount(-1)
+
+        self.opacity_group.start()
+
+
+
+
+    def stop_opacity_animation(self, target):
+        if hasattr(self, "opacity_group") and self.opacity_group.state() == QAbstractAnimation.Running:
+            self.opacity_group.stop()
+        
+        # effect = target.graphicsEffect()
+        # if isinstance(effect, QGraphicsOpacityEffect):
+        #     effect.setOpacity(1.0)
+        #     target.update()
+
 
     def on_touch_controls(self, button):
         # 1. Visual press feedback
@@ -1202,29 +1371,39 @@ class MainWindow(QMainWindow):
             color: white;
         }
         """))
-    
-    def on_touch_different_color(self, button, color):
+        
+    def on_touch_different_color(self, button, color, border, colorPressed, borderPressed):
+        # 1. Apply pressed style immediately
         button.setStyleSheet(f"""
         QPushButton {{
             background-color: {color};
-            border: 1px solid;
             color: white;
+            border: 2px solid {border};
         }}
         """)
-        
-        # 2. Reset after 200ms
-        QTimer.singleShot(200, lambda: button.setStyleSheet(f"""
+
+        # 2. Reset back to normal style after 300ms (with :disabled included)
+        QTimer.singleShot(300, lambda: button.setStyleSheet(f"""
         QPushButton {{
+            background-color: {colorPressed};       /* Darker pressed red */
+            border: 2px inset {borderPressed};      /* Inset border for "sunken" effect */
             color: white;
+ 
+        }}
+
+        QPushButton:disabled {{
+            background-color: #BDBDBD;
+            border: 2px solid #9E9E9E;
+            color: #616161;
         }}
         """))
-
 
 def convert_cv_to_qt(cv_img):
     rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
     h, w, ch = rgb_image.shape
     bytes_per_line = ch * w
     return QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+
 
 def ros_spin(node):
     rclpy.spin(node)

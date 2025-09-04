@@ -26,7 +26,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/TaskCmd.msg"
     "msg/TaskState.msg"
     "msg/DIDOCmd.msg"
-    "msg/ClipperCmd.msg"
+    "msg/GripperCmd.msg"
     "msg/CurrentPose.msg"
     "msg/MH2State.msg"
     "msg/LimitCmd.msg"

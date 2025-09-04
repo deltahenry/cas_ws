@@ -1,2 +1,0 @@
-#open_clipper,close_clipper
-string mode

@@ -55,6 +55,12 @@ QPushButton:checked {
     border: 1px solid #0B76A0;
 }
 
+QPushButton:disabled {
+    background-color: #BDBDBD;       /* Gray when disabled */
+    border: 2px solid #9E9E9E;
+    color: #616161;
+}
+
 QLabel {
 	color:white;
 }</string>
@@ -511,6 +517,9 @@ Record</string>
              <layout class="QVBoxLayout" name="verticalLayout_12">
               <item>
                <widget class="QPushButton" name="INITButton">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -805,6 +814,9 @@ QPushButton#RunButton:pressed {
             </item>
             <item>
              <widget class="QPushButton" name="AutoStopButton">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -820,13 +832,35 @@ QPushButton#RunButton:pressed {
               <property name="font">
                <font>
                 <pointsize>16</pointsize>
+                <bold>true</bold>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">
+               <string notr="true">QPushButton {
+    background-color: #D32F2F;       /* Material Red 700 */
+    color: white;
+    border: 2px solid #9A0007;       /* Darker red border */
+}
+
+QPushButton:hover {
+    background-color: #E53935;       /* Slightly brighter red */
+}
+QPushButton:pressed {
+    background-color: #B71C1C;       /* Darker pressed red */
+    border: 2px inset #7F0000;       /* Inset border for &quot;sunken&quot; effect */
+}
+QPushButton:disabled {
+    background-color: #BDBDBD;       /* Gray when disabled */
+    border: 2px solid #9E9E9E;
+    color: #616161;
+}
+
+/*
 QPushButton#AutoStopButton:pressed {
-    background-color: #990000;       /* darker red when pressed */
-}</string>
+    background-color: #990000; 
+}
+*/
+</string>
               </property>
               <property name="text">
                <string>STOP</string>
@@ -908,6 +942,12 @@ QPushButton#AutoStopButton:pressed {
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item alignment="Qt::AlignmentFlag::AlignVCenter">
              <widget class="QWidget" name="StartWidget" native="true">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
                <item>
                 <widget class="QLabel" name="StartProcessText">
@@ -932,11 +972,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -975,11 +1021,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1018,11 +1070,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1061,11 +1119,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1104,11 +1168,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1147,11 +1217,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1190,11 +1266,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1233,11 +1315,17 @@ QPushButton#AutoStopButton:pressed {
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color:#FFFFFF; border-radius:15px;</string>
+                 </property>
                  <property name="text">
                   <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap>icons/white/timeline-circle.svg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -1293,7 +1381,7 @@ QPushButton#AutoStopButton:pressed {
                  <string>C1-2</string>
                 </property>
                 <property name="checkable">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1308,6 +1396,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C2-1</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="2" column="1">
@@ -1320,6 +1411,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C3-2</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1340,6 +1434,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C1-3</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="2" column="3">
@@ -1352,6 +1449,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C3-4</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1366,6 +1466,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C5-2</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="9" column="0">
@@ -1378,6 +1481,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C9-1</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1392,6 +1498,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C3-3</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="7" column="0">
@@ -1404,6 +1513,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C7-1</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1418,6 +1530,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C8-1</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="0" column="3">
@@ -1430,6 +1545,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C1-4</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1444,6 +1562,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C6-1</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="2" column="0">
@@ -1456,6 +1577,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C3-1</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1476,6 +1600,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C1-1</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="5" column="2">
@@ -1488,6 +1615,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C5-3</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1502,6 +1632,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C5-1</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="3" column="0">
@@ -1514,6 +1647,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C4-1</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1528,6 +1664,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C2-2</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="1" column="2">
@@ -1540,6 +1679,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C2-3</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1554,6 +1696,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C2-4</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="3" column="1">
@@ -1566,6 +1711,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C4-2</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1580,6 +1728,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C4-3</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="3" column="3">
@@ -1592,6 +1743,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C4-4</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1606,6 +1760,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C6-2</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="6" column="2">
@@ -1618,6 +1775,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C6-3</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1632,6 +1792,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C5-4</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="6" column="3">
@@ -1644,6 +1807,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C6-4</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1658,6 +1824,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C7-2</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="7" column="2">
@@ -1670,6 +1839,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C7-3</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1684,6 +1856,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C7-4</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="8" column="1">
@@ -1696,6 +1871,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C8-2</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1710,6 +1888,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C8-3</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="8" column="3">
@@ -1722,6 +1903,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C8-4</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1736,6 +1920,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C9-2</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="9" column="2">
@@ -1748,6 +1935,9 @@ QPushButton#AutoStopButton:pressed {
                 </property>
                 <property name="text">
                  <string>C9-3</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1762,6 +1952,9 @@ QPushButton#AutoStopButton:pressed {
                 <property name="text">
                  <string>C9-4</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
              </layout>
@@ -1771,7 +1964,7 @@ QPushButton#AutoStopButton:pressed {
           <widget class="QLabel" name="CabinetLabel">
            <property name="geometry">
             <rect>
-             <x>320</x>
+             <x>330</x>
              <y>0</y>
              <width>101</width>
              <height>21</height>
@@ -1878,7 +2071,7 @@ QPushButton#AutoStopButton:pressed {
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="ChooseClipper">
+               <widget class="QPushButton" name="ChooseGripper">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -1889,7 +2082,7 @@ QPushButton#AutoStopButton:pressed {
                  <string notr="true"/>
                 </property>
                 <property name="text">
-                 <string>Clipper</string>
+                 <string>Gripper/Limit</string>
                 </property>
                </widget>
               </item>
@@ -2023,7 +2216,7 @@ QPushButton#AutoStopButton:pressed {
               </rect>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>1</number>
              </property>
              <widget class="QWidget" name="MotorConfigPage">
               <widget class="QPushButton" name="ServoON">
@@ -3248,8 +3441,8 @@ QPushButton:checked {
              </layout>
             </widget>
            </widget>
-           <widget class="QWidget" name="ClipperPage">
-            <widget class="QPushButton" name="OpenClipper">
+           <widget class="QWidget" name="GripperPage">
+            <widget class="QPushButton" name="OpenGripper">
              <property name="geometry">
               <rect>
                <x>40</x>
@@ -3274,7 +3467,7 @@ QPushButton:checked {
               <bool>false</bool>
              </property>
             </widget>
-            <widget class="QPushButton" name="CloseClipper">
+            <widget class="QPushButton" name="CloseGripper">
              <property name="geometry">
               <rect>
                <x>170</x>
@@ -3299,7 +3492,7 @@ QPushButton:checked {
               <bool>false</bool>
              </property>
             </widget>
-            <widget class="QPushButton" name="StopClipper">
+            <widget class="QPushButton" name="StopGripper">
              <property name="geometry">
               <rect>
                <x>40</x>
@@ -3324,7 +3517,7 @@ QPushButton:checked {
               <bool>false</bool>
              </property>
             </widget>
-            <widget class="QPushButton" name="ResetClipper">
+            <widget class="QPushButton" name="ResetGripper">
              <property name="geometry">
               <rect>
                <x>170</x>
@@ -3347,6 +3540,119 @@ QPushButton:checked {
              </property>
              <property name="checkable">
               <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="LimitOpen">
+             <property name="geometry">
+              <rect>
+               <x>30</x>
+               <y>340</y>
+               <width>271</width>
+               <height>79</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>開啟 Limit</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="LimitClose">
+             <property name="geometry">
+              <rect>
+               <x>30</x>
+               <y>420</y>
+               <width>271</width>
+               <height>79</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>關閉 Limit</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="LimitStop">
+             <property name="geometry">
+              <rect>
+               <x>30</x>
+               <y>500</y>
+               <width>271</width>
+               <height>79</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>停止 Limit</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_13">
+             <property name="geometry">
+              <rect>
+               <x>100</x>
+               <y>310</y>
+               <width>121</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Limit Control</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_14">
+             <property name="geometry">
+              <rect>
+               <x>100</x>
+               <y>40</y>
+               <width>151</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Gripper Control</string>
              </property>
             </widget>
            </widget>
@@ -3607,7 +3913,7 @@ border: none;</string>
              <x>10</x>
              <y>100</y>
              <width>291</width>
-             <height>571</height>
+             <height>581</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -3650,7 +3956,7 @@ border: none;</string>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="ClipperOption">
+             <widget class="QPushButton" name="GripperOption">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -3661,7 +3967,7 @@ border: none;</string>
                <string notr="true"/>
               </property>
               <property name="text">
-               <string>Clipper</string>
+               <string>Gripper/Limit</string>
               </property>
              </widget>
             </item>
@@ -7192,6 +7498,12 @@ border: none;</string>
            </property>
            <item>
             <widget class="QLabel" name="QuantityText">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="font">
               <font>
                <bold>true</bold>
@@ -7272,20 +7584,26 @@ border: none;</string>
            </property>
            <item>
             <widget class="QLabel" name="CartHeightText">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="font">
               <font>
                <bold>true</bold>
               </font>
              </property>
              <property name="text">
-              <string>Cart Height:</string>
+              <string>Cart Height (mm):</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLabel" name="CartHeightInput">
              <property name="text">
-              <string>153.3 mm</string>
+              <string>153.3</string>
              </property>
             </widget>
            </item>
@@ -7312,20 +7630,33 @@ border: none;</string>
            </property>
            <item>
             <widget class="QLabel" name="CartDepthText">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="font">
               <font>
                <bold>true</bold>
               </font>
              </property>
              <property name="text">
-              <string>Cart Depth:</string>
+              <string>Cart Depth (mm):</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="CartDepthInput">
+            <widget class="QLabel" name="CartDepthLeftInput">
              <property name="text">
-              <string>200.1 mm</string>
+              <string>L: 0</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="CartDepthRightInput">
+             <property name="text">
+              <string>R: 0</string>
              </property>
             </widget>
            </item>
@@ -7492,17 +7823,17 @@ border: none;</string>
     <bool>false</bool>
    </property>
   </buttongroup>
+  <buttongroup name="FontSizeButtonGroup"/>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="LanguageButtonGroup"/>
+  <buttongroup name="AutoAndManualButtonGroup"/>
+  <buttongroup name="MenuButtonGroup"/>
   <buttongroup name="VisionButtonGroup">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
   <buttongroup name="ThemeButtonGroup"/>
-  <buttongroup name="FontSizeButtonGroup"/>
-  <buttongroup name="LanguageButtonGroup"/>
-  <buttongroup name="MenuButtonGroup"/>
-  <buttongroup name="AutoAndManualButtonGroup"/>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
   <buttongroup name="RecipeModeGroup"/>
  </buttongroups>

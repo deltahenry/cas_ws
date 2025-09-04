@@ -26,7 +26,7 @@ setup(
             'height = io_module.height:main',
             'forklift = io_module.forklift:main',
             'io_node = io_module.io_node:main',
-            'clipper = io_module.clipper_control:main',
+            'gripper = io_module.gripper_control:main',
             'limit_control = io_module.limit_control:main',
         ],
     },
