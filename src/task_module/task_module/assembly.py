@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray,Int32,Int32MultiArray
-from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,ForkCmd,ForkState,Recipe,CurrentPose,ClipperCmd
+from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,ForkCmd,ForkState,Recipe,CurrentPose,ClipperCmd,LimitCmd
 import numpy as np
 
 #parameters
@@ -94,6 +94,7 @@ class DataNode(Node):
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
         self.clipper_cmd_publisher = self.create_publisher(ClipperCmd, 'clipper_cmd', 10)
         self.laser_cmd_publisher = self.create_publisher(Int32MultiArray,'/laser_io_cmd',10)
+        self.limit_pub = self.create_publisher(LimitCmd, "/limit_cmd", 10)
         
     def publish_fork_cmd(self, mode, speed, direction, distance):
         msg = ForkCmd()
@@ -151,7 +152,9 @@ class DataNode(Node):
 class AssemblyState(Enum):
     IDLE = "idle"
     INIT = "init"
-    PUSH = "push"
+    PUSH_READY = "push_ready"
+    CLOSE_LIMIT = "close_limit"
+    PUSH_ASSEMBLY = "push_assembly"
     OPEN_CLIPPER = "open_clipper"
     BACK_HOME = "back_home"
     MOVE_FORKLIFT = "move_forklift"
@@ -168,7 +171,9 @@ class AssemblyFSM(Machine):
         states = [
             AssemblyState.IDLE.value,
             AssemblyState.INIT.value,       
-            AssemblyState.PUSH.value,
+            AssemblyState.PUSH_READY.value,
+            AssemblyState.CLOSE_LIMIT.value,
+            AssemblyState.PUSH_ASSEMBLY.value,
             AssemblyState.OPEN_CLIPPER.value,
             AssemblyState.BACK_HOME.value,
             AssemblyState.MOVE_FORKLIFT.value,
@@ -178,8 +183,10 @@ class AssemblyFSM(Machine):
         
         transitions = [
             {'trigger': 'idle_to_init', 'source': AssemblyState.IDLE.value, 'dest': AssemblyState.INIT.value},
-            {'trigger': 'init_to_push', 'source': AssemblyState.INIT.value, 'dest': AssemblyState.PUSH.value},
-            {'trigger': 'push_to_open_clipper', 'source': AssemblyState.PUSH.value, 'dest': AssemblyState.OPEN_CLIPPER.value},
+            {'trigger': 'init_to_push_ready', 'source': AssemblyState.INIT.value, 'dest': AssemblyState.PUSH_READY.value},
+            {'trigger': 'push_ready_to_close_limit', 'source': AssemblyState.PUSH_READY.value, 'dest': AssemblyState.CLOSE_LIMIT.value},
+            {'trigger': 'close_limit_to_push_assembly', 'source': AssemblyState.CLOSE_LIMIT.value, 'dest': AssemblyState.PUSH_ASSEMBLY.value},
+            {'trigger': 'push_assembly_to_open_clipper', 'source': AssemblyState.PUSH_ASSEMBLY.value, 'dest': AssemblyState.OPEN_CLIPPER.value},
             {'trigger': 'open_clipper_to_back_home', 'source': AssemblyState.OPEN_CLIPPER.value, 'dest': AssemblyState.BACK_HOME.value},
             {'trigger': 'back_home_to_move_forklift', 'source': AssemblyState.BACK_HOME.value, 'dest': AssemblyState.MOVE_FORKLIFT.value},
             {'trigger': 'move_forklift_to_done', 'source': AssemblyState.MOVE_FORKLIFT.value, 'dest': AssemblyState.DONE.value},
@@ -223,8 +230,10 @@ class AssemblyFSM(Machine):
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
+        depth_cmd = (self.data_node.depth_data[0] + self.data_node.depth_data[1])/2.0
         push_pose_cmd = [0.0,self.data_node.target_depth,0.0]  # 推進階段的目標位置
-        back_pose_cmd = [0.0, -45.0, 0.0]  # 回到家位置的目標位置
+        ready_pose_cmd = [0.0,150, 0.0]  # 拉取準備位置
+        home_pose_cmd = [0.0, -45.0, 0.0]  # 回到家位置的目標位置
 
         if self.state == AssemblyState.IDLE.value:
             print("[AssemblymentFSM] 等待開始")
@@ -237,7 +246,28 @@ class AssemblyFSM(Machine):
             print("[AssemblymentFSM] 初始化階段")
             self.init_to_push()
         
-        elif self.state == AssemblyState.PUSH.value:
+        elif self.state == AssemblyState.PUSH_READY.value:
+            print("[AssemblymentFSM] 推進階段")
+            if not self.motor_cmd_sent:
+                self.sent_motor_cmd(ready_pose_cmd)
+                self.motor_cmd_sent = True  # 標記已發送初始化命令
+            else:
+                print("[AssemblymentFSM] 馬達命令已發送，等待完成")
+                ready_arrive = self.check_pose(ready_pose_cmd)
+                if ready_arrive:
+                    print("[AssemblymentFSM] 馬達已到達limit準備位置")
+                    self.motor_cmd_sent = False  # 重置標記
+                    self.push_ready_to_close_limit()
+                else:
+                    print("[AssemblymentFSM] 馬達尚未到達limit準備位置，繼續等待")
+        
+        elif self.state == AssemblyState.CLOSE_LIMIT.value:
+            print("[AssemblymentFSM] 關閉limit階段")
+            self.send_limit_cmd("close_limit")
+            time.sleep(5)
+            self.close_limit_to_push_assembly()
+
+        elif self.state == AssemblyState.PUSH_ASSEMBLY.value:
             print("[AssemblymentFSM] 推進階段")
             if not self.motor_cmd_sent:
                 self.sent_motor_cmd(push_pose_cmd)
@@ -246,11 +276,11 @@ class AssemblyFSM(Machine):
                 print("[AssemblymentFSM] 馬達命令已發送，等待完成")
                 push_arrive = self.check_pose(push_pose_cmd)
                 if push_arrive:
-                    print("[AssemblymentFSM] 馬達已到達推進位置")
+                    print("[AssemblymentFSM] 馬達已到達limit準備位置")
                     self.motor_cmd_sent = False  # 重置標記
-                    self.push_to_open_clipper()
+                    self.push_assembly_to_open_clipper()
                 else:
-                    print("[AssemblymentFSM] 馬達尚未到達推進位置，繼續等待")
+                    print("[AssemblymentFSM] 馬達尚未到達limit準備位置，繼續等待")
         
         elif self.state == AssemblyState.OPEN_CLIPPER.value:
             print("[AssemblymentFSM] 開啟夾爪階段")
@@ -261,11 +291,11 @@ class AssemblyFSM(Machine):
         elif self.state == AssemblyState.BACK_HOME.value:
             print("[AssemblymentFSM] 回到家位置階段")
             if not self.motor_cmd_sent:
-                self.sent_motor_cmd(back_pose_cmd)
+                self.sent_motor_cmd(home_pose_cmd)
                 self.motor_cmd_sent = True
             else:
                 print("[AssemblymentFSM] 馬達命令已發送，等待完成")
-                back_arrive = self.check_pose(back_pose_cmd)
+                back_arrive = self.check_pose(home_pose_cmd)
                 if back_arrive:
                     print("[AssemblymentFSM] 馬達已到達家位置")
                     self.back_home_to_move_forklift()

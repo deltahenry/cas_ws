@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray,Int32,Int32MultiArray
-from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,ForkCmd,ForkState,Recipe,CurrentPose,ClipperCmd
+from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,ForkCmd,ForkState,Recipe,CurrentPose,ClipperCmd,LimitCmd
 import numpy as np
 
 #parameters
@@ -94,6 +94,7 @@ class DataNode(Node):
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
         self.clipper_cmd_publisher = self.create_publisher(ClipperCmd, 'clipper_cmd', 10)
         self.laser_cmd_publisher = self.create_publisher(Int32MultiArray,'/laser_io_cmd',10)
+        self.limit_pub = self.create_publisher(LimitCmd, "/limit_cmd", 10)
         
     def publish_fork_cmd(self, mode, speed, direction, distance):
         msg = ForkCmd()
@@ -154,7 +155,9 @@ class PickState(Enum):
     INIT = "init"
     MOVE_FORWARD = 'move_forward'
     CLOSE_CLIPPER = "close_clipper"
-    PULL = "pull"
+    PULL_READY = "pull_ready"
+    OPEN_LIMIT = "open_limit"
+    PULL_HOME = "pull_home"
     MOVE_FORKLIFT = "move_forklift"
     DONE = "done"
     FAIL = "fail"
@@ -171,7 +174,9 @@ class PickFSM(Machine):
             PickState.INIT.value,       
             PickState.MOVE_FORWARD.value,
             PickState.CLOSE_CLIPPER.value,
-            PickState.PULL.value,
+            PickState.PULL_READY.value,
+            PickState.OPEN_LIMIT.value,
+            PickState.PULL_HOME.value,
             PickState.MOVE_FORKLIFT.value,
             PickState.DONE.value,
             PickState.FAIL.value
@@ -181,8 +186,10 @@ class PickFSM(Machine):
             {'trigger': 'idle_to_init', 'source': PickState.IDLE.value, 'dest': PickState.INIT.value},
             {'trigger': 'init_to_move_forward', 'source': PickState.INIT.value, 'dest': PickState.MOVE_FORWARD.value},
             {'trigger': 'move_forward_to_close_clipper', 'source': PickState.MOVE_FORWARD.value, 'dest': PickState.CLOSE_CLIPPER.value},
-            {'trigger': 'close_clipper_to_pull', 'source': PickState.CLOSE_CLIPPER.value, 'dest': PickState.PULL.value},
-            {'trigger': 'pull_to_move_forklift', 'source': PickState.PULL.value, 'dest': PickState.MOVE_FORKLIFT.value},
+            {'trigger': 'close_clipper_to_pull_ready', 'source': PickState.CLOSE_CLIPPER.value, 'dest': PickState.PULL_READY.value},
+            {'trigger': 'pull_ready_to_open_limit', 'source': PickState.PULL_READY.value, 'dest': PickState.OPEN_LIMIT.value},
+            {'trigger': 'open_limit_to_pull_home', 'source': PickState.OPEN_LIMIT.value, 'dest': PickState.PULL_HOME.value},
+            {'trigger': 'pull_home_to_move_forklift', 'source': PickState.PULL_HOME.value, 'dest': PickState.MOVE_FORKLIFT.value},
             {'trigger': 'move_forklift_to_done', 'source': PickState.MOVE_FORKLIFT.value, 'dest': PickState.DONE.value},
             {'trigger': 'fail', 'source': '*', 'dest': PickState.FAIL.value},
             {'trigger': 'return_to_idle', 'source': '*', 'dest': PickState.IDLE.value}
@@ -225,7 +232,8 @@ class PickFSM(Machine):
 
     def run(self):
         move_forward_cmd = [0.0,self.data_node.target_depth,0.0]  # 推進階段的目標位置
-        back_pose_cmd = [0.0, -45.0, 0.0]  # 回到家位置的目標位置
+        ready_pose_cmd = [0.0,150, 0.0]  # 拉取準備位置
+        home_pose_cmd = [0.0, -45.0, 0.0]  # 回到家位置的目標位置
 
         if self.state == PickState.IDLE.value:
             print("[PickmentFSM] 等待開始")
@@ -259,20 +267,41 @@ class PickFSM(Machine):
             time.sleep(10)  # 等待夾爪開啟
             self.close_clipper_to_pull()
 
-        elif self.state == PickState.PULL.value:
+        elif self.state == PickState.PULL_READY.value:
             print("[PickmentFSM] 拉取階段")
             if not self.motor_cmd_sent:
-                self.sent_motor_cmd(back_pose_cmd)
+                self.sent_motor_cmd(ready_pose_cmd)
                 self.motor_cmd_sent = True
             else:
                 print("[PickmentFSM] 馬達命令已發送，等待完成")
-                back_arrive = self.check_pose(back_pose_cmd)
+                ready_arrive = self.check_pose(ready_pose_cmd)
+                if ready_arrive:
+                    print("[PickmentFSM] 馬達已到達limit準備位置")
+                    self.motor_cmd_sent = False  # 重置標記
+                    self.pull_ready_to_open_limit()
+                else:
+                    print("[PickmentFSM] 馬達尚未到達limit準備位置，繼續等待")
+        
+        elif self.state == PickState.OPEN_LIMIT.value:
+            print("[PickmentFSM] 開啟limit階段")
+            self.send_limit_cmd("open_limit")
+            time.sleep(5)
+            self.open_limit_to_pull_home()
+
+        elif self.state == PickState.PULL_HOME.value:
+            print("[PickmentFSM] 拉取階段")
+            if not self.motor_cmd_sent:
+                self.sent_motor_cmd(home_pose_cmd)
+                self.motor_cmd_sent = True
+            else:
+                print("[PickmentFSM] 馬達命令已發送，等待完成")
+                back_arrive = self.check_pose(home_pose_cmd)
                 if back_arrive:
-                    print("[PickmentFSM] 馬達已到達家位置")
+                    print("[PickmentFSM] 馬達已到達home位置")
                     self.motor_cmd_sent = False  # 重置標記
                     self.pull_to_move_forklift()
                 else:
-                    print("[PickmentFSM] 馬達尚未到達家位置，繼續等待")
+                    print("[PickmentFSM] 馬達尚未到達home位置，繼續等待")
         
         elif self.state == PickState.MOVE_FORKLIFT.value:
             print("[PickmentFSM] 移動叉車階段")
@@ -349,6 +378,17 @@ class PickFSM(Machine):
             value = Int32MultiArray(data=value)  # 封裝為 Int32MultiArray
             self.data_node.laser_cmd_publisher.publish(value)
         print(f"[RoughAlignmentFSM] 發送雷射命令: {cmd}")
+
+    def send_limit_cmd(self, cmd: str):
+        msg = LimitCmd()
+        msg.mode = cmd
+        self.data_node.limit_pub.publish(msg)
+        if cmd == "open_limit":
+            print("[UI] 發布 LimitCmd: 開啟")
+        elif cmd == "close_limit":
+            print("[UI] 發布 LimitCmd: 關閉")
+        elif cmd == "stop_limit":
+            print("[UI] 發布 LimitCmd: 停止")
 
 
 def main():
