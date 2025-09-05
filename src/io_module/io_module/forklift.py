@@ -13,6 +13,7 @@ import csv
 
 #parameters
 timer_period = 0.1  # seconds
+TOR = 1.0  # mm
 
 
 # --- ROS2 Node ---
@@ -194,7 +195,7 @@ class ForkliftControl(Machine):
         result = "waiting"
         # register_address = self.data_node.register_address
         # slave_id = self.data_node.slave_id
-        tolerance = 1
+        tolerance = TOR
 
         current_height = self.data_node.current_height
 
@@ -235,7 +236,8 @@ class ForkliftControl(Machine):
         # up邏輯：
         elif self.data_node.current_direction == "up":
             print("up time:", time.time())
-            if des_direction == "stop" or current_height > distance_cmd - 8.0:
+            #need to verify
+            if des_direction == "stop" or current_height + tolerance > distance_cmd :
                 print(current_height, distance_cmd)
                 print("stop time:", time.time())
                 value_to_write = self.encode("fast", "stop")  # 停止叉車
@@ -244,27 +246,9 @@ class ForkliftControl(Machine):
                 self.data_node.current_speed = "stop"  # 更新當前速度
                 result = "done"  # 任務完成
 
-            # elif current_height > distance_cmd + tolerance:
-            #     value_to_write = self.encode("fast", "stop")  # 停止叉車
-            #     self.data_node.fork_io_cmd_publisher.publish(value_to_write)
-            #     self.data_node.current_direction = "stop"  # 更新當前方向
-            #     self.data_node.current_speed = "stop"  # 更新當前速度
-            #     result = "done"  # 任務完成
-
             else:
                 value_to_write = self.encode(self.data_node.current_speed, self.data_node.current_direction) # 保持當前速度和方向
                 self.data_node.fork_io_cmd_publisher.publish(value_to_write)
-                # if current_height < distance_cmd - 5.0:
-                #     value_to_write = self.encode("fast", "up") # 保持當前速度和方向
-                #     self.data_node.fork_io_cmd_publisher.publish(value_to_write)
-                #     time.sleep(0.1)  
-                #     value_to_write = self.encode("fast", "stop") # stop
-                #     self.data_node.fork_io_cmd_publisher.publish(value_to_write)
-                #     time.sleep(1.0)  # 等待停止完成
-
-                # else:
-                #     value_to_write = self.encode(self.data_node.current_speed, self.data_node.current_direction) # 保持當前速度和方向
-                #     self.data_node.fork_io_cmd_publisher.publish(value_to_write)
 
         # down邏輯：down 快 ➝ down 慢
         elif self.data_node.current_direction == "down":
@@ -330,7 +314,7 @@ class ForkliftControl(Machine):
             else:
                 self.count = 0
                 print(self.data_node.current_height, self.data_node.distance)
-                if self.data_node.current_height >= self.data_node.distance + 5:
+                if self.data_node.current_height > self.data_node.distance + TOR:
                     print("[ForkliftControl] too high, return to run")
                     self.resume()
                 else:

@@ -290,7 +290,7 @@ class CompensateFSM(Machine):
         self.yaw_cmd = 0.0
         self.z_cmd = 80.0
 
-        self.data_node.confirm_compensate = False
+        self.data_node.get_detection = False
 
         self.data_node.to_done = False
 
@@ -471,9 +471,14 @@ class CompensateFSM(Machine):
             right = self.data_node.depth_data[1]
             yaw_compensate = math.atan2((right - left), 480.0)
 
-            if abs(yaw_compensate) < TOL_YAW_RAD:
+            if abs(left-right) > 30.0:  # >3.5 deg
+                print("[CompensatementFSM] 深度感測器數值異常，跳過YAW補償")
+                self.fail()
+
+            elif abs(yaw_compensate) < TOL_YAW_RAD:
                 print("[CompensatementFSM] YAW方向補償量過小，跳過YAW補償")
                 self.compensate_yaw_check_to_compensate_yaw_done()
+            
             else:
                 self.compensate_yaw_check_to_compensate_yaw()
         
@@ -500,6 +505,8 @@ class CompensateFSM(Machine):
                 print(" yaw_cmd:",self.yaw_cmd)
 
                 self.data_node.ui_pose_publisher.publish(Float32MultiArray(data=[self.x_cmd,self.y_cmd,self.yaw_cmd*57.2958,self.z_cmd]))
+
+                # self.data_node.confirm_compensate = True
 
                 if self.data_node.confirm_compensate:
                     if not self.send_compensate:
@@ -549,12 +556,21 @@ class CompensateFSM(Machine):
             else:
                 print("[CompensatementFSM] 最終補償量過大，進行補償")
                 self.compensate_check_to_compensate_x_start()
-                
-
-
-                
+                      
         elif self.state == CompensateState.DONE.value:
             print("[CompensatementFSM] 補償完成!")
+
+        elif self.state == CompensateState.FAIL.value:
+            print("[CompensatementFSM] 補償失敗，請重新嘗試!")
+            if self.data_node.to_done:
+                print("[CompensatementFSM] 使用者跳過補償失敗，進入下一步")
+                self.data_node.get_detection = False
+                self.data_node.to_done = False
+                self.data_node.confirm_compensate = False
+                self.send_compensate = False
+                self.return_to_idle()
+            else:
+                print("[CompensatementFSM] 補償失敗，等待使用者操作...")
 
 
     def compensate(self,x_cmd,y_cmd,yaw_cmd,z_cmd):
