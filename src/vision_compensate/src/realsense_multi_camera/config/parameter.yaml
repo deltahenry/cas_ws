@@ -1,0 +1,35 @@
+realsense_camera:
+  # Camera model selection
+  model: "D405"  # Options: "D405", "D435", "auto"
+  
+  # Camera settings
+  camera_settings:
+    width: 640
+    height: 480
+    fps: 30
+    
+  # Model-specific configurations
+  model_configs:
+    D405:
+      min_distance: 0.13  # meters
+      max_distance: 4.0   # meters
+      fov_horizontal: 87  # degrees
+      fov_vertical: 58    # degrees
+      
+    D435:
+      min_distance: 0.11  # meters
+      max_distance: 10.0  # meters
+      fov_horizontal: 87  # degrees
+      fov_vertical: 58    # degrees
+      
+  # Display settings
+  display:
+    window_name: "RealSense Camera"
+    show_info_overlay: true
+    auto_resize: true
+    
+  # ROS2 settings
+  ros2:
+    topic_name: "camera/rgb/image_raw"
+    frame_id: "camera_link"
+    queue_size: 1
