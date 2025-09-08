@@ -4,11 +4,27 @@
 import sys
 from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QComboBox
+    QLabel, QPushButton, QComboBox, QStackedWidget, QGridLayout
 )
+from PySide6.QtCore import Qt, QTimer
 import rclpy
 from rclpy.node import Node
 from common_msgs.msg import Recipe  # 你的自訂 msg
+
+
+# Pick (2x9，高度獨立)
+pick_heights = {
+    "C1": [944.0, 824.0, 704.0, 586.0, 465.0, 344.0, 226.0, 113.0, 113.0],
+    "C2": [944.0, 824.0, 704.0, 586.0, 465.0, 344.0, 226.0, 113.0, 113.0],
+}
+
+# Assembly (4x9，高度獨立)
+assembly_heights = {
+    "C1": [944.0, 824.0, 704.0, 586.0, 465.0, 344.0, 226.0, 113.0, 113.0],
+    "C2": [944.0, 824.0, 704.0, 586.0, 465.0, 344.0, 226.0, 113.0, 113.0],
+    "C3": [944.0, 824.0, 704.0, 586.0, 465.0, 344.0, 226.0, 113.0, 113.0],
+    "C4": [944.0, 824.0, 704.0, 586.0, 465.0, 344.0, 226.0, 113.0, 113.0],
+}
 
 
 class RecipePublisher(Node):
@@ -31,50 +47,74 @@ class RecipeUI(QWidget):
         self.node = node
         self.setWindowTitle("Recipe Publisher UI")
 
-        layout = QVBoxLayout()
+        self.selected_button = None
+        self.selected_mode = None
+        self.selected_height = None
+        self.selected_depth = None
 
-        # Mode 下拉選單
+        main_layout = QVBoxLayout()
+
+        # Mode 選擇
         mode_layout = QHBoxLayout()
         mode_label = QLabel("Mode:")
         self.mode_box = QComboBox()
         self.mode_box.addItems(["pick", "assembly"])
+        self.mode_box.currentTextChanged.connect(self.switch_page)
         mode_layout.addWidget(mode_label)
         mode_layout.addWidget(self.mode_box)
-        layout.addLayout(mode_layout)
+        main_layout.addLayout(mode_layout)
 
-        # Height 輸入
-        height_layout = QHBoxLayout()
-        height_label = QLabel("Height:")
-        self.height_input = QLineEdit()
-        self.height_input.setPlaceholderText("輸入 height (float)")
-        height_layout.addWidget(height_label)
-        height_layout.addWidget(self.height_input)
-        layout.addLayout(height_layout)
+        # Stack: Pick Page & Assembly Page
+        self.stack = QStackedWidget()
+        self.pick_page = self.create_grid_page("pick", pick_heights, fixed_depth=500.0)
+        self.assembly_page = self.create_grid_page("assembly", assembly_heights, fixed_depth=600.0)
+        self.stack.addWidget(self.pick_page)
+        self.stack.addWidget(self.assembly_page)
+        main_layout.addWidget(self.stack)
 
-        # Depth 輸入
-        depth_layout = QHBoxLayout()
-        depth_label = QLabel("Depth:")
-        self.depth_input = QLineEdit()
-        self.depth_input.setPlaceholderText("輸入 depth (float)")
-        depth_layout.addWidget(depth_label)
-        depth_layout.addWidget(self.depth_input)
-        layout.addLayout(depth_layout)
+        # Save 按鈕
+        self.save_button = QPushButton("Save Recipe")
+        self.save_button.clicked.connect(self.save_recipe)
+        main_layout.addWidget(self.save_button)
 
-        # Publish 按鈕
-        self.publish_button = QPushButton("Publish Recipe")
-        self.publish_button.clicked.connect(self.publish_recipe)
-        layout.addWidget(self.publish_button)
+        self.setLayout(main_layout)
+        self.switch_page("pick")  # 預設顯示 Pick 頁面
 
-        self.setLayout(layout)
+    def create_grid_page(self, mode, height_dict, fixed_depth):
+        page = QWidget()
+        layout = QGridLayout(page)
 
-    def publish_recipe(self):
-        try:
-            mode = self.mode_box.currentText()
-            height = float(self.height_input.text())
-            depth = float(self.depth_input.text())
-            self.node.publish_recipe(mode, height, depth)
-        except ValueError:
-            print("請輸入正確的數字 (height, depth)")
+        for c, (col_name, heights) in enumerate(height_dict.items()):
+            for r, h in enumerate(heights):
+                btn = QPushButton(f"{col_name}R{r+1}\nH={h}, D={fixed_depth}")
+                btn.setCheckable(True)
+                btn.clicked.connect(
+                    lambda checked, h=h, d=fixed_depth, b=btn, m=mode: self.select_cell(m, h, d, b)
+                )
+                layout.addWidget(btn, r, c)
+
+        return page
+
+    def switch_page(self, mode):
+        if mode == "pick":
+            self.stack.setCurrentIndex(0)
+        else:
+            self.stack.setCurrentIndex(1)
+
+    def select_cell(self, mode, height, depth, button):
+        if self.selected_button:
+            self.selected_button.setChecked(False)
+        self.selected_button = button
+        self.selected_mode = mode
+        self.selected_height = height
+        self.selected_depth = depth
+        print(f"選擇 {mode} -> H={height}, D={depth}")
+
+    def save_recipe(self):
+        if self.selected_mode is None:
+            print("請先選擇格子")
+            return
+        self.node.publish_recipe(self.selected_mode, self.selected_height, self.selected_depth)
 
 
 def main(args=None):
@@ -86,7 +126,6 @@ def main(args=None):
     ui.show()
 
     # ROS2 與 Qt 整合
-    from PySide6.QtCore import QTimer
     timer = QTimer()
     timer.timeout.connect(lambda: rclpy.spin_once(node, timeout_sec=0.01))
     timer.start(10)
