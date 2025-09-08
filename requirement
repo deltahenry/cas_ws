@@ -1,0 +1,44 @@
+依下列描述產生claude cli 能理解的specification.md檔
+這是在一個ros2的資料夾下，目前要新增2個python package
+在src下方新增2個package
+1. realsense_camera_driver
+以python撰寫
+驅動realsense並將取得rgb的圖
+以讀取parameter.yaml的方式，決定連接哪個型號，如D405，D435
+以讀取parameter.yaml的方式，連接幾個camera，如1,2,3......
+以讀取parameter.yaml的方式，決定FPS, 預設15
+啟動node 後以10Hz發布topic /camera_image, type CV.MAT
+
+2. vision_compensation
+建立一個subsribe 訂閱/detection_cmd, type string , 及其callback function, detection_cmd_callback
+建立一個subsribe 訂閱/camera_image, type CV.MAT , 進callback function後將其存在class 的image_now裡面
+建立發布/compensate_pose 可以讓其他的node訂閱，並以以下方式解包
+def compensate_pose_callback(self, msg: Float32MultiArray):
+    if len(msg.data) >= 2:
+        X, Z = msg.data[:2]
+        self.get_logger().info(f"Received compensation: X={X:.2f}, Z={Z:.2f}")
+        
+在detection_cmd_callback裡面監控2個指令
+ msg.data == "start_compensate" 呼叫x, z = compensate_cabinet(image_golden, image_now);
+ 比較golden sample和目前取得的image, 輸出x和z 
+ 校正係數: X_out *= 0.53, Z_out *= 0.18
+golden sample 檔名 = ~/image_sample2D_golden(x=0,z=112).png
+
+msg.data == "start_test"       呼叫x, z = compensate_cabinet_test(image_golden, image_test);
+ 比較golden sample和存好檔的圖image_test, 輸出x和z 
+ 校正係數: X_out *= 0.53, Z_out *= 0.18
+golden sample 檔名 = ~/image_sample/2D_golden(x=0,z=112).png
+image_test 檔名 = ~/image_sample/2D(x=25,z=117).png
+ 
+翻譯ultility 裡的vision.cpp 和 vision.hpp成vision.py 放在vision_compensation資料夾下
+    將int batteryFrameLocationCompensation(const std::string& golden_path_name,
+        const std::string& current_image_path,
+        double& X_out, double& Z_out);
+    轉為x, z = compensate_cabinet(image_golden, image_now)
+    
+    將int batteryFrameLocationCompensation(const std::string& golden_path_name,
+        cv::Mat current,
+        double& X_out, double& Z_out);
+      轉為x, z = compensate_cabinet_test(image_golden, image_test)
+        
+

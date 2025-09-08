@@ -1,0 +1,6 @@
+realsense_camera_node:
+  ros__parameters:
+    camera:
+      model: "D435"  # D405, D435, etc.
+      count: 1       # Number of cameras
+      fps: 15        # Frames per second
