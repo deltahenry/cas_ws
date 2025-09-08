@@ -29,6 +29,7 @@ setup(
             "ui_recipe = ui_module.ui_recipe:main",
             "ui_comfirm = ui_module.ui_comfirm:main",
             "ui_limit = ui_module.ui_limit:main",
+            "ui_cabinent = ui_module.ui_cabinent:main",
         ],
     },
 )

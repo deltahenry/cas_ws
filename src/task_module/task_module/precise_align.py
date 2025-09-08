@@ -246,8 +246,14 @@ class PreciseAlignFSM(Machine):
                 return
 
         elif self.state == PreciseAlignState.MOVE_DETECT.value:
-            height_cmd = self.data_node.target_height
+            regular_cabinent_height = 120.0
+            special_cabinent_height = 113.0
             tolerance = 1.0
+
+            if abs(self.data_node.target_height) - 226.0 < 10.0: #2nd cabinent
+                height_cmd = self.data_node.target_height - special_cabinent_height
+            else:
+                height_cmd = self.data_node.target_height- regular_cabinent_height
 
             if not self.send_fork_cmd:
                 self.fork_cmd(mode="run", speed="slow", direction="down", distance=height_cmd)
@@ -282,8 +288,7 @@ class PreciseAlignFSM(Machine):
                 print("waiting for precise align done")
         
         elif self.state == PreciseAlignState.MOVE_ACT.value:
-            one_cabinent_height = 120.0
-            height_cmd = self.data_node.target_height + one_cabinent_height
+            height_cmd = self.data_node.target_height
             tolerance = 1.0
 
             if not self.send_fork_cmd:
