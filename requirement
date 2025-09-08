@@ -17,8 +17,9 @@ def compensate_pose_callback(self, msg: Float32MultiArray):
     if len(msg.data) >= 2:
         X, Z = msg.data[:2]
         self.get_logger().info(f"Received compensation: X={X:.2f}, Z={Z:.2f}")
-        
-在detection_cmd_callback裡面監控2個指令
+    
+顯示目前照片    
+在detection_cmd_callback裡面監控指令
  msg.data == "start_detect" 呼叫x, z = compensate_cabinet(image_golden, image_now);
  比較golden sample和目前取得的image, 輸出x和z 
  校正係數: X_out *= 0.53, Z_out *= 0.18
@@ -34,6 +35,9 @@ msg.data == "start_test"       呼叫x, z = compensate_cabinet_test(image_golden
  校正係數: X_out *= 0.53, Z_out *= 0.18
 golden sample 檔名 = ~/image_sample/2D_golden(x=0,z=112).png
 image_test 檔名 = ~/image_sample/2D(x=25,z=117).png
+ 
+ msg.data == "save_image"       
+將圖片存成png檔，檔名為時間 如 2025_0908_173026.png
  
 翻譯ultility 裡的vision.cpp 和 vision.hpp成vision.py 放在vision_compensation資料夾下
     將int batteryFrameLocationCompensation(const std::string& golden_path_name,
