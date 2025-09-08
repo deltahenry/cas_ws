@@ -7,6 +7,7 @@ from sensor_msgs.msg import Image
 import cv2
 import numpy as np
 import os
+from datetime import datetime
 from .vision import compensate_cabinet, compensate_cabinet_test
 
 
@@ -15,6 +16,8 @@ class VisionCompensationNode(Node):
         super().__init__('vision_compensation_node')
         
         self.image_now = None
+        self.show_display = True  # Enable image display
+        self.window_name = "Vision Compensation - Current Image"
         
         # Subscribers
         self.detection_cmd_subscriber = self.create_subscription(
@@ -69,8 +72,27 @@ class VisionCompensationNode(Node):
         """Store current image from camera"""
         try:
             self.image_now = self.ros_image_to_numpy(msg)
+            
+            # Display current image
+            if self.show_display and self.image_now is not None:
+                self.display_current_image()
+                
         except Exception as e:
             self.get_logger().error(f'Error converting image: {str(e)}')
+            
+    def display_current_image(self):
+        """Display current image using OpenCV"""
+        if self.image_now is not None:
+            try:
+                # Create display window
+                cv2.namedWindow(self.window_name, cv2.WINDOW_AUTOSIZE)
+                
+                # Display image
+                cv2.imshow(self.window_name, self.image_now)
+                cv2.waitKey(1)  # Non-blocking wait
+                
+            except Exception as e:
+                self.get_logger().error(f'Error displaying image: {str(e)}')
             
     def detection_cmd_callback(self, msg: String):
         """Handle detection commands"""
@@ -83,6 +105,8 @@ class VisionCompensationNode(Node):
             self.handle_start_detect_0()
         elif command == "start_test":
             self.handle_start_test()
+        elif command == "save_image":
+            self.handle_save_image()
         else:
             self.get_logger().warn(f'Unknown command: {command}')
             
@@ -148,6 +172,28 @@ class VisionCompensationNode(Node):
         except Exception as e:
             self.get_logger().error(f'Error in test compensation calculation: {str(e)}')
             
+    def handle_save_image(self):
+        """Handle save_image command"""
+        if self.image_now is None:
+            self.get_logger().error('No current image available to save')
+            return
+            
+        try:
+            # Generate timestamp filename: YYYY_MMDD_HHMMSS.png
+            timestamp = datetime.now().strftime('%Y_%m%d_%H%M%S')
+            filename = f"{timestamp}.png"
+            
+            # Save image to current working directory
+            success = cv2.imwrite(filename, self.image_now)
+            
+            if success:
+                self.get_logger().info(f'Image saved successfully: {filename}')
+            else:
+                self.get_logger().error(f'Failed to save image: {filename}')
+                
+        except Exception as e:
+            self.get_logger().error(f'Error saving image: {str(e)}')
+            
     def publish_compensation(self, x: float, z: float):
         """Publish compensation values"""
         msg = Float32MultiArray()
@@ -160,6 +206,12 @@ class VisionCompensationNode(Node):
         if len(msg.data) >= 2:
             X, Z = msg.data[:2]
             self.get_logger().info(f"Received compensation: X={X:.2f}, Z={Z:.2f}")
+            
+    def destroy_node(self):
+        """Clean up resources when node is destroyed"""
+        if self.show_display:
+            cv2.destroyAllWindows()
+        super().destroy_node()
 
 
 def main(args=None):
@@ -178,3 +230,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+

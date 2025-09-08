@@ -37,7 +37,7 @@ camera:
 ## Package 2: vision_compensation
 
 ### Description
-A ROS2 package that performs vision-based compensation by comparing current images with golden samples.
+A ROS2 package that performs vision-based compensation by comparing current images with golden samples and provides image display and save functionality.
 
 ### Subscribers
 1. **Topic**: `/detection_cmd`
@@ -58,6 +58,11 @@ def compensate_pose_callback(self, msg: Float32MultiArray):
         X, Z = msg.data[:2]
         self.get_logger().info(f"Received compensation: X={X:.2f}, Z={Z:.2f}")
 ```
+
+### Features
+- **Current Image Display**: Show current camera image
+- **Image Processing**: Vision-based compensation calculations
+- **Image Saving**: Save current image with timestamp
 
 ### Commands
 
@@ -90,6 +95,13 @@ def compensate_pose_callback(self, msg: Float32MultiArray):
 - **Golden sample path**: `~/image_sample/2D_golden(x=0,z=112).png`
 - **Test image path**: `~/image_sample/2D(x=25,z=117).png`
 
+#### 4. save_image
+- **Trigger**: `msg.data == "save_image"`
+- **Function**: Save current image to PNG file
+- **Description**: Save current camera image with timestamp filename
+- **Filename format**: `YYYY_MMDD_HHMMSS.png` (e.g., `2025_0908_173026.png`)
+- **Save location**: Current working directory
+
 ### Vision Processing Module
 
 #### File: `vision.py`
@@ -109,6 +121,7 @@ Convert C++ utility functions from `utility/vision.cpp` and `vision.hpp` to Pyth
 - RealSense SDK
 - std_msgs
 - sensor_msgs
+- datetime (for timestamp generation)
 
 ## File Paths
 - Golden sample (detect): `~/image_sample2D_golden(x=0,z=112).png`
@@ -116,3 +129,4 @@ Convert C++ utility functions from `utility/vision.cpp` and `vision.hpp` to Pyth
 - Test image (detect_0): `~/image_sample2D_golden(x=0,z=112).png`
 - Golden sample (test): `~/image_sample/2D_golden(x=0,z=112).png`
 - Test image (test): `~/image_sample/2D(x=25,z=117).png`
+- Saved images: `YYYY_MMDD_HHMMSS.png` in current directory
