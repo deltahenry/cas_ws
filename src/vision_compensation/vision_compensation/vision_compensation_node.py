@@ -77,15 +77,17 @@ class VisionCompensationNode(Node):
         command = msg.data
         self.get_logger().info(f'Received command: {command}')
         
-        if command == "start_compensate":
-            self.handle_start_compensate()
+        if command == "start_detect":
+            self.handle_start_detect()
+        elif command == "start_detect_0":
+            self.handle_start_detect_0()
         elif command == "start_test":
             self.handle_start_test()
         else:
             self.get_logger().warn(f'Unknown command: {command}')
             
-    def handle_start_compensate(self):
-        """Handle start_compensate command"""
+    def handle_start_detect(self):
+        """Handle start_detect command"""
         if self.image_now is None:
             self.get_logger().error('No current image available')
             return
@@ -99,10 +101,31 @@ class VisionCompensationNode(Node):
         try:
             x, z = compensate_cabinet(golden_path, self.image_now)
             self.publish_compensation(x, z)
-            self.get_logger().info(f'Compensation calculated: X={x:.2f}, Z={z:.2f}')
+            self.get_logger().info(f'Detect compensation calculated: X={x:.2f}, Z={z:.2f}')
             
         except Exception as e:
-            self.get_logger().error(f'Error in compensation calculation: {str(e)}')
+            self.get_logger().error(f'Error in detect compensation calculation: {str(e)}')
+            
+    def handle_start_detect_0(self):
+        """Handle start_detect_0 command"""
+        golden_path = os.path.expanduser('~/image_sample2D_golden(x=0,z=112).png')
+        test_path = os.path.expanduser('~/image_sample2D_golden(x=0,z=112).png')  # Same as golden
+        
+        if not os.path.exists(golden_path):
+            self.get_logger().error(f'Golden sample not found: {golden_path}')
+            return
+            
+        if not os.path.exists(test_path):
+            self.get_logger().error(f'Test image not found: {test_path}')
+            return
+            
+        try:
+            x, z = compensate_cabinet_test(golden_path, test_path)
+            self.publish_compensation(x, z)
+            self.get_logger().info(f'Detect_0 compensation calculated: X={x:.2f}, Z={z:.2f}')
+            
+        except Exception as e:
+            self.get_logger().error(f'Error in detect_0 compensation calculation: {str(e)}')
             
     def handle_start_test(self):
         """Handle start_test command"""
