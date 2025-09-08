@@ -492,21 +492,21 @@ class CompensateFSM(Machine):
                 right = self.data_node.depth_data[1]
                 yaw_compensate = math.atan2((right - left), 480.0) #480 = sensor width
 
-                self.x_cmd = self.data_node.current_pose[0] + 800.0*0.2*yaw_compensate  
+                self.x_cmd = self.data_node.current_pose[0] + 880.0*0.2*yaw_compensate  
                 self.y_cmd = self.data_node.current_pose[1]
-                self.yaw_cmd = self.data_node.current_pose[2] + 0.2*yaw_compensate  #radian
+                self.yaw_cmd = self.data_node.current_pose[2] + 0.3*yaw_compensate  #radian
                 self.z_cmd = self.data_node.current_height
                 
                 print("left:",left," right:",right)
-                print("yaw_compensate:",yaw_compensate)
-                print("current yaw:",self.data_node.current_pose[2])
+                print("yaw_mea:", f"{math.degrees(-yaw_compensate):.2f}")
+                print("current yaw:", f"{math.degrees(self.data_node.current_pose[2]):.2f}")
                 yaw_cmd_wo = self.data_node.current_pose[2] + yaw_compensate
                 print("yaw_cmd_wo_modify:",yaw_cmd_wo)
                 print(" yaw_cmd:",self.yaw_cmd)
 
                 self.data_node.ui_pose_publisher.publish(Float32MultiArray(data=[self.x_cmd,self.y_cmd,self.yaw_cmd*57.2958,self.z_cmd]))
 
-                # self.data_node.confirm_compensate = True
+                self.data_node.confirm_compensate = True
 
                 if self.data_node.confirm_compensate:
                     if not self.send_compensate:
