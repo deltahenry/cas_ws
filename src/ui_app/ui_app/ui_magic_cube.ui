@@ -417,9 +417,9 @@ Record</string>
         <widget class="QWidget" name="AutoAndManualWidget" native="true">
          <property name="geometry">
           <rect>
-           <x>720</x>
-           <y>10</y>
-           <width>291</width>
+           <x>700</x>
+           <y>0</y>
+           <width>321</width>
            <height>681</height>
           </rect>
          </property>
@@ -529,6 +529,7 @@ Record</string>
                 <property name="font">
                  <font>
                   <pointsize>16</pointsize>
+                  <bold>true</bold>
                  </font>
                 </property>
                 <property name="styleSheet">
@@ -554,6 +555,7 @@ QPushButton#INITButton:pressed {
                 <property name="font">
                  <font>
                   <pointsize>16</pointsize>
+                  <bold>true</bold>
                  </font>
                 </property>
                 <property name="styleSheet">
@@ -569,36 +571,52 @@ QPushButton#RunButton:pressed {
               </item>
               <item>
                <widget class="QLabel" name="label_11">
-                <property name="text">
-                 <string>Height</string>
+                <property name="font">
+                 <font>
+                  <pointsize>13</pointsize>
+                  <bold>true</bold>
+                 </font>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="HeightRecipeInput">
                 <property name="styleSheet">
-                 <string notr="true">color: white;</string>
+                 <string notr="true">margin-bottom: 10px;</string>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_12">
+                <property name="lineWidth">
+                 <number>1</number>
+                </property>
                 <property name="text">
-                 <string>Depth</string>
+                 <string>Change Action</string>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="DepthRecipeInput">
-                <property name="styleSheet">
-                 <string notr="true">color: white;</string>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="PickRecipeButton">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>70</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Ubuntu Mono</family>
+                  <pointsize>16</pointsize>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
                 <property name="text">
-                 <string>Pick</string>
+                 <string>PICK</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
@@ -610,8 +628,26 @@ QPushButton#RunButton:pressed {
               </item>
               <item>
                <widget class="QPushButton" name="AssemblyRecipeButton">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>70</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>16</pointsize>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
-                 <string>Assembly</string>
+                 <string>ASSEMBLY</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
@@ -619,16 +655,6 @@ QPushButton#RunButton:pressed {
                 <attribute name="buttonGroup">
                  <string notr="true">RecipeModeGroup</string>
                 </attribute>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="SaveRecipeButton">
-                <property name="text">
-                 <string>Publish Recipe</string>
-                </property>
-                <property name="checkable">
-                 <bool>false</bool>
-                </property>
                </widget>
               </item>
              </layout>
@@ -793,12 +819,13 @@ QPushButton#RunButton:pressed {
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>60</height>
+                <height>75</height>
                </size>
               </property>
               <property name="font">
                <font>
                 <pointsize>16</pointsize>
+                <bold>true</bold>
                </font>
               </property>
               <property name="styleSheet">
@@ -826,7 +853,7 @@ QPushButton#RunButton:pressed {
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>60</height>
+                <height>75</height>
                </size>
               </property>
               <property name="font">
@@ -1341,7 +1368,7 @@ QPushButton#AutoStopButton:pressed {
            </layout>
           </widget>
          </widget>
-         <widget class="QWidget" name="CabinetPage">
+         <widget class="QWidget" name="PickCabinetPage">
           <widget class="QWidget" name="widget" native="true">
            <property name="geometry">
             <rect>
@@ -1362,7 +1389,87 @@ QPushButton#AutoStopButton:pressed {
              <number>0</number>
             </property>
             <item row="0" column="0">
-             <layout class="QGridLayout" name="gridLayout_2">
+             <layout class="QGridLayout" name="GridLayoutPick">
+              <item row="8" column="0">
+               <widget class="QPushButton" name="C81">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R8
+H=113.0, D=500.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QPushButton" name="C42">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R4
+H=586.0, D=500.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QPushButton" name="C31">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R3
+H=704.0, D=500.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="8" column="1">
+               <widget class="QPushButton" name="C82">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R8
+H=113.0, D=500.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
+               </widget>
+              </item>
               <item row="0" column="1">
                <widget class="QPushButton" name="C12">
                 <property name="minimumSize">
@@ -1378,177 +1485,15 @@ QPushButton#AutoStopButton:pressed {
                  </size>
                 </property>
                 <property name="text">
-                 <string>C1-2</string>
+                 <string>C2R1
+H=944.0, D=500.0</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
                 </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QPushButton" name="C21">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C2-1</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QPushButton" name="C32">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C3-2</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QPushButton" name="C13">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="sizeIncrement">
-                 <size>
-                  <width>2</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C1-3</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="3">
-               <widget class="QPushButton" name="C34">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C3-4</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="1">
-               <widget class="QPushButton" name="C52">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C5-2</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="9" column="0">
-               <widget class="QPushButton" name="C91">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C9-1</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="2">
-               <widget class="QPushButton" name="C33">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C3-3</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="0">
-               <widget class="QPushButton" name="C71">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C7-1</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="0">
-               <widget class="QPushButton" name="C81">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C8-1</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="3">
-               <widget class="QPushButton" name="C14">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C1-4</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
                </widget>
               </item>
               <item row="6" column="0">
@@ -1560,15 +1505,19 @@ QPushButton#AutoStopButton:pressed {
                  </size>
                 </property>
                 <property name="text">
-                 <string>C6-1</string>
+                 <string>C1R6
+H=344.0, D=500.0</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
                 </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
                </widget>
               </item>
-              <item row="2" column="0">
-               <widget class="QPushButton" name="C31">
+              <item row="1" column="1">
+               <widget class="QPushButton" name="C22">
                 <property name="minimumSize">
                  <size>
                   <width>65</width>
@@ -1576,11 +1525,95 @@ QPushButton#AutoStopButton:pressed {
                  </size>
                 </property>
                 <property name="text">
-                 <string>C3-1</string>
+                 <string>C2R2
+H=824.0, D=500.0</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
                 </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QPushButton" name="C32">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R3
+H=704.0, D=500.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QPushButton" name="C41">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R4
+H=586.0, D=500.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="9" column="0">
+               <widget class="QPushButton" name="C91">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R9
+H=113.0, D=500.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QPushButton" name="C62">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R6
+H=344.0, D=500.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
                </widget>
               </item>
               <item row="0" column="0">
@@ -1598,27 +1631,15 @@ QPushButton#AutoStopButton:pressed {
                  </size>
                 </property>
                 <property name="text">
-                 <string>C1-1</string>
+                 <string>C1R1
+H=944.0, D=500.0</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
                 </property>
-               </widget>
-              </item>
-              <item row="5" column="2">
-               <widget class="QPushButton" name="C53">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C5-3</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
                </widget>
               </item>
               <item row="5" column="0">
@@ -1630,283 +1651,15 @@ QPushButton#AutoStopButton:pressed {
                  </size>
                 </property>
                 <property name="text">
-                 <string>C5-1</string>
+                 <string>C1R5
+H=465.0, D=500.0</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
                 </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QPushButton" name="C41">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C4-1</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QPushButton" name="C22">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C2-2</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2">
-               <widget class="QPushButton" name="C23">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C2-3</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="3">
-               <widget class="QPushButton" name="C24">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C2-4</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QPushButton" name="C42">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C4-2</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="2">
-               <widget class="QPushButton" name="C43">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C4-3</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="3">
-               <widget class="QPushButton" name="C44">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C4-4</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="1">
-               <widget class="QPushButton" name="C62">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C6-2</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="2">
-               <widget class="QPushButton" name="C63">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C6-3</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="3">
-               <widget class="QPushButton" name="C54">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C5-4</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="3">
-               <widget class="QPushButton" name="C64">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C6-4</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="1">
-               <widget class="QPushButton" name="C72">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C7-2</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="2">
-               <widget class="QPushButton" name="C73">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C7-3</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="3">
-               <widget class="QPushButton" name="C74">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C7-4</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="1">
-               <widget class="QPushButton" name="C82">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C8-2</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="2">
-               <widget class="QPushButton" name="C83">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C8-3</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="3">
-               <widget class="QPushButton" name="C84">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>65</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>C8-4</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
                </widget>
               </item>
               <item row="9" column="1">
@@ -1918,15 +1671,19 @@ QPushButton#AutoStopButton:pressed {
                  </size>
                 </property>
                 <property name="text">
-                 <string>C9-2</string>
+                 <string>C2R9
+H=113.0, D=500.0</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
                 </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
                </widget>
               </item>
-              <item row="9" column="2">
-               <widget class="QPushButton" name="C93">
+              <item row="1" column="0">
+               <widget class="QPushButton" name="C21">
                 <property name="minimumSize">
                  <size>
                   <width>65</width>
@@ -1934,15 +1691,19 @@ QPushButton#AutoStopButton:pressed {
                  </size>
                 </property>
                 <property name="text">
-                 <string>C9-3</string>
+                 <string>C1R2
+H=824.0, D=500.0</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
                 </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
                </widget>
               </item>
-              <item row="9" column="3">
-               <widget class="QPushButton" name="C94">
+              <item row="7" column="0">
+               <widget class="QPushButton" name="C71">
                 <property name="minimumSize">
                  <size>
                   <width>65</width>
@@ -1950,11 +1711,55 @@ QPushButton#AutoStopButton:pressed {
                  </size>
                 </property>
                 <property name="text">
-                 <string>C9-4</string>
+                 <string>C1R7
+H=226.0, D=500.0</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>
                 </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QPushButton" name="C52">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R5
+H=465.0, D=500.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="7" column="1">
+               <widget class="QPushButton" name="C72">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R7
+H=226.0, D=500.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">PickRecipeButtonGroup</string>
+                </attribute>
                </widget>
               </item>
              </layout>
@@ -1976,10 +1781,13 @@ QPushButton#AutoStopButton:pressed {
             </font>
            </property>
            <property name="text">
-            <string>Assembly</string>
+            <string>Pick</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
-          <widget class="QPushButton" name="SaveCabinet">
+          <widget class="QPushButton" name="SavePickCabinet">
            <property name="geometry">
             <rect>
              <x>240</x>
@@ -1992,7 +1800,7 @@ QPushButton#AutoStopButton:pressed {
             <string>Save</string>
            </property>
           </widget>
-          <widget class="QPushButton" name="CancelCabinet">
+          <widget class="QPushButton" name="CancelPickCabinet">
            <property name="geometry">
             <rect>
              <x>390</x>
@@ -2004,6 +1812,920 @@ QPushButton#AutoStopButton:pressed {
            <property name="text">
             <string>Cancel</string>
            </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="AssemblyCabinetPage">
+          <widget class="QLabel" name="CabinetLabel_2">
+           <property name="geometry">
+            <rect>
+             <x>310</x>
+             <y>0</y>
+             <width>101</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>16</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Assembly</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="CancelAssemblyCabinet">
+           <property name="geometry">
+            <rect>
+             <x>460</x>
+             <y>670</y>
+             <width>95</width>
+             <height>25</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Cancel</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="SaveAssemblyCabinet">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>670</y>
+             <width>95</width>
+             <height>25</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Save</string>
+           </property>
+          </widget>
+          <widget class="QWidget" name="widget_4" native="true">
+           <property name="geometry">
+            <rect>
+             <x>40</x>
+             <y>20</y>
+             <width>641</width>
+             <height>631</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_10">
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <layout class="QGridLayout" name="GridLayoutAssembly">
+              <item row="6" column="1">
+               <widget class="QPushButton" name="C62_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R6
+H=344.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="3" column="3">
+               <widget class="QPushButton" name="C12_15">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4R4
+H=586.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="9" column="2">
+               <widget class="QPushButton" name="C12_11">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3R9
+H=113.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="7" column="3">
+               <widget class="QPushButton" name="C12_18">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4R7
+H=226.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QPushButton" name="C51_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R5
+H=465.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QPushButton" name="C52_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R5
+H=465.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="C21_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R2
+H=824.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QPushButton" name="C32_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R3
+H=704.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="8" column="1">
+               <widget class="QPushButton" name="C82_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R8
+H=113.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="9" column="0">
+               <widget class="QPushButton" name="C91_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R9
+H=113.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QPushButton" name="C22_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R2
+H=824.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QPushButton" name="C12_13">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4R2
+H=824.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QPushButton" name="C12_7">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3R3
+H=704.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="6" column="2">
+               <widget class="QPushButton" name="C12_8">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3R6
+H=344.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="6" column="3">
+               <widget class="QPushButton" name="C12_17">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4R6
+H=344.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <widget class="QPushButton" name="C71_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R7
+H=226.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="3" column="2">
+               <widget class="QPushButton" name="C12_4">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3R4
+H=586.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QPushButton" name="C42_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R4
+H=586.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="5" column="3">
+               <widget class="QPushButton" name="C12_16">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4R5
+H=465.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="9" column="1">
+               <widget class="QPushButton" name="C92_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R9
+H=113.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="8" column="0">
+               <widget class="QPushButton" name="C81_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R8
+H=113.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="5" column="2">
+               <widget class="QPushButton" name="C12_6">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3R5
+H=465.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="7" column="1">
+               <widget class="QPushButton" name="C72_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R7
+H=226.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="8" column="3">
+               <widget class="QPushButton" name="C12_19">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4R8
+H=113.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QPushButton" name="C61_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R6
+H=344.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QPushButton" name="C12_5">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3R2
+H=824.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QPushButton" name="C12_12">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4R1
+H=944.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="8" column="2">
+               <widget class="QPushButton" name="C12_10">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3R8
+H=113.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QPushButton" name="C12_3">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3R1
+H=944.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QPushButton" name="C31_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R3
+H=704.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QPushButton" name="C41_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R4
+H=586.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QPushButton" name="C11_2">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C1R1
+H=944.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QPushButton" name="C12_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C2R1
+H=944.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="2" column="3">
+               <widget class="QPushButton" name="C12_14">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4R3
+H=704.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="7" column="2">
+               <widget class="QPushButton" name="C12_9">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C3R7
+H=226.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="9" column="3">
+               <widget class="QPushButton" name="C12_20">
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>C4R9
+H=113.0, D=600.0</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_3</string>
+                </attribute>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
          </widget>
         </widget>
@@ -7818,23 +8540,25 @@ border: none;</string>
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="AutoAndManualButtonGroup"/>
+  <buttongroup name="ThemeButtonGroup"/>
+  <buttongroup name="FontSizeButtonGroup"/>
   <buttongroup name="ManualButtons">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
-  <buttongroup name="FontSizeButtonGroup"/>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="LanguageButtonGroup"/>
-  <buttongroup name="AutoAndManualButtonGroup"/>
-  <buttongroup name="MenuButtonGroup"/>
   <buttongroup name="VisionButtonGroup">
    <property name="exclusive">
     <bool>false</bool>
    </property>
   </buttongroup>
-  <buttongroup name="ThemeButtonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="MenuButtonGroup"/>
   <buttongroup name="RecipeModeGroup"/>
+  <buttongroup name="PickRecipeButtonGroup"/>
+  <buttongroup name="buttonGroup_3"/>
  </buttongroups>
 </ui>
