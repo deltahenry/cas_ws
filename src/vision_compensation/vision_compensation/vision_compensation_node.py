@@ -116,7 +116,7 @@ class VisionCompensationNode(Node):
             self.get_logger().error('No current image available')
             return
             
-        golden_path = os.path.expanduser('~/image_sample2D_golden(x=0,z=112).png')
+        golden_path = os.path.expanduser('~/image_sample/2D_golden(x=0,z=112).png')
         
         if not os.path.exists(golden_path):
             self.get_logger().error(f'Golden sample not found: {golden_path}')
@@ -132,8 +132,8 @@ class VisionCompensationNode(Node):
             
     def handle_start_detect_0(self):
         """Handle start_detect_0 command"""
-        golden_path = os.path.expanduser('~/image_sample2D_golden(x=0,z=112).png')
-        test_path = os.path.expanduser('~/image_sample2D_golden(x=0,z=112).png')  # Same as golden
+        golden_path = os.path.expanduser('~/image_sample/2D_golden(x=0,z=112).png')
+        test_path = os.path.expanduser('~/image_sample/2D_golden(x=0,z=112).png')  # Same as golden
         
         if not os.path.exists(golden_path):
             self.get_logger().error(f'Golden sample not found: {golden_path}')

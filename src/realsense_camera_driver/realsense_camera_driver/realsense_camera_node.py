@@ -30,7 +30,7 @@ class RealSenseCameraNode(Node):
                 import pyrealsense2 as rs
                 self.pipeline = rs.pipeline()
                 self.config = rs.config()
-                self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, self.fps)
+                self.config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, self.fps)
                 self.pipeline.start(self.config)
                 self.has_realsense = True
                 self.get_logger().info(f'RealSense {self.camera_model} camera initialized with {self.fps} FPS')

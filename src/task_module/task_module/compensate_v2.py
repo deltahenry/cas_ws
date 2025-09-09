@@ -345,7 +345,7 @@ class CompensateFSM(Machine):
 
         elif self.state == CompensateState.COMPENSATE_Z_START.value:
             print("[CompensatementFSM] 視覺檢測中...")
-            self.data_node.detection_cmd_publisher.publish(String(data="start_test"))
+            self.data_node.detection_cmd_publisher.publish(String(data="start_detect"))
             self.compensate_z_start_to_compensate_z_wait()
         
         elif self.state == CompensateState.COMPENSATE_Z_WAIT.value:
@@ -401,7 +401,7 @@ class CompensateFSM(Machine):
         elif self.state == CompensateState.COMPENSATE_X_START.value:
             print("[CompensatementFSM] 視覺檢測中...")
             print("to_done:",self.data_node.to_done)
-            self.data_node.detection_cmd_publisher.publish(String(data="start_test"))
+            self.data_node.detection_cmd_publisher.publish(String(data="start_detect"))
             self.compensate_x_start_to_compensate_x_wait()
         
         elif self.state == CompensateState.COMPENSATE_X_WAIT.value:
@@ -460,7 +460,7 @@ class CompensateFSM(Machine):
         
         elif self.state == CompensateState.COMPENSATE_YAW_START.value:
             print("[CompensatementFSM] 視覺檢測中...")
-            self.data_node.detection_cmd_publisher.publish(String(data="start_test"))
+            self.data_node.detection_cmd_publisher.publish(String(data="start_detect"))
             self.compensate_yaw_start_to_compensate_yaw_wait()
         
         elif self.state == CompensateState.COMPENSATE_YAW_WAIT.value:
@@ -531,7 +531,7 @@ class CompensateFSM(Machine):
         
         elif self.state == CompensateState.COMPENSATE_CHECK_START.value:
             print("[CompensatementFSM] 視覺檢測中...")
-            self.data_node.detection_cmd_publisher.publish(String(data="start_test"))
+            self.data_node.detection_cmd_publisher.publish(String(data="start_detect"))
             self.compensate_check_start_to_compensate_check_wait()
         
         elif self.state == CompensateState.COMPENSATE_CHECK_WAIT.value:
