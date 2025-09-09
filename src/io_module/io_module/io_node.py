@@ -5,14 +5,13 @@ from enum import Enum, auto
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String,Int32MultiArray
+from std_msgs.msg import String,Int32MultiArray,Bool
 from common_msgs.msg import DIDOCmd,MH2State
 from pymodbus.client import ModbusTcpClient
-import time
 import numpy as np
 
 #parameters
-timer_period = 0.01  # seconds
+timer_period = 0.05  # seconds
 
 
 # --- ROS2 Node ---
@@ -20,8 +19,10 @@ class DataNode(Node):
     def __init__(self):
         super().__init__('data_node')
 
+        self.tcp_connected = False   # 紀錄 TCP 狀態
        
         self.init_modbus()  # 初始化Modbus通訊
+
         self.init_io_port()  # 初始化IO端口
 
         
@@ -66,6 +67,9 @@ class DataNode(Node):
             10
         )
 
+        self.tcp_status_pub = self.create_publisher(Bool, "tcp_status", 10)  # 加一個 publisher
+
+
     def init_modbus(self):
         """初始化叉車Modbus通訊"""
         # 設備參數
@@ -77,7 +81,24 @@ class DataNode(Node):
 
         # # 建立連線S
         self.client = ModbusTcpClient(ip, port=port)
-        self.client.connect()
+        self.tcp_connected = self.client.connect()
+
+    def ensure_connection(self):
+        """確保 TCP 連線，若斷線則嘗試重連"""
+        if not self.client.is_socket_open():
+            self.tcp_connected = False
+            self.get_logger().warn("⚠️ TCP 已斷線，嘗試重新連線...")
+            self.tcp_connected = self.client.connect()
+
+            if self.tcp_connected:
+                self.get_logger().info("🔄 TCP 重連成功")
+            else:
+                self.get_logger().error("❌ TCP 重連失敗")
+        
+        # 發佈 TCP 狀態
+        self.tcp_status_pub.publish(Bool(data=self.tcp_connected))
+
+        return self.tcp_connected
 
     def init_io_port(self):
         
@@ -163,7 +184,7 @@ class DataNode(Node):
             self.get_logger().error(f"Failed to parse DO name '{msg.name}': {e}")
 
 
-class ForkliftControl(Machine):
+class ForkliftControl():
     def __init__(self, data_node: DataNode):
         self.data_node = data_node
 
@@ -176,6 +197,11 @@ class ForkliftControl(Machine):
 
     def run(self):
         # 每站的設定（可用清單定義來擴展性更強）
+
+        if not self.data_node.ensure_connection():
+            self.data_node.get_logger().error("❌ Modbus 斷線，略過 DO 寫入")
+            return
+    
         stations = [
             {"slave_id": 2, "do_array": self.data_node.DO_1, "register_address": 0x9C18},
             {"slave_id": 2, "do_array": self.data_node.DO_2, "register_address": 0x9C20},
@@ -192,10 +218,22 @@ class ForkliftControl(Machine):
                 value=value,
                 slave=slave_id
             )
-            print(f"[Slave {slave_id}] 寫入位址 {hex(address)} 的值: {value} (0b{value:016b})")
+            if result.isError():
+                self.data_node.get_logger().error(
+                    f"[Slave {slave_id}] 寫入 {hex(address)} 失敗: {result}"
+                )
+            else:
+                self.data_node.get_logger().info(
+                    f"[Slave {slave_id}] 寫入 {hex(address)}: {value} (0b{value:016b})"
+                )
 
     def read_di(self):
         """從多個 Modbus 暫存器讀取 DI 狀態到各自陣列"""
+
+        if not self.data_node.ensure_connection():
+            self.data_node.get_logger().error("❌ Modbus 斷線，略過 DI 讀取")
+            return
+
         try:
             di_map = [
                 {"slave_id": 2,"address": 0x0006, "array": self.data_node.on12_state},

@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 import os
 from datetime import datetime
-from .vision import compensate_cabinet, compensate_cabinet_test
+from .vision import compensate_cabinet_with_visualization, compensate_cabinet_test_with_visualization
 
 
 class VisionCompensationNode(Node):
@@ -34,10 +34,22 @@ class VisionCompensationNode(Node):
             10
         )
         
-        # Publisher
+        # Publishers
         self.compensate_pose_publisher = self.create_publisher(
             Float32MultiArray,
             '/compensate_pose',
+            10
+        )
+        
+        self.image_golden_with_corner_publisher = self.create_publisher(
+            Image,
+            '/image_golden_with_corner',
+            10
+        )
+        
+        self.image_now_with_corner_publisher = self.create_publisher(
+            Image,
+            '/image_now_with_corner',
             10
         )
         
@@ -67,6 +79,33 @@ class VisionCompensationNode(Node):
             cv_image = np_array.reshape((height, width, channels))
         
         return cv_image
+    
+    def numpy_to_ros_image(self, cv_image):
+        """Convert numpy array to ROS Image message"""
+        ros_image = Image()
+        
+        if len(cv_image.shape) == 3:
+            height, width, channels = cv_image.shape
+            if channels == 3:
+                ros_image.encoding = "bgr8"
+            elif channels == 4:
+                ros_image.encoding = "bgra8"
+        elif len(cv_image.shape) == 2:
+            height, width = cv_image.shape
+            channels = 1
+            ros_image.encoding = "mono8"
+        else:
+            raise ValueError("Unsupported image format")
+        
+        ros_image.height = height
+        ros_image.width = width
+        ros_image.step = width * channels
+        ros_image.is_bigendian = False
+        ros_image.data = cv_image.tobytes()
+        ros_image.header.stamp = self.get_clock().now().to_msg()
+        ros_image.header.frame_id = "camera_frame"
+        
+        return ros_image
 
     def camera_image_callback(self, msg: Image):
         """Store current image from camera"""
@@ -116,24 +155,30 @@ class VisionCompensationNode(Node):
             self.get_logger().error('No current image available')
             return
             
-        golden_path = os.path.expanduser('~/image_sample2D_golden(x=0,z=112).png')
+        golden_path = os.path.expanduser('~/image_sample/2D_golden(x=0,z=112).png')
         
         if not os.path.exists(golden_path):
             self.get_logger().error(f'Golden sample not found: {golden_path}')
             return
             
         try:
-            x, z = compensate_cabinet(golden_path, self.image_now)
-            self.publish_compensation(x, z)
-            self.get_logger().info(f'Detect compensation calculated: X={x:.2f}, Z={z:.2f}')
+            x, z, vis_golden, vis_current = compensate_cabinet_with_visualization(golden_path, self.image_now)
+            
+            # Apply calibration coefficients
+            x_out = x * 0.53
+            z_out = z * 0.18
+            
+            self.publish_compensation(x_out, z_out)
+            self.publish_visualization_images(vis_golden, vis_current)
+            self.get_logger().info(f'Detect compensation calculated: X={x_out:.2f}, Z={z_out:.2f}')
             
         except Exception as e:
             self.get_logger().error(f'Error in detect compensation calculation: {str(e)}')
             
     def handle_start_detect_0(self):
         """Handle start_detect_0 command"""
-        golden_path = os.path.expanduser('~/image_sample2D_golden(x=0,z=112).png')
-        test_path = os.path.expanduser('~/image_sample2D_golden(x=0,z=112).png')  # Same as golden
+        golden_path = os.path.expanduser('~/image_sample/2D_golden(x=0,z=112).png')
+        test_path = os.path.expanduser('~/image_sample/2D_golden(x=0,z=112).png')  # Same as golden
         
         if not os.path.exists(golden_path):
             self.get_logger().error(f'Golden sample not found: {golden_path}')
@@ -144,9 +189,15 @@ class VisionCompensationNode(Node):
             return
             
         try:
-            x, z = compensate_cabinet_test(golden_path, test_path)
-            self.publish_compensation(x, z)
-            self.get_logger().info(f'Detect_0 compensation calculated: X={x:.2f}, Z={z:.2f}')
+            x, z, vis_golden, vis_current = compensate_cabinet_test_with_visualization(golden_path, test_path)
+            
+            # Apply calibration coefficients
+            x_out = x * 0.53
+            z_out = z * 0.18
+            
+            self.publish_compensation(x_out, z_out)
+            self.publish_visualization_images(vis_golden, vis_current)
+            self.get_logger().info(f'Detect_0 compensation calculated: X={x_out:.2f}, Z={z_out:.2f}')
             
         except Exception as e:
             self.get_logger().error(f'Error in detect_0 compensation calculation: {str(e)}')
@@ -165,9 +216,15 @@ class VisionCompensationNode(Node):
             return
             
         try:
-            x, z = compensate_cabinet_test(golden_path, test_path)
-            self.publish_compensation(x, z)
-            self.get_logger().info(f'Test compensation calculated: X={x:.2f}, Z={z:.2f}')
+            x, z, vis_golden, vis_current = compensate_cabinet_test_with_visualization(golden_path, test_path)
+            
+            # Apply calibration coefficients
+            x_out = x * 0.53
+            z_out = z * 0.18
+            
+            self.publish_compensation(x_out, z_out)
+            self.publish_visualization_images(vis_golden, vis_current)
+            self.get_logger().info(f'Test compensation calculated: X={x_out:.2f}, Z={z_out:.2f}')
             
         except Exception as e:
             self.get_logger().error(f'Error in test compensation calculation: {str(e)}')
@@ -200,6 +257,20 @@ class VisionCompensationNode(Node):
         msg.data = [float(x), float(z)]
         
         self.compensate_pose_publisher.publish(msg)
+        
+    def publish_visualization_images(self, vis_golden, vis_current):
+        """Publish visualization images with corner annotations"""
+        try:
+            if vis_golden is not None:
+                golden_ros_image = self.numpy_to_ros_image(vis_golden)
+                self.image_golden_with_corner_publisher.publish(golden_ros_image)
+                
+            if vis_current is not None:
+                current_ros_image = self.numpy_to_ros_image(vis_current)
+                self.image_now_with_corner_publisher.publish(current_ros_image)
+                
+        except Exception as e:
+            self.get_logger().error(f'Error publishing visualization images: {str(e)}')
         
     def compensate_pose_callback(self, msg: Float32MultiArray):
         """Example callback for receiving compensation pose"""

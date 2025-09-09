@@ -266,7 +266,7 @@ class MotorController:
         if hasattr(self.ui, "yPos"):
             self.ui.yPos.setText(f"{y:.2f}")
         if hasattr(self.ui, "yawPos"):
-            self.ui.yawPos.setText(f"{yaw_deg*57.2958:.2f}")  # degrees with 2 decimal places
+            self.ui.yawPos.setText(f"{yaw_deg:.2f}")  # degrees with 2 decimal places
 
 
     def send_y_motor_cmd(self, flag):
