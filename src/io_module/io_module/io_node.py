@@ -25,6 +25,14 @@ class DataNode(Node):
 
         self.init_io_port()  # 初始化IO端口
 
+        self.left_gripper_state = 'open'  # 初始狀態
+        self.right_gripper_state = 'open'  # 初始狀態
+        self.gripper_state = [0,0] # 初始狀態 [left, right] open=0, close=1, moving=2
+    
+
+        self.left_limit_state = 'closed'  # 初始狀態
+        self.right_limit_state = 'closed'  # 初始狀態
+        self.limit_state = [0,0] # 初始狀態 [left, right] open=0, close=1, moving=2
         
         self.fork_cmd_subscriber = self.create_subscription(
             Int32MultiArray,
@@ -68,6 +76,9 @@ class DataNode(Node):
         )
 
         self.tcp_status_pub = self.create_publisher(Bool, "tcp_status", 10)  # 加一個 publisher
+
+        self.gripper_state_pub = self.create_publisher(Int32MultiArray, "gripper_state", 10)
+        self.limit_state_pub = self.create_publisher(Int32MultiArray, "limit_state", 10)
 
 
     def init_modbus(self):
@@ -188,7 +199,6 @@ class ForkliftControl():
     def __init__(self, data_node: DataNode):
         self.data_node = data_node
 
-        
     def encode_outputs(self, do_array):
         value = 0
         for i, bit in enumerate(do_array):
@@ -265,6 +275,12 @@ class ForkliftControl():
                 for i in range(16):
                     arr[i] = (reg_value >> i) & 0x1
                 print(f"[Slave {slave_id}] 讀取位址 {hex(addr)} 的值: {reg_value} (0b{reg_value:016b})")
+        
+
+            # 更新夾爪狀態
+            self.update_gripper_state()
+            # 更新限位狀態
+            self.update_limit_state()   
 
         except Exception as e:
             print(f"Modbus DI 讀取異常: {e}")
@@ -304,6 +320,52 @@ class ForkliftControl():
             value |= (bit & 1) << i
         return value
 
+    def update_gripper_state(self):
+        #N.C. 狀態下為 1，動作時變為 0
+        if self.data_node.DI_1[3] == 0 and self.data_node.DI_1[4] == 1:
+            self.data_node.left_gripper_state = 'open'
+        elif self.data_node.DI_1[3] == 1 and self.data_node.DI_1[4] == 0:
+            self.data_node.left_gripper_state = 'close'
+        else:
+            self.data_node.left_gripper_state = 'moving'
+
+        if self.data_node.DI_1[5] == 0 and self.data_node.DI_1[6] == 1:
+            self.data_node.right_gripper_state = 'open'
+        elif self.data_node.DI_1[5] == 1 and self.data_node.DI_1[6] == 0:
+            self.data_node.right_gripper_state = 'close'
+        else:
+            self.data_node.right_gripper_state = 'moving'
+        # 更新狀態陣列
+        state_map = {'open': 0, 'close': 1, 'moving': 2}
+        self.data_node.gripper_state[0] = state_map[self.data_node.left_gripper_state]
+        self.data_node.gripper_state[1] = state_map[self.data_node.right_gripper_state] 
+        # 發佈狀態
+        gripper_msg = Int32MultiArray()
+        gripper_msg.data = self.data_node.gripper_state
+        self.data_node.gripper_state_pub.publish(gripper_msg)
+    
+    def update_limit_state(self):
+        if self.data_node.DI_1[11] == 0 and self.data_node.DI_1[12] == 1:
+            self.data_node.left_limit_state = 'close'
+        elif self.data_node.DI_1[11] == 1 and self.data_node.DI_1[12] == 0:
+            self.data_node.left_limit_state = 'open'
+        else:
+            self.data_node.left_limit_state = 'moving'
+
+        if self.data_node.DI_1[13] == 0 and self.data_node.DI_1[14] == 1:
+            self.data_node.right_limit_state = 'close'
+        elif self.data_node.DI_1[13] == 1 and self.data_node.DI_1[14] == 0:
+            self.data_node.right_limit_state = 'open'
+        else:
+            self.data_node.right_limit_state = 'moving'
+        # 更新狀態陣列
+        state_map = {'open': 0, 'close': 1, 'moving': 2}
+        self.data_node.limit_state[0] = state_map[self.data_node.left_limit_state]
+        self.data_node.limit_state[1] = state_map[self.data_node.right_limit_state] 
+        # 發佈狀態
+        limit_msg = Int32MultiArray()
+        limit_msg.data = self.data_node.limit_state
+        self.data_node.limit_state_pub.publish(limit_msg)
 
 
 
@@ -318,9 +380,9 @@ def main():
     try:
         while rclpy.ok():
             executor.spin_once(timeout_sec=0.1)
-            system.run()
+            system.run()      # DO 控制
             system.read_di()  # 讀取 DI 狀態
-            time.sleep(timer_period)
+            time.sleep(timer_period) #timer period = 50ms
 
     except KeyboardInterrupt:
         pass

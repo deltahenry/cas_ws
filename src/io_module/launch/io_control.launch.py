@@ -7,12 +7,12 @@ import os
 
 def generate_launch_description():
     return LaunchDescription([
-        Node(
-            package='io_module',
-            executable='io_node',
-            name='io_node',
-            output='screen'
-        ), 
+        # Node(
+        #     package='io_module',
+        #     executable='io_node',
+        #     name='io_node',
+        #     output='screen'
+        # ), 
         Node(
             package='io_module',
             executable='height',
