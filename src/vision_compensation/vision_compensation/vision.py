@@ -39,6 +39,7 @@ class BlobEdgePipeline:
         try:
             with open(config_path, 'r') as file:
                 config = yaml.safe_load(file)
+
                 pipeline_config = config.get('blob_edge_pipeline', {})
                 
                 self.MinAreaLR = pipeline_config.get('MinAreaLR', self.MinAreaLR)
@@ -71,7 +72,7 @@ def median_of(values):
     else:
         return 0.5 * (sorted_vals[n // 2 - 1] + sorted_vals[n // 2])
 
-def cross_2d(ax, ay, bx, by):lx0
+def cross_2d(ax, ay, bx, by):
     return ax * by - ay * bx
 
 def line_line_intersection(p1, p2, p3, p4):
@@ -82,6 +83,7 @@ def line_line_intersection(p1, p2, p3, p4):
     qp = (p3[0] - p1[0], p3[1] - p1[1])
     
     rxs = cross_2d(r[0], r[1], s[0], s[1])
+
     qpxs = cross_2d(qp[0], qp[1], s[0], s[1])
     
     if abs(rxs) < EPS:
@@ -162,7 +164,7 @@ def order_corners(pts4):
 
 def mask_between_two_lines(img_size, l1a, l1b, r1a, r1b):
     def build_param(a, b):
-        vx = float(b[0] - a[0])w, h)
+        vx = float(b[0] - a[0])
     
         vy = float(b[1] - a[1])
         n = np.sqrt(vx * vx + vy * vy)
