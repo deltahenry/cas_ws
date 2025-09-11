@@ -33,6 +33,9 @@ class DataNode(Node):
 
         self.target_depth = 20.0
 
+        self.gripper_state = [0,0] # 初始狀態 [left, right] open=0, close=1, moving=2
+        self.limit_state = [0,0] # 初始狀態 [left, right] open=0, close=1, moving=2
+
 
        
         # 初始化 ROS2 Node
@@ -84,6 +87,20 @@ class DataNode(Node):
             CurrentPose,
             'current_pose',
             self.current_pose_callback,
+            10
+        )
+
+        self.gripper_state_subscriber = self.create_subscription(
+            Int32MultiArray,
+            'gripper_state',
+            self.gripper_state_callback,
+            10
+        )
+
+        self.limit_state_subscriber = self.create_subscription(
+            Int32MultiArray,
+            'limit_state',
+            self.limit_state_callback,
             10
         )
 
@@ -149,6 +166,21 @@ class DataNode(Node):
         self.current_pose[1] = msg.pose_data[1]
         self.current_pose[2] = msg.pose_data[2]
 
+    def gripper_state_callback(self, msg: Int32MultiArray):
+        print(f"接收到夾爪狀態: {msg.data}")
+        if len(msg.data) >= 2:
+            self.gripper_state[0] = msg.data[0]  # 左夾爪狀態
+            self.gripper_state[1] = msg.data[1]  # 右夾爪狀態
+        else:
+            self.get_logger().warn("接收到的夾爪狀態長度不足，無法更新。")
+    
+    def limit_state_callback(self, msg: Int32MultiArray):
+        print(f"接收到限位狀態: {msg.data}")
+        if len(msg.data) >= 2:
+            self.limit_state[0] = msg.data[0]  # 左限位狀態
+            self.limit_state[1] = msg.data[1]  # 右限位狀態
+        else:
+            self.get_logger().warn("接收到的限位狀態長度不足，無法更新。")
 
 class PickState(Enum):
     IDLE = "idle"
@@ -244,8 +276,20 @@ class PickFSM(Machine):
         elif self.state == PickState.INIT.value:
             self.laser_cmd("laser_open")  # 開啟雷射
             print("[PickmentFSM] 初始化階段")
-            self.init_to_move_forward()
-        
+            #check gripper and limit state
+            if self.data_node.gripper_state == [0,0] and self.data_node.limit_state == [1,1]:
+                print("[PickmentFSM] 夾爪和限位狀態正常，進入推進階段")
+                self.init_to_move_forward()
+            else:
+                if self.data_node.gripper_state != [0,0]:  # 假設 0 表示夾爪已開啟
+                    print("[PickmentFSM] 夾爪未開啟，發送開啟命令")
+                    self.send_gripper_cmd("open_gripper")
+                elif self.data_node.limit_state != [1,1]:  # 假設 1 表示限位已關閉
+                    print("[PickmentFSM] 限位未關閉，發送關閉命令")
+                    self.send_limit_cmd("close_limit")
+                else:
+                    print("waiting")
+
         elif self.state == PickState.MOVE_FORWARD.value:
             print("[PickmentFSM] 推進階段")
             if not self.motor_cmd_sent:
@@ -267,6 +311,14 @@ class PickFSM(Machine):
             time.sleep(10)  # 等待夾爪開啟
             self.close_gripper_to_pull_ready()
 
+            if self.data_node.gripper_state == [1,1]:  # 假設 1 表示夾爪已關閉
+                print("[PickmentFSM] 夾爪已關閉")
+                self.close_gripper_to_pull_ready()
+            elif self.data_node.gripper_state == [2,2]:  # 假設 2 表示夾爪正在移動
+                print("[PickmentFSM] 夾爪正在移動，等待完成")
+            else:
+                print("[PickmentFSM] 夾爪未關閉，繼續等待")
+
         elif self.state == PickState.PULL_READY.value:
             print("[PickmentFSM] 拉取階段")
             if not self.motor_cmd_sent:
@@ -285,8 +337,13 @@ class PickFSM(Machine):
         elif self.state == PickState.OPEN_LIMIT.value:
             print("[PickmentFSM] 開啟limit階段")
             self.send_limit_cmd("open_limit")
-            time.sleep(5)
-            self.open_limit_to_pull_home()
+            if self.data_node.limit_state == [0,0]:  # 假設 0 表示限位已開啟
+                print("[PickmentFSM] 限位已開啟")
+                self.open_limit_to_pull_home()
+            elif self.data_node.limit_state == [2,2]:  # 假設 2 表示限位正在移動
+                print("[PickmentFSM] 限位正在移動，等待完成")
+            else:
+                print("[PickmentFSM] 限位未開啟，繼續等待")
 
         elif self.state == PickState.PULL_HOME.value:
             print("[PickmentFSM] 拉取階段")
