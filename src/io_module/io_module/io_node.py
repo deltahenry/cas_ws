@@ -77,9 +77,12 @@ class DataNode(Node):
 
         self.tcp_status_pub = self.create_publisher(Bool, "tcp_status", 10)  # 加一個 publisher
 
+<<<<<<< HEAD
         self.gripper_state_pub = self.create_publisher(Int32MultiArray, "gripper_state", 10)
         self.limit_state_pub = self.create_publisher(Int32MultiArray, "limit_state", 10)
 
+=======
+>>>>>>> test2
 
     def init_modbus(self):
         """初始化叉車Modbus通訊"""

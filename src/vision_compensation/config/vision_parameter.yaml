@@ -1,0 +1,52 @@
+# Vision pipeline parameters
+# Configuration for BlobEdgePipeline class
+
+blob_edge_pipeline:
+  # Minimum area for left/right blobs
+  MinAreaLR: 10000
+  
+  # Threshold for left/right detection
+  LeftRightThreshold: 165
+  
+  # Minimum area for top/bottom blobs  
+  MinAreaTB: 150
+  
+  # Threshold for top/bottom detection
+  TopBottomThreshold: 150
+  
+  # Dilation iterations for LR
+  dilateIterationsLR: 0
+  
+  # Trimming percentage
+  TrimPercent: 15
+  
+  # Band scaling factor
+  BandScale: 0.98
+  
+  # Minimum samples for line fitting
+  MinSamplesForFit: 10
+
+# Additional calibration parameters
+calibration:
+  # Calibration coefficients for compensation output
+  x_coefficient: 0.53
+  z_coefficient: 0.18
+  
+# Image processing parameters
+image_processing:
+  # Thresholds for corner detection
+  threshold1: 150  # thr1 for right side detection
+  threshold2: 110  # thr2 for left side detection  
+  threshold3: 150  # thr3 for feature detection
+  
+  # Minimum area for feature blobs
+  min_feature_area: 350
+  
+  # Morphology kernel size
+  kernel_size: 3
+  
+  # Erosion iterations
+  erosion_iterations: 8
+  
+  # Dilation iterations for mask processing
+  dilation_iterations: 5

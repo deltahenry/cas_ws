@@ -3,6 +3,7 @@
 import cv2
 import numpy as np
 import os
+import yaml
 from typing import Tuple, Optional, List
 
 # Return codes (match C++ implementation)
@@ -14,6 +15,45 @@ class ReturnCodes:
     ERR_LEFT_SIDE_DETECT = -3
     ERR_FOUR_POINTS_NOT_FOUND = -4
     ERR_LINE_INTERSECTION = -5
+
+class BlobEdgePipeline:
+    """Configuration class for vision pipeline parameters"""
+    
+    def __init__(self, config_path: Optional[str] = None):
+        # Default parameters
+        self.MinAreaLR = 10000
+        self.LeftRightThreshold = 165
+        self.MinAreaTB = 150
+        self.TopBottomThreshold = 150
+        self.dilateIterationsLR = 0
+        self.TrimPercent = 15
+        self.BandScale = 0.98
+        self.MinSamplesForFit = 10
+        
+        # Load from config file if provided
+        if config_path and os.path.exists(config_path):
+            self.load_from_yaml(config_path)
+    
+    def load_from_yaml(self, config_path: str):
+        """Load parameters from YAML configuration file"""
+        try:
+            with open(config_path, 'r') as file:
+                config = yaml.safe_load(file)
+
+                pipeline_config = config.get('blob_edge_pipeline', {})
+                
+                self.MinAreaLR = pipeline_config.get('MinAreaLR', self.MinAreaLR)
+                self.LeftRightThreshold = pipeline_config.get('LeftRightThreshold', self.LeftRightThreshold)
+                self.MinAreaTB = pipeline_config.get('MinAreaTB', self.MinAreaTB)
+                self.TopBottomThreshold = pipeline_config.get('TopBottomThreshold', self.TopBottomThreshold)
+                self.dilateIterationsLR = pipeline_config.get('dilateIterationsLR', self.dilateIterationsLR)
+                self.TrimPercent = pipeline_config.get('TrimPercent', self.TrimPercent)
+                self.BandScale = pipeline_config.get('BandScale', self.BandScale)
+                self.MinSamplesForFit = pipeline_config.get('MinSamplesForFit', self.MinSamplesForFit)
+                
+        except Exception as e:
+            print(f"Error loading config from {config_path}: {e}")
+            print("Using default parameters")
 
 def clamp(value, min_val, max_val):
     return max(min_val, min(max_val, value))
@@ -43,6 +83,7 @@ def line_line_intersection(p1, p2, p3, p4):
     qp = (p3[0] - p1[0], p3[1] - p1[1])
     
     rxs = cross_2d(r[0], r[1], s[0], s[1])
+
     qpxs = cross_2d(qp[0], qp[1], s[0], s[1])
     
     if abs(rxs) < EPS:
@@ -124,6 +165,7 @@ def order_corners(pts4):
 def mask_between_two_lines(img_size, l1a, l1b, r1a, r1b):
     def build_param(a, b):
         vx = float(b[0] - a[0])
+    
         vy = float(b[1] - a[1])
         n = np.sqrt(vx * vx + vy * vy)
         if n < 1e-6:
@@ -343,16 +385,66 @@ def find_out_battery_frame_corner(img_gray, thr1, thr2, thr3, area_min):
     point_corners = [p_lt, p_lb, p_rt, p_rb]
     return ReturnCodes.OK, point_corners
 
-def compensate_cabinet(image_golden_path: str, image_now: np.ndarray) -> Tuple[float, float]:
+def draw_corners(vis_image, corners_ok, corners_points, color=(255, 0, 255)):
+    """Draw corner points on visualization image"""
+    if vis_image is None:
+        return
+    
+    labels = ['LT', 'LB', 'RT', 'RB']
+    for i, (is_ok, point) in enumerate(zip(corners_ok, corners_points)):
+        if is_ok and point is not None:
+            x, y = int(point[0]), int(point[1])
+            # Draw filled circle
+            cv2.circle(vis_image, (x, y), 7, color, -1)
+            # Draw label
+            cv2.putText(vis_image, labels[i], (x + 6, y - 6), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+
+def draw_avg_dot(vis_image, avg_point, color, tag):
+    """Draw average point with label"""
+    if vis_image is None or avg_point is None:
+        return
+    
+    x, y = int(round(avg_point[0])), int(round(avg_point[1]))
+    # Draw filled circle
+    cv2.circle(vis_image, (x, y), 9, color, -1)
+    # Draw outer circle
+    cv2.circle(vis_image, (x, y), 12, color, 2)
+    # Draw label
+    cv2.putText(vis_image, tag, (x + 8, y - 8), 
+               cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+
+def draw_arrow_and_delta(vis_image, from_avg, to_avg, dx, dy, color_from, color_to, color_text):
+    """Draw arrow from current to golden position with delta text"""
+    if vis_image is None or from_avg is None or to_avg is None:
+        return
+    
+    from_pt = (int(round(from_avg[0])), int(round(from_avg[1])))
+    to_pt = (int(round(to_avg[0])), int(round(to_avg[1])))
+    
+    # Draw arrow from current to golden (yellow arrow)
+    try:
+        cv2.arrowedLine(vis_image, from_pt, to_pt, (0, 255, 255), 3, tipLength=0.2)
+    except:
+        cv2.line(vis_image, from_pt, to_pt, (0, 255, 255), 3)
+    
+    # Draw delta text at midpoint
+    mid_x = (from_pt[0] + to_pt[0]) // 2
+    mid_y = (from_pt[1] + to_pt[1]) // 2
+    text = f"ΔX={dx:.2f}, ΔY={dy:.2f}"
+    cv2.putText(vis_image, text, (mid_x + 10, mid_y - 10),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.8, color_text, 2)
+
+def compensate_cabinet_with_visualization(image_golden_path: str, image_now: np.ndarray) -> Tuple[float, float, np.ndarray, np.ndarray]:
     """
-    Compare golden sample with current image and return compensation values.
+    Compare golden sample with current image and return compensation values plus visualization images.
     
     Args:
         image_golden_path: Path to golden image file
         image_now: Current image as numpy array
         
     Returns:
-        Tuple of (x, z) compensation values
+        Tuple of (x, z, vis_golden, vis_current) - compensation values and visualization images
     """
     # Read golden image
     color_golden = cv2.imread(image_golden_path, cv2.IMREAD_COLOR)
@@ -361,6 +453,13 @@ def compensate_cabinet(image_golden_path: str, image_now: np.ndarray) -> Tuple[f
     
     if image_now is None or image_now.size == 0:
         raise ValueError("Current image is empty")
+    
+    # Create visualization images (BGR color)
+    vis_golden = color_golden.copy()
+    if len(image_now.shape) == 3:
+        vis_current = image_now.copy()
+    else:
+        vis_current = cv2.cvtColor(image_now, cv2.COLOR_GRAY2BGR)
     
     # Split channels
     ch_g = cv2.split(color_golden)
@@ -385,15 +484,70 @@ def compensate_cabinet(image_golden_path: str, image_now: np.ndarray) -> Tuple[f
     # Calculate average positions
     avg_x_golden = sum(p[0] for p in pts_golden) / 4.0
     avg_y_golden = sum(p[1] for p in pts_golden) / 4.0
+    avg_golden = (avg_x_golden, avg_y_golden)
     
     avg_x_current = sum(p[0] for p in pts_current) / 4.0
     avg_y_current = sum(p[1] for p in pts_current) / 4.0
+    avg_current = (avg_x_current, avg_y_current)
     
-    # Apply calibration coefficients
-    x_out = (avg_x_golden - avg_x_current) * 0.53
-    z_out = (avg_y_golden - avg_y_current) * 0.18
+    # Calculate raw offsets (before calibration)
+    x_out = avg_x_golden - avg_x_current
+    z_out = avg_y_golden - avg_y_current
     
-    return x_out, z_out
+    # Colors (BGR format)
+    col_corner = (255, 0, 255)    # Magenta
+    col_avg_golden = (255, 255, 0)  # Cyan 
+    col_avg_current = (0, 0, 255)   # Red
+    col_text = (255, 255, 255)      # White
+    
+    # Draw on golden image
+    corners_ok_g = [True] * 4  # Assume all corners were found
+    draw_corners(vis_golden, corners_ok_g, pts_golden, col_corner)
+    draw_avg_dot(vis_golden, avg_golden, col_avg_golden, "G")
+    
+    # Draw on current image  
+    corners_ok_c = [True] * 4  # Assume all corners were found
+    draw_corners(vis_current, corners_ok_c, pts_current, col_corner)
+    draw_avg_dot(vis_current, avg_current, col_avg_current, "C")
+    
+    # Draw arrow from current to golden on current image
+    draw_arrow_and_delta(vis_current, avg_current, avg_golden, x_out, z_out, 
+                        col_avg_current, col_avg_golden, col_text)
+    
+    return x_out, z_out, vis_golden, vis_current
+
+def compensate_cabinet_test_with_visualization(image_golden_path: str, image_test_path: str) -> Tuple[float, float, np.ndarray, np.ndarray]:
+    """
+    Compare golden sample with test image file and return compensation values plus visualization images.
+    
+    Args:
+        image_golden_path: Path to golden image file
+        image_test_path: Path to test image file
+        
+    Returns:
+        Tuple of (x, z, vis_golden, vis_current) - compensation values and visualization images
+    """
+    # Read test image
+    color_test = cv2.imread(image_test_path, cv2.IMREAD_COLOR)
+    if color_test is None:
+        raise ValueError(f"Could not read test image: {image_test_path}")
+    
+    return compensate_cabinet_with_visualization(image_golden_path, color_test)
+
+# Legacy functions for backwards compatibility
+def compensate_cabinet(image_golden_path: str, image_now: np.ndarray) -> Tuple[float, float]:
+    """
+    Compare golden sample with current image and return compensation values.
+    
+    Args:
+        image_golden_path: Path to golden image file
+        image_now: Current image as numpy array
+        
+    Returns:
+        Tuple of (x, z) compensation values
+    """
+    x, z, _, _ = compensate_cabinet_with_visualization(image_golden_path, image_now)
+    return x, z
 
 def compensate_cabinet_test(image_golden_path: str, image_test_path: str) -> Tuple[float, float]:
     """
@@ -406,9 +560,5 @@ def compensate_cabinet_test(image_golden_path: str, image_test_path: str) -> Tup
     Returns:
         Tuple of (x, z) compensation values
     """
-    # Read test image
-    color_test = cv2.imread(image_test_path, cv2.IMREAD_COLOR)
-    if color_test is None:
-        raise ValueError(f"Could not read test image: {image_test_path}")
-    
-    return compensate_cabinet(image_golden_path, color_test)
+    x, z, _, _ = compensate_cabinet_test_with_visualization(image_golden_path, image_test_path)
+    return x, z

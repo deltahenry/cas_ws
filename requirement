@@ -19,13 +19,21 @@ def compensate_pose_callback(self, msg: Float32MultiArray):
         self.get_logger().info(f"Received compensation: X={X:.2f}, Z={Z:.2f}")
     
 顯示目前照片    
+<<<<<<< HEAD
 在detection_cmd_callback裡面監控指令
+=======
+在detection_cmd_callback裡面監控指令兩個指令都要發布/image_golden_with_corner, /image_now_with_corner
+>>>>>>> test2
  msg.data == "start_detect" 呼叫x, z = compensate_cabinet(image_golden, image_now);
  比較golden sample和目前取得的image, 輸出x和z 
  校正係數: X_out *= 0.53, Z_out *= 0.18
 golden sample 檔名 = ~/image_sample2D_golden(x=0,z=112).png
 
+<<<<<<< HEAD
  msg.data == "start_detect_0" 呼叫x, z = compensate_cabinet_test(image_golden, image_test);
+=======
+ msg.data == "start_detect_0" 呼叫x, z = compensate_cabinet(image_golden, image_test);
+>>>>>>> test2
 golden sample 檔名 = ~/image_sample2D_golden(x=0,z=112).png
 image_test 檔名 = ~/image_sample2D_golden(x=0,z=112).png
  校正係數: X_out *= 0.53, Z_out *= 0.18
@@ -39,6 +47,7 @@ image_test 檔名 = ~/image_sample/2D(x=25,z=117).png
  msg.data == "save_image"       
 將圖片存成png檔，檔名為時間 如 2025_0908_173026.png
  
+<<<<<<< HEAD
 翻譯ultility 裡的vision.cpp 和 vision.hpp成vision.py 放在vision_compensation資料夾下
     將int batteryFrameLocationCompensation(const std::string& golden_path_name,
         const std::string& current_image_path,
@@ -51,3 +60,15 @@ image_test 檔名 = ~/image_sample/2D(x=25,z=117).png
       轉為x, z = compensate_cabinet_test(image_golden, image_test)
         
 
+=======
+翻譯ultility 裡的vision.cs 和 example.cs成vision.py 和example.cs放在vision_compensation資料夾下
+將CompareAverageCornersAndDraw命名為compensate_cabinet, 並保留所有輸入和輸出
+建立class BlobEdgePipeline 放調整參數
+把參數寫在vision_parameter.yaml裡面
+    
+增加一個show_image_node 訂閱 image_golden_with_corner, /image_now_with_corner
+在收到的時候把這2張圖畫出來
+顯示在同一個視窗上，分為上下2格
+
+產生一個launch file
+>>>>>>> test2
