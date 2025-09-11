@@ -8,11 +8,7 @@ import cv2
 import numpy as np
 import os
 from datetime import datetime
-<<<<<<< HEAD
-from .vision import compensate_cabinet, compensate_cabinet_test
-=======
 from .vision import compensate_cabinet_with_visualization, compensate_cabinet_test_with_visualization
->>>>>>> test2
 
 
 class VisionCompensationNode(Node):
@@ -166,11 +162,6 @@ class VisionCompensationNode(Node):
             return
             
         try:
-<<<<<<< HEAD
-            x, z = compensate_cabinet(golden_path, self.image_now)
-            self.publish_compensation(x, z)
-            self.get_logger().info(f'Detect compensation calculated: X={x:.2f}, Z={z:.2f}')
-=======
             x, z, vis_golden, vis_current = compensate_cabinet_with_visualization(golden_path, self.image_now)
             
             # Apply calibration coefficients
@@ -180,7 +171,6 @@ class VisionCompensationNode(Node):
             self.publish_compensation(x_out, z_out)
             self.publish_visualization_images(vis_golden, vis_current)
             self.get_logger().info(f'Detect compensation calculated: X={x_out:.2f}, Z={z_out:.2f}')
->>>>>>> test2
             
         except Exception as e:
             self.get_logger().error(f'Error in detect compensation calculation: {str(e)}')
@@ -199,11 +189,6 @@ class VisionCompensationNode(Node):
             return
             
         try:
-<<<<<<< HEAD
-            x, z = compensate_cabinet_test(golden_path, test_path)
-            self.publish_compensation(x, z)
-            self.get_logger().info(f'Detect_0 compensation calculated: X={x:.2f}, Z={z:.2f}')
-=======
             x, z, vis_golden, vis_current = compensate_cabinet_test_with_visualization(golden_path, test_path)
             
             # Apply calibration coefficients
@@ -213,7 +198,6 @@ class VisionCompensationNode(Node):
             self.publish_compensation(x_out, z_out)
             self.publish_visualization_images(vis_golden, vis_current)
             self.get_logger().info(f'Detect_0 compensation calculated: X={x_out:.2f}, Z={z_out:.2f}')
->>>>>>> test2
             
         except Exception as e:
             self.get_logger().error(f'Error in detect_0 compensation calculation: {str(e)}')

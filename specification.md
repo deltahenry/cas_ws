@@ -1,22 +1,14 @@
 # ROS2 Vision Compensation System Specification
 
 ## Overview
-<<<<<<< HEAD
-This specification describes the implementation of two ROS2 Python packages for vision-based compensation using RealSense cameras.
-=======
 This specification describes the implementation of three ROS2 Python packages for vision-based compensation using RealSense cameras.
->>>>>>> test2
 
 ## Package Structure
 ```
 src/
 ├── realsense_camera_driver/
-<<<<<<< HEAD
-└── vision_compensation/
-=======
 ├── vision_compensation/
 └── show_image_node/
->>>>>>> test2
 ```
 
 ## Package 1: realsense_camera_driver
@@ -57,12 +49,6 @@ A ROS2 package that performs vision-based compensation by comparing current imag
    - Type: `CV.MAT`
    - Callback: Stores image in `self.image_now`
 
-<<<<<<< HEAD
-### Publisher
-- **Topic**: `/compensate_pose`
-- **Type**: `Float32MultiArray`
-- **Usage example**:
-=======
 ### Publishers
 1. **Topic**: `/compensate_pose`
    - Type: `Float32MultiArray`
@@ -77,7 +63,6 @@ A ROS2 package that performs vision-based compensation by comparing current imag
    - Description: Current image with corner annotations
 
 ### Usage Example
->>>>>>> test2
 ```python
 def compensate_pose_callback(self, msg: Float32MultiArray):
     if len(msg.data) >= 2:
@@ -87,10 +72,7 @@ def compensate_pose_callback(self, msg: Float32MultiArray):
 
 ### Features
 - **Current Image Display**: Show current camera image
-<<<<<<< HEAD
-=======
 - **Corner Detection and Annotation**: Visualize detected corners on images
->>>>>>> test2
 - **Image Processing**: Vision-based compensation calculations
 - **Image Saving**: Save current image with timestamp
 
@@ -100,22 +82,6 @@ def compensate_pose_callback(self, msg: Float32MultiArray):
 - **Trigger**: `msg.data == "start_detect"`
 - **Function**: `x, z = compensate_cabinet(image_golden, image_now)`
 - **Description**: Compare golden sample with current image
-<<<<<<< HEAD
-- **Calibration coefficients**: 
-  - `X_out *= 0.53`
-  - `Z_out *= 0.18`
-- **Golden sample path**: `~/image_sample2D_golden(x=0,z=112).png`
-
-#### 2. start_detect_0
-- **Trigger**: `msg.data == "start_detect_0"`
-- **Function**: `x, z = compensate_cabinet_test(image_golden, image_test)`
-- **Description**: Compare golden sample with same image (test mode)
-- **Calibration coefficients**: 
-  - `X_out *= 0.53`
-  - `Z_out *= 0.18`
-- **Golden sample path**: `~/image_sample2D_golden(x=0,z=112).png`
-- **Test image path**: `~/image_sample2D_golden(x=0,z=112).png` (same as golden)
-=======
 - **Publishers**: Both `/image_golden_with_corner` and `/image_now_with_corner`
 - **Calibration coefficients**: 
   - `X_out *= 0.53`
@@ -132,16 +98,12 @@ def compensate_pose_callback(self, msg: Float32MultiArray):
   - `Z_out *= 0.18`
 - **Golden sample path**: `~/image_sample/2D_golden(x=0,z=112).png`
 - **Test image path**: `~/image_sample/2D_golden(x=0,z=112).png` (same as golden)
->>>>>>> test2
 
 #### 3. start_test
 - **Trigger**: `msg.data == "start_test"`
 - **Function**: `x, z = compensate_cabinet_test(image_golden, image_test)`
 - **Description**: Compare golden sample with test image file
-<<<<<<< HEAD
-=======
 - **Publishers**: Both `/image_golden_with_corner` and `/image_now_with_corner`
->>>>>>> test2
 - **Calibration coefficients**: 
   - `X_out *= 0.53`
   - `Z_out *= 0.18`
@@ -158,33 +120,6 @@ def compensate_pose_callback(self, msg: Float32MultiArray):
 ### Vision Processing Module
 
 #### File: `vision.py`
-<<<<<<< HEAD
-Convert C++ utility functions from `utility/vision.cpp` and `vision.hpp` to Python:
-
-1. **Function**: `compensate_cabinet(image_golden, image_now)`
-   - **Original C++**: `int batteryFrameLocationCompensation(const std::string& golden_path_name, const std::string& current_image_path, double& X_out, double& Z_out)`
-   - **Returns**: `x, z` coordinates
-
-2. **Function**: `compensate_cabinet_test(image_golden, image_test)`
-   - **Original C++**: `int batteryFrameLocationCompensation(const std::string& golden_path_name, cv::Mat current, double& X_out, double& Z_out)`
-   - **Returns**: `x, z` coordinates
-
-## Dependencies
-- ROS2 (Python)
-- OpenCV (cv2)
-- RealSense SDK
-- std_msgs
-- sensor_msgs
-- datetime (for timestamp generation)
-
-## File Paths
-- Golden sample (detect): `~/image_sample2D_golden(x=0,z=112).png`
-- Golden sample (detect_0): `~/image_sample2D_golden(x=0,z=112).png`
-- Test image (detect_0): `~/image_sample2D_golden(x=0,z=112).png`
-- Golden sample (test): `~/image_sample/2D_golden(x=0,z=112).png`
-- Test image (test): `~/image_sample/2D(x=25,z=117).png`
-- Saved images: `YYYY_MMDD_HHMMSS.png` in current directory
-=======
 Translate C# utility functions from `utility/vision.cs` to Python:
 
 1. **Main Function**: `compensate_cabinet(image_golden, image_now)`
@@ -306,4 +241,3 @@ src/
 - **Class creation**: Create `BlobEdgePipeline` class for parameter management
 - **Configuration**: Parameters stored in `vision_parameter.yaml`
 - **C# to Python considerations**: Convert Emgu CV (C#) calls to OpenCV (Python) equivalents
->>>>>>> test2
