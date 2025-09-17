@@ -48,6 +48,7 @@ setup(
             'roi_preview_node = vision_module.roi_preview_node:main',
             'get_matrix = vision_module.get_matrix:main',
             'detection_origin = vision_module.detection_origin:main',
+            'compensate_aider = vision_module.compensate_aider:main',
         ],
     },
 )

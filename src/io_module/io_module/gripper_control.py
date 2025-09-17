@@ -37,6 +37,7 @@ class DataNode(Node):
         )
         
         self.gripper_io_cmd_publisher = self.create_publisher(Int32MultiArray, 'gripper_io_cmd', 10)
+        self.gripper_state_publisher = self.create_publisher(String, 'gripper_control_state', 10)
 
 
     def gripper_cmd_callback(self, msg: GripperCmd):
@@ -262,6 +263,7 @@ def main():
             executor.spin_once(timeout_sec=0.1)
             system.step()
             print(f"[現在狀態] {system.state}")
+            data.gripper_state_publisher.publish(String(data=system.state))
             time.sleep(timer_period)
 
     except KeyboardInterrupt:

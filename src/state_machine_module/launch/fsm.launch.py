@@ -49,6 +49,12 @@ def generate_launch_description():
             name='recipe_node',
             output='screen'
         ),
+        Node(
+            package='task_module',
+            executable='compensate_v2',
+            name='compensate_v2',
+            output='screen'
+        ),
 
     
     ])

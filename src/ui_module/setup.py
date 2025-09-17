@@ -30,6 +30,8 @@ setup(
             "ui_comfirm = ui_module.ui_comfirm:main",
             "ui_limit = ui_module.ui_limit:main",
             "ui_cabinent = ui_module.ui_cabinent:main",
+            "ui_new = ui_module.ui_new:main",
+            "ui_task = ui_module.ui_task:main",
         ],
     },
 )

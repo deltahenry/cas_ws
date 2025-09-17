@@ -7,15 +7,17 @@ from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, Q
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Float32MultiArray
-from common_msgs.msg import TaskCmd, LimitCmd   # ✅ 匯入 LimitCmd
+from common_msgs.msg import TaskCmd, LimitCmd, TaskState   # ✅ 匯入 LimitCmd
 
 class IntegratedUI(QWidget):
     def __init__(self, ros_node: Node):
         super().__init__()
         self.ros_node = ros_node
+        self.state = "idle"
 
         # ========== Compensate ==========
         self.pose_label = QLabel("目標位置: (尚未獲取)")
+        self.state_label = QLabel("補償狀態: idle")   # ✅ 新增顯示補償狀態
 
         self.detect_btn = QPushButton("🔍 偵測")
         self.cancel_btn = QPushButton("❌ 取消偵測")
@@ -26,21 +28,31 @@ class IntegratedUI(QWidget):
         self.limit_open_btn = QPushButton("🚦 開啟 Limit")
         self.limit_close_btn = QPushButton("🛑 關閉 Limit")
         self.limit_stop_btn = QPushButton("⏹ 停止 Limit")
+        self.pass_btn = QPushButton("▶ Pass")
 
         # Publisher
         self.task_cmd_pub = self.ros_node.create_publisher(TaskCmd, "/compensate_cmd", 10)
         self.confirm_pub = self.ros_node.create_publisher(String, "/confirm_cmd", 10)
         self.limit_pub = self.ros_node.create_publisher(LimitCmd, "/limit_cmd", 10)   # ✅ 使用 LimitCmd
+        self.pass_pub = self.ros_node.create_publisher(Float32MultiArray, "/compensate_pose_cmd", 10)
 
         # Subscriber
         self.pose_sub = self.ros_node.create_subscription(
-            Float32MultiArray, "/compensate_pose_cmd", self.pose_callback, 10
+            Float32MultiArray, "/ui_compensate_pose", self.pose_callback, 10
         )
+
+        self.compensate_state_sub = self.ros_node.create_subscription(
+            TaskState, '/task_state_compensate', self.compensate_state_callback, 10
+        )
+
+
 
         # ========== Layout ==========
         layout = QVBoxLayout()
         layout.addWidget(QLabel("=== 補償控制 ==="))
+        layout.addWidget(self.state_label)
         layout.addWidget(self.pose_label)
+        layout.addWidget(self.pass_btn)
         layout.addWidget(self.detect_btn)
         layout.addWidget(self.cancel_btn)
         layout.addWidget(self.confirm_btn)
@@ -62,6 +74,21 @@ class IntegratedUI(QWidget):
         self.limit_open_btn.clicked.connect(lambda: self.send_limit_cmd("open_limit"))
         self.limit_close_btn.clicked.connect(lambda: self.send_limit_cmd("close_limit"))
         self.limit_stop_btn.clicked.connect(lambda: self.send_limit_cmd("stop_limit"))
+
+        self.pass_btn.clicked.connect(self.publish_pass_once)
+
+    def compensate_state_callback(self, msg: TaskState):
+        self.state = msg.state
+        self.state_label.setText(f"補償狀態: {self.state}")   # ✅ 更新 UI
+        print(f"[UI] 補償狀態更新: {self.state}")
+
+    def publish_pass_once(self):
+        """Publish /compensate_pose once with fixed values"""
+        msg = Float32MultiArray()
+        msg.data = [0.0, 0.0]
+        self.pass_pub.publish(msg)
+        print("[UI] Pass published once: [0.0, 0.0]")
+
 
     # ===== Compensate 功能 =====
     def send_detect_cmd(self, cmd: str):

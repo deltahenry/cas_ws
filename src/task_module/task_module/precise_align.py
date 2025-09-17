@@ -147,8 +147,8 @@ class PreciseAlignState(Enum):
     IDLE = "idle"
     INIT = "init"
     MOVE_DETECT = "move_to_detect"
+    # MOVE_ACT = "move_to_act"
     ALIGN = "align"
-    MOVE_ACT = "move_to_act"
     DONE = "done"
     FAIL = "fail"
 
@@ -163,7 +163,7 @@ class PreciseAlignFSM(Machine):
             PreciseAlignState.INIT.value,
             PreciseAlignState.MOVE_DETECT.value,
             PreciseAlignState.ALIGN.value,
-            PreciseAlignState.MOVE_ACT.value,
+            # PreciseAlignState.MOVE_ACT.value,
             PreciseAlignState.DONE.value,
             PreciseAlignState.FAIL.value
         ]
@@ -172,8 +172,8 @@ class PreciseAlignFSM(Machine):
             {'trigger': 'idle_to_init', 'source': PreciseAlignState.IDLE.value, 'dest': PreciseAlignState.INIT.value},
             {'trigger': 'init_to_move_detect', 'source': PreciseAlignState.INIT.value, 'dest': PreciseAlignState.MOVE_DETECT.value},
             {'trigger': 'move_detect_to_align', 'source': PreciseAlignState.MOVE_DETECT.value, 'dest': PreciseAlignState.ALIGN.value},
-            {'trigger': 'align_to_move_act', 'source': PreciseAlignState.ALIGN.value, 'dest': PreciseAlignState.MOVE_ACT.value},
-            {'trigger': 'move_act_to_done', 'source': PreciseAlignState.MOVE_ACT.value, 'dest': PreciseAlignState.DONE.value},
+            {'trigger': 'align_to_done', 'source': PreciseAlignState.ALIGN.value, 'dest': PreciseAlignState.DONE.value},
+            # {'trigger': 'move_act_to_done', 'source': PreciseAlignState.MOVE_ACT.value, 'dest': PreciseAlignState.DONE.value},
             {'trigger': 'return_to_idle', 'source': '*', 'dest': PreciseAlignState.IDLE.value},
             {'trigger': 'to_fail', 'source': '*', 'dest': PreciseAlignState.FAIL.value},
         ]
@@ -250,10 +250,12 @@ class PreciseAlignFSM(Machine):
             special_cabinent_height = 113.0
             tolerance = 1.0
 
-            if abs(self.data_node.target_height) - 226.0 < 10.0: #2nd cabinent
-                height_cmd = self.data_node.target_height - special_cabinent_height
-            else:
-                height_cmd = self.data_node.target_height- regular_cabinent_height
+            # if abs(self.data_node.target_height) - 226.0 < 10.0: #2nd cabinent
+            #     height_cmd = self.data_node.target_height - special_cabinent_height
+            # else:
+            #     height_cmd = self.data_node.target_height- regular_cabinent_height
+
+            height_cmd = self.data_node.target_height
 
             if not self.send_fork_cmd:
                 self.fork_cmd(mode="run", speed="slow", direction="down", distance=height_cmd)
@@ -273,7 +275,7 @@ class PreciseAlignFSM(Machine):
 
             if self.data_node.compensate_state == "done":
                 print("粗對齊完成，進入深度檢查階段")
-                self.align_to_move_act()
+                self.align_to_done()
 
                 #close rough align
                 self.data_node.compensate_cmd_publisher.publish(TaskCmd(mode='stop'))
@@ -287,21 +289,21 @@ class PreciseAlignFSM(Machine):
             else:
                 print("waiting for precise align done")
         
-        elif self.state == PreciseAlignState.MOVE_ACT.value:
-            height_cmd = self.data_node.target_height
-            tolerance = 1.0
+        # elif self.state == PreciseAlignState.MOVE_ACT.value:
+        #     height_cmd = self.data_node.target_height
+        #     tolerance = 1.0
 
-            if not self.send_fork_cmd:
-                self.fork_cmd(mode="run", speed="slow", direction="down", distance=height_cmd)
-                self.send_fork_cmd = True
+        #     if not self.send_fork_cmd:
+        #         self.fork_cmd(mode="run", speed="slow", direction="down", distance=height_cmd)
+        #         self.send_fork_cmd = True
             
-            else:
-                if abs(self.data_node.current_height - height_cmd) <= tolerance and self.data_node.forkstate == "idle":
-                    self.send_fork_cmd = False
-                    print("[PreciseAlignmentFSM] 叉車已到達目標高度，進入電池檢測階段")
-                    self.move_act_to_done()
-                else:
-                    print("waiting")
+        #     else:
+        #         if abs(self.data_node.current_height - height_cmd) <= tolerance and self.data_node.forkstate == "idle":
+        #             self.send_fork_cmd = False
+        #             print("[PreciseAlignmentFSM] 叉車已到達目標高度，進入電池檢測階段")
+        #             self.move_act_to_done()
+        #         else:
+        #             print("waiting")
             
         elif self.state == PreciseAlignState.DONE.value:
             self.laser_cmd("laser_close")  # 開啟雷射

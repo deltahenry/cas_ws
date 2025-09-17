@@ -93,7 +93,7 @@ class DataNode(Node):
 
         self.compensate_pose_sub = self.create_subscription(
             Float32MultiArray,
-            '/compensate_pose',
+            '/compensate_pose_cmd',
             self.compensate_pose_callback,
             10
         )
@@ -112,7 +112,7 @@ class DataNode(Node):
         self.motion_cmd_publisher = self.create_publisher(MotionCmd, '/motion_cmd', 10)
         self.fork_cmd_publisher = self.create_publisher(ForkCmd, 'fork_cmd', 10)
         self.laser_cmd_publisher = self.create_publisher(Int32MultiArray,'/laser_io_cmd',10)
-        self.ui_pose_publisher = self.create_publisher(Float32MultiArray,'/compensate_pose_cmd',10)
+        self.ui_pose_publisher = self.create_publisher(Float32MultiArray,'/ui_compensate_pose',10)
 
         self.detection_cmd_publisher = self.create_publisher(String,'/detection_cmd',10)
 
@@ -378,6 +378,8 @@ class CompensateFSM(Machine):
 
                 self.data_node.ui_pose_publisher.publish(Float32MultiArray(data=[self.x_cmd,self.y_cmd,self.yaw_cmd*57.2958,self.z_cmd]))
 
+                self.data_node.confirm_compensate = True  # 自動確認補償
+
                 if self.data_node.confirm_compensate:
                     if not self.send_compensate:
                         self.compensate(self.x_cmd,self.y_cmd,self.yaw_cmd,self.z_cmd)
@@ -437,6 +439,8 @@ class CompensateFSM(Machine):
                 self.z_cmd = self.data_node.current_height 
 
                 self.data_node.ui_pose_publisher.publish(Float32MultiArray(data=[self.x_cmd,self.y_cmd,self.yaw_cmd*57.2958,self.z_cmd]))
+
+                self.data_node.confirm_compensate = True  # 自動確認補償
 
                 if self.data_node.confirm_compensate:
                     if not self.send_compensate:

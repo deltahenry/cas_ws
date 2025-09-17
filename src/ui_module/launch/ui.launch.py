@@ -15,27 +15,33 @@ def generate_launch_description():
         ),
         Node(
             package='ui_module',
+            executable='ui_new',
+            name='ui_new',
+            output='screen'
+        ),
+        Node(
+            package='ui_module',
             executable='ui_motor_control',
             name='ui_motor_control',
             output='screen'
         ),
-        Node(
-            package='ui_module',
-            executable='ui_forklift',
-            name='ui_forklift',
-            output='screen'
-        ),
-        Node(
-            package='ui_module',
-            executable='ui_recipe',
-            name='ui_recipe',
-            output='screen'
-        ),
-        Node(
-            package='ui_module',
-            executable='ui_limit',
-            name='ui_limit',
-            output='screen'
-        ),
+        # Node(
+        #     package='ui_module',
+        #     executable='ui_forklift',
+        #     name='ui_forklift',
+        #     output='screen'
+        # ),
+        # Node(
+        #     package='ui_module',
+        #     executable='ui_recipe',
+        #     name='ui_recipe',
+        #     output='screen'
+        # ),
+        # Node(
+        #     package='ui_module',
+        #     executable='ui_limit',
+        #     name='ui_limit',
+        #     output='screen'
+        # ),
 
     ])

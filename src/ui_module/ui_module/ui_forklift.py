@@ -1,6 +1,7 @@
 import sys
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QPushButton, QComboBox, QLabel, QSlider, QHBoxLayout
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout,
+    QPushButton, QLabel, QLineEdit
 )
 from PySide6.QtCore import Qt, QTimer
 import rclpy
@@ -13,7 +14,7 @@ class ForkliftControlNode(Node):
     def __init__(self):
         super().__init__('forklift_control_node')
         self.current_height = 0  # mm
-        self.gui = None  # GUI reference
+        self.gui = None
 
         self.publisher_ = self.create_publisher(ForkCmd, 'fork_cmd', 10)
         self.height_info_subscriber = self.create_subscription(
@@ -30,13 +31,14 @@ class ForkliftControlNode(Node):
         msg.direction = direction
         msg.distance = distance
         self.publisher_.publish(msg)
-        self.get_logger().info(f"Published ForkCmd: mode={mode}, speed={speed}, direction={direction}, distance={distance}")
+        self.get_logger().info(
+            f"Published ForkCmd: mode={mode}, speed={speed}, direction={direction}, distance={distance}"
+        )
 
     def height_info_callback(self, msg: Int32):
         self.current_height = msg.data
         if self.gui:
             self.gui.update_height(msg.data)
-        self.get_logger().info(f"Received height info: {msg.data} mm")
 
 
 class ForkliftControlGUI(QWidget):
@@ -44,131 +46,87 @@ class ForkliftControlGUI(QWidget):
         super().__init__()
         self.ros_node = ros_node
         self.setWindowTitle("Forklift Control")
-        self.step = 10  # mm per step
-        self.adjust_direction = None
-        self.current_distance = 120  # initial value
+        self.step = 2  # 每次移動量 2mm
+        self.current_distance = 0
 
         layout = QVBoxLayout()
 
-        # --- Height Display ---
-        self.height_label = QLabel("Current Height: 0 mm")
-        self.height_label.setStyleSheet("font-size: 18px;")
+        # --- 高度顯示 ---
+        self.height_label = QLabel("現在高度: 0 mm")
+        self.height_label.setAlignment(Qt.AlignCenter)
+        self.height_label.setStyleSheet("font-size: 20px;")
         layout.addWidget(self.height_label)
 
-        self.height_cmd_label = QLabel("Height Cmd: 120 mm")
-        self.height_cmd_label.setStyleSheet("font-size: 18px;")
+        self.height_cmd_label = QLabel("高度命令: 0 mm")
+        self.height_cmd_label.setAlignment(Qt.AlignCenter)
+        self.height_cmd_label.setStyleSheet("font-size: 20px;")
         layout.addWidget(self.height_cmd_label)
 
-        # --- Mode ---
-        self.mode_combo = QComboBox()
-        self.mode_combo.addItems(["run"])
-        layout.addWidget(QLabel("Mode"))
-        layout.addWidget(self.mode_combo)
+        # --- 輸入框 + 發布命令 ---
+        input_layout = QHBoxLayout()
+        self.input_field = QLineEdit()
+        self.input_field.setPlaceholderText("輸入高度 mm")
+        self.input_field.setFixedHeight(40)
+        input_layout.addWidget(self.input_field)
 
-        # --- Speed ---
-        self.speed_combo = QComboBox()
-        self.speed_combo.addItems(["fast", "slow", "medium"])
-        layout.addWidget(QLabel("Speed"))
-        layout.addWidget(self.speed_combo)
+        self.publish_button = QPushButton("發布命令")
+        self.publish_button.setMinimumHeight(40)
+        self.publish_button.setStyleSheet("font-size: 18px; background-color: green; color: white;")
+        self.publish_button.clicked.connect(self.send_command)
+        input_layout.addWidget(self.publish_button)
+        layout.addLayout(input_layout)
 
-        # --- Direction ---
-        self.direction_combo = QComboBox()
-        self.direction_combo.addItems(["up", "down"])
-        # layout.addWidget(QLabel("Direction"))
-        # layout.addWidget(self.direction_combo)
-
-        # --- Distance Slider ---
-        layout.addWidget(QLabel("Distance (manual)"))
-        self.distance_slider = QSlider(Qt.Horizontal)
-        self.distance_slider.setMinimum(80)
-        self.distance_slider.setMaximum(1500)
-        self.distance_slider.setValue(self.current_distance)
-        self.distance_slider.valueChanged.connect(self.update_distance)
-        layout.addWidget(self.distance_slider)
-
-        # --- Up/Down Buttons ---
-        button_layout = QHBoxLayout()
+        # --- 上下微調按鈕 ---
+        btn_layout = QHBoxLayout()
         self.up_button = QPushButton("↑")
         self.down_button = QPushButton("↓")
         for btn in [self.up_button, self.down_button]:
             btn.setMinimumHeight(60)
             btn.setStyleSheet("font-size: 24px;")
-        button_layout.addWidget(self.up_button)
-        button_layout.addWidget(self.down_button)
-        layout.addLayout(button_layout)
+        btn_layout.addWidget(self.up_button)
+        btn_layout.addWidget(self.down_button)
+        layout.addLayout(btn_layout)
 
-        self.up_button.pressed.connect(self.start_increase)
-        self.up_button.released.connect(self.stop_adjustment)
-        self.down_button.pressed.connect(self.start_decrease)
-        self.down_button.released.connect(self.stop_adjustment)
+        self.up_button.clicked.connect(self.increase_and_send)
+        self.down_button.clicked.connect(self.decrease_and_send)
 
-        self.adjust_timer = QTimer()
-        self.adjust_timer.timeout.connect(self.adjust_distance)
-
-        # --- Send Manual Command Button ---
-        self.send_button = QPushButton("Send Command")
-        self.send_button.setMinimumHeight(60)
-        self.send_button.setStyleSheet("font-size: 20px; color: white; background-color: green;")
-        self.send_button.clicked.connect(self.send_command)
-        layout.addWidget(self.send_button)
-
-        # --- STOP Button ---
+        # --- STOP 按鈕 ---
         self.stop_button = QPushButton("STOP")
         self.stop_button.setMinimumHeight(60)
-        self.stop_button.setStyleSheet("font-size: 20px; color: white; background-color: red;")
+        self.stop_button.setStyleSheet("font-size: 20px; background-color: red; color: white;")
         self.stop_button.clicked.connect(self.send_stop_command)
         layout.addWidget(self.stop_button)
 
         self.setLayout(layout)
 
-    def update_distance(self, value):
-        self.current_distance = value
-        self.height_cmd_label.setText(f"Height Cmd: {value} mm")
-
     def update_height(self, height):
-        self.height_label.setText(f"Current Height: {height} mm")
-
-    def get_current_height(self):
-        return self.ros_node.current_height
-
-    def start_increase(self):
-        self.adjust_direction = "up"
-        self.adjust_timer.start(100)
-
-    def start_decrease(self):
-        self.adjust_direction = "down"
-        self.adjust_timer.start(100)
-
-    def stop_adjustment(self):
-        self.adjust_timer.stop()
-        self.adjust_direction = None
-
-    def adjust_distance(self):
-        current_height = self.get_current_height()
-
-        if self.adjust_direction == "up":
-            distance = min(1500, current_height + self.step)
-        elif self.adjust_direction == "down":
-            distance = max(80, current_height - self.step)
-        else:
-            return
-
-        mode = self.mode_combo.currentText()
-        speed = self.speed_combo.currentText()
-        direction = self.adjust_direction
-        self.ros_node.publish_cmd(mode, speed, direction, float(distance))
-        self.height_cmd_label.setText(f"Height Cmd: {distance} mm")
+        self.height_label.setText(f"現在高度: {height} mm")
 
     def send_command(self):
-        mode = self.mode_combo.currentText()
-        speed = self.speed_combo.currentText()
-        direction = self.direction_combo.currentText()
-        distance = float(self.current_distance)
-        self.ros_node.publish_cmd(mode, speed, direction, distance)
-        self.height_cmd_label.setText(f"Height Cmd: {distance} mm")
+        """由輸入框 Key in 值來發布"""
+        text = self.input_field.text().strip()
+        if not text:
+            return
+        try:
+            value = int(text)
+            self.current_distance = value
+            self.height_cmd_label.setText(f"高度命令: {value} mm")
+            self.ros_node.publish_cmd("run", "slow", "up", float(value))
+        except ValueError:
+            print("⚠️ 請輸入有效的數字")
 
     def send_stop_command(self):
-        self.ros_node.publish_cmd("stop", "", "", 0.0)
+        self.ros_node.publish_cmd("stop", "slow", "down", 0.0)
+
+    def increase_and_send(self):
+        self.current_distance += self.step
+        self.height_cmd_label.setText(f"高度命令: {self.current_distance} mm")
+        self.ros_node.publish_cmd("run", "slow", "up", float(self.current_distance))
+
+    def decrease_and_send(self):
+        self.current_distance = max(0, self.current_distance - self.step)
+        self.height_cmd_label.setText(f"高度命令: {self.current_distance} mm")
+        self.ros_node.publish_cmd("run", "slow", "down", float(self.current_distance))
 
 
 def main(args=None):
@@ -185,11 +143,10 @@ def main(args=None):
     timer.start(10)
 
     exit_code = app.exec()
-
     ros_node.destroy_node()
     rclpy.shutdown()
     sys.exit(exit_code)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

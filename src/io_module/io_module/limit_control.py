@@ -37,6 +37,7 @@ class DataNode(Node):
         )
         
         self.limit_io_cmd_publisher = self.create_publisher(Int32MultiArray, 'limit_io_cmd', 10)
+        self.limit_state_publisher = self.create_publisher(String, 'limit_control_state', 10)
 
 
     def limit_cmd_callback(self, msg: LimitCmd):
@@ -231,6 +232,7 @@ def main():
             executor.spin_once(timeout_sec=0.1)
             system.step()
             print(f"[現在狀態] {system.state}")
+            data.limit_state_publisher.publish(String(data=system.state))
             time.sleep(timer_period)
 
     except KeyboardInterrupt:
