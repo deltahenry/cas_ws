@@ -7,10 +7,16 @@ import os
 
 def generate_launch_description():
     return LaunchDescription([
+        # Node(
+        #     package='motion_control_module',
+        #     executable='control',
+        #     name='motion_control',
+        #     output='screen'
+        # ),
         Node(
             package='motion_control_module',
-            executable='control',
-            name='motion_control',
+            executable='control_v2',
+            name='motion_control_v2',
             output='screen'
         ),
         Node(

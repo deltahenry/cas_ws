@@ -2,9 +2,7 @@ uint8           TYPE_HOME = 0
 uint8           TYPE_GOTO = 1
 uint8           TYPE_GOTO_RELATIVE = 2
 uint8           TYPE_Y_MOVE = 3
-
-# add new type for velocity mode
-uint8           TYPE_VELOCITY=4
+uint8           TYPE_STOP = 4
 
 uint8           command_type
 

@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String, Float32MultiArray,Int32
+from std_msgs.msg import String, Float32MultiArray,Int32,Bool
 from common_msgs.msg import Recipe, TaskCmd, StateCmd, TaskState, LimitCmd,GripperCmd,ForkCmd,MotionCmd,MotionState,CurrentPose,ForkState
 
 from PySide6.QtGui import QPixmap, QImage
@@ -37,6 +37,7 @@ class RecipePublisher(Node):
         self.confirm_pub = self.create_publisher(String, '/confirm_cmd', 10)
         self.compensate_task_pub = self.create_publisher(TaskCmd, '/compensate_cmd', 10)
         self.compensate_pose_pub = self.create_publisher(Float32MultiArray, '/compensate_pose_cmd', 10)
+        self.debug_pub = self.create_publisher(Bool,'/debug_cmd', 10)
 
 
     def publish_recipe(self, mode, height, depth):
@@ -277,6 +278,8 @@ class UI3(QWidget):
         self.state = "idle"
         self.current_yaw = 0.0  # 存放 UI 回傳 yaw 值
 
+        self.debug_state = False  # 除錯模式
+
         # ---------------- 補償控制區 ----------------
         compensation_group = QGroupBox("補償控制")
         compensation_layout = QVBoxLayout()
@@ -462,46 +465,66 @@ class UI3(QWidget):
         self.motor_widget = QWidget()
         motor_layout = QVBoxLayout()
 
-        # 十字 X/Y 控制 (GridLayout)
-        xy_layout = QGridLayout()
+        # --- 上方 Home / Y+ / Stop + Debug --- 
+        top_layout = QGridLayout()
+
+        self.home_btn = QPushButton("🏠 Home")
+        self.debug_btn = QPushButton("🐞 Debug")
+        self.stop_btn = QPushButton("🛑 Stop")
         self.y_plus_btn = QPushButton("Y+")
-        self.y_minus_btn = QPushButton("Y-")
-        self.x_plus_btn = QPushButton("X+")
+
+        for btn in [self.home_btn, self.debug_btn, self.stop_btn]:
+            btn.setFixedSize(60, 30)
+            btn.setStyleSheet("font-size: 12px;")
+
+        self.y_plus_btn.setFixedSize(40, 40)
+        self.y_plus_btn.setStyleSheet("font-size: 16px;")
+
+        # 左上 Home
+        top_layout.addWidget(self.home_btn, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+        # Debug 在 Home 下方
+        top_layout.addWidget(self.debug_btn, 0, 2, alignment=Qt.AlignLeft | Qt.AlignTop)
+        # 右上 Stop
+        top_layout.addWidget(self.stop_btn, 0, 2, alignment=Qt.AlignRight | Qt.AlignTop)
+        # Y+ 置中
+        top_layout.addWidget(self.y_plus_btn, 0, 1, alignment=Qt.AlignCenter)
+
+        motor_layout.addLayout(top_layout)
+
+        # --- 下方中央 XY 控制 + 步距下拉 ---
+        xy_layout = QGridLayout()
         self.x_minus_btn = QPushButton("X-")
-
-        for btn in [self.y_plus_btn, self.y_minus_btn, self.x_plus_btn, self.x_minus_btn]:
-            btn.setFixedSize(50, 50)   # 稍微放大避免誤觸
-            btn.setStyleSheet("font-size: 16px;")
-
-        xy_layout.addWidget(self.y_plus_btn, 0, 1)
-        xy_layout.addWidget(self.x_minus_btn, 1, 0)
-        xy_layout.addWidget(self.x_plus_btn, 1, 2)
-        xy_layout.addWidget(self.y_minus_btn, 2, 1)
-
-        # 在 Grid 左下 & 右上 放 yaw 按鈕
-        self.yaw_plus_btn = QPushButton("⟲")  # 旋轉圖示
-        self.yaw_minus_btn = QPushButton("⟳")
-        for btn in [self.yaw_plus_btn, self.yaw_minus_btn]:
-            btn.setFixedSize(50, 50)
-            btn.setStyleSheet("font-size: 18px;")
-
-        xy_layout.addWidget(self.yaw_plus_btn, 0, 2, alignment=Qt.AlignRight | Qt.AlignTop)
-        xy_layout.addWidget(self.yaw_minus_btn, 2, 0, alignment=Qt.AlignLeft | Qt.AlignBottom)
-
-        # --- Step 模式選單 (縮小後放左上角) ---
+        self.x_plus_btn = QPushButton("X+")
+        self.y_minus_btn = QPushButton("Y-")
         self.step_combo = QComboBox()
-        self.step_combo.setFixedSize(100, 30)  # 縮小尺寸
+        self.step_combo.setFixedSize(80, 30)
         self.step_combo.setStyleSheet("font-size: 12px;")
         self.step_combo.addItem("0.1mm/0.1°", (0.1, 0.1, 0.1))
         self.step_combo.addItem("1mm/0.5°", (1.0, 1.0, 0.5))
         self.step_combo.addItem("5mm/1°", (5.0, 5.0, 1.0))
         self.step_combo.addItem("10mm/5°", (10.0, 10.0, 5.0))
 
-        xy_layout.addWidget(self.step_combo, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+        for btn in [self.x_minus_btn, self.x_plus_btn, self.y_minus_btn]:
+            btn.setFixedSize(40, 40)
+            btn.setStyleSheet("font-size: 16px;")
+
+        xy_layout.addWidget(self.x_minus_btn, 0, 0, alignment=Qt.AlignCenter)
+        xy_layout.addWidget(self.step_combo, 0, 1, alignment=Qt.AlignCenter)
+        xy_layout.addWidget(self.x_plus_btn, 0, 2, alignment=Qt.AlignCenter)
+        xy_layout.addWidget(self.y_minus_btn, 1, 1, alignment=Qt.AlignCenter)
+
+        # Yaw 按鈕左下 / 右下
+        self.yaw_plus_btn = QPushButton("⟲")
+        self.yaw_minus_btn = QPushButton("⟳")
+        for btn in [self.yaw_plus_btn, self.yaw_minus_btn]:
+            btn.setFixedSize(30, 30)
+            btn.setStyleSheet("font-size: 18px;")
+        xy_layout.addWidget(self.yaw_minus_btn, 1, 0, alignment=Qt.AlignLeft | Qt.AlignBottom)
+        xy_layout.addWidget(self.yaw_plus_btn, 1, 2, alignment=Qt.AlignRight | Qt.AlignBottom)
 
         motor_layout.addLayout(xy_layout)
 
-        # Y軸 key-in + 發布
+        # --- Y 軸輸入 + 發布 ---
         y_input_layout = QHBoxLayout()
         self.y_input = QLineEdit()
         self.y_input.setPlaceholderText("輸入Y軸位置 (mm)")
@@ -511,6 +534,7 @@ class UI3(QWidget):
         y_input_layout.addWidget(self.y_input)
         y_input_layout.addWidget(self.y_publish_btn)
         motor_layout.addLayout(y_input_layout)
+
         self.motor_widget.setLayout(motor_layout)
 
         # 事件綁定
@@ -521,6 +545,9 @@ class UI3(QWidget):
         self.y_minus_btn.clicked.connect(lambda: self.motor_y_move("y-", self.step_combo.currentData()[1]))
         self.yaw_plus_btn.clicked.connect(lambda: self.motor_yaw_move("yaw+", self.step_combo.currentData()[2]))
         self.yaw_minus_btn.clicked.connect(lambda: self.motor_yaw_move("yaw-", self.step_combo.currentData()[2]))
+        self.home_btn.clicked.connect(self.motor_home)
+        self.stop_btn.clicked.connect(self.motor_stop)
+        self.debug_btn.clicked.connect(self.toggle_debug_state)
 
         # 將元件頁面加入堆疊
         self.component_stack.addWidget(self.motor_widget)
@@ -553,6 +580,7 @@ class UI3(QWidget):
         self.limit_pub = node.limit_pub
         self.fork_pub = node.create_publisher(ForkCmd, 'fork_cmd', 10)
         self.motion_pub = node.create_publisher(MotionCmd, 'motion_cmd', 10)
+        self.debug_pub = node.debug_pub
         
         # Subscriber
         node.create_subscription(Float32MultiArray, "/ui_compensate_pose", self.pose_callback, 10)
@@ -561,6 +589,7 @@ class UI3(QWidget):
         node.create_subscription(ForkState, 'fork_state', self.update_fork_state, 10)
         node.create_subscription(String, 'gripper_control_state', self.update_gripper_state, 10)
         node.create_subscription(String, 'limit_control_state', self.update_limit_state, 10)
+        node.create_subscription(Bool, 'debug_mode_state', self.update_debug_state, 10)
 
         # 事件
         self.detect_btn.clicked.connect(lambda: self.send_detect_cmd("l_shape"))
@@ -774,6 +803,46 @@ class UI3(QWidget):
         msg.speed = 20.0
         self.motion_pub.publish(msg)
 
+    def motor_home(self):
+        msg = MotionCmd()
+        msg.command_type = MotionCmd.TYPE_HOME
+        msg.pose_data = [0.0, 0.0, 0.0]  # X, Y, Z, Yaw(deg)
+        msg.speed = 5.0
+        self.motion_pub.publish(msg)
+    
+    def motor_stop(self):
+        msg = MotionCmd()
+        msg.command_type = MotionCmd.TYPE_STOP
+        msg.pose_data = [0.0, 0.0, 0.0]  # X, Y, Z, Yaw(deg)
+        msg.speed = 0.0
+        self.motion_pub.publish(msg)
+
+    def update_debug_state(self, msg: Bool):
+        self.debug_state = msg.data
+        self.update_button_style()
+
+    def toggle_debug_state(self):
+        """按鈕被點擊時切換狀態"""
+        self.debug_state = not self.debug_state
+        self.update_button_style()
+        # 發布新的狀態
+        msg = Bool()
+        msg.data = self.debug_state
+        self.debug_pub.publish(msg)
+
+    def update_button_style(self):
+        """根據 debug_state 改變按鈕外觀"""
+        if self.debug_state:
+            self.debug_btn.setStyleSheet(
+                "font-size: 14px; font-weight: bold; background-color: green; color: white;"
+            )
+            self.debug_btn.setChecked(True)
+        else:
+            self.debug_btn.setStyleSheet(
+                "font-size: 14px; font-weight: bold; background-color: lightgray; color: black;"
+            )
+            self.debug_btn.setChecked(False)
+
 # ---------------- 視覺 Overlay ----------------
 class VisualOverlay(QWidget):
     def __init__(self, node):
@@ -805,7 +874,8 @@ class IntegratedUI(QWidget):
         super().__init__()
         
         node.create_subscription(CurrentPose, '/current_pose', self.update_current_pose, 10)
-        node.create_subscription(Float32MultiArray, 'depth_data', self.update_depth, 10)     
+        node.create_subscription(Float32MultiArray, 'depth_data', self.update_depth, 10)   
+        node.create_subscription(Int32, 'lr_distance', self.update_height, 10)
 
         self.resize(1280, 799)
         self.setWindowTitle("Integrated UI")
@@ -905,6 +975,10 @@ class IntegratedUI(QWidget):
         right_depth = float(msg.data[1])
         self.depth_label.setText(f"📏 Depth:\nL: {left_depth:.2f} mm\nR: {right_depth:.2f} mm")
 
+    def update_height(self,msg: Int32):
+        z_height = float(msg.data)
+        self.height_label.setText(f"⬆️ Height:\nZ: {z_height:.2f} mm")
+        
 # -------------------
 def main(args=None):
     rclpy.init(args=args)
