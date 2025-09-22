@@ -13,6 +13,7 @@ import numpy as np
 #parameters
 timer_period = 0.05  # seconds
 
+#DI_1[15] = NC
 
 # --- ROS2 Node ---
 class DataNode(Node):

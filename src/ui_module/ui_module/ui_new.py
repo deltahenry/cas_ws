@@ -18,12 +18,12 @@ from PySide6.QtGui import QPixmap, QImage
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
+
 # -------------------
 # 高度設定
 pick_heights = {"C1": [944.0,824.0,704.0,586.0,465.0,344.0,226.0,113.0,113.0]}
 assembly_heights = {"C1": [944.0,824.0,704.0,586.0,465.0,344.0,226.0,113.0,113.0]}
 
-# -------------------
 # ROS2 Publisher Node
 class RecipePublisher(Node):
     def __init__(self):
@@ -39,7 +39,6 @@ class RecipePublisher(Node):
         self.compensate_pose_pub = self.create_publisher(Float32MultiArray, '/compensate_pose_cmd', 10)
         self.debug_pub = self.create_publisher(Bool,'/debug_cmd', 10)
 
-
     def publish_recipe(self, mode, height, depth):
         msg = Recipe()
         msg.mode = mode
@@ -47,6 +46,7 @@ class RecipePublisher(Node):
         msg.depth = depth
         self.recipe_publisher.publish(msg)
         self.get_logger().info(f"Published Recipe: {msg}")
+
 
 # -------------------
 # UI1: RecipeUI
@@ -75,6 +75,17 @@ class RecipeUI(QWidget):
         mode_layout.addWidget(mode_label)
         mode_layout.addWidget(self.mode_box)
         main_layout.addLayout(mode_layout)
+
+        # 手動輸入深度
+        depth_layout = QHBoxLayout()
+        depth_label = QLabel("Depth:")
+        self.depth_spin = QDoubleSpinBox()
+        self.depth_spin.setRange(0, 2000)   # 假設深度範圍
+        self.depth_spin.setValue(self.pick_depth)
+        self.depth_spin.valueChanged.connect(self.update_depth)
+        depth_layout.addWidget(depth_label)
+        depth_layout.addWidget(self.depth_spin)
+        main_layout.addLayout(depth_layout)
 
         # Stack
         self.stack = QStackedWidget()
@@ -106,11 +117,14 @@ class RecipeUI(QWidget):
     def switch_page(self, mode):
         if mode=="pick":
             self.stack.setCurrentIndex(0)
+            self.depth_spin.setValue(self.pick_depth)
         else:
             self.stack.setCurrentIndex(1)
+            self.depth_spin.setValue(self.assembly_depth)
 
     def select_cell(self, mode, height, depth, button, name):
-        if self.selected_button: self.selected_button.setChecked(False)
+        if self.selected_button: 
+            self.selected_button.setChecked(False)
         self.selected_button = button
         self.selected_mode = mode
         self.selected_height = height
@@ -119,14 +133,27 @@ class RecipeUI(QWidget):
         if self.log_callback:
             self.log_callback(1,f"👉 選擇 {mode} -> {name}, Depth={depth:.1f}")
 
+    def update_depth(self, val):
+        """當手動輸入深度時更新"""
+        if self.mode_box.currentText() == "pick":
+            self.pick_depth = val
+        else:
+            self.assembly_depth = val
+        # 如果已經選擇了某個 cell，要更新顯示
+        if self.selected_button:
+            self.selected_button.setText(f"{self.selected_name}\nH={self.selected_height:.1f}, D={val:.1f}")
+            self.selected_depth = val
+
     def save_recipe(self):
         if not self.selected_mode:
             if self.log_callback: self.log_callback(1,"⚠ 請先選擇格子")
             return
         if self.selected_mode=="pick":
             self.selected_depth = self.pick_depth
+            self.update_depth(self.pick_depth)
         else:
             self.selected_depth = self.assembly_depth
+            self.update_depth(self.assembly_depth)
         self.node.publish_recipe(self.selected_mode,self.selected_height,self.selected_depth)
         if self.log_callback:
             self.log_callback(1,f"💾 已儲存: Mode={self.selected_mode},櫃體={self.selected_name}, Depth={self.selected_depth:.1f}")
@@ -141,6 +168,17 @@ class UI2(QWidget):
         layout = QVBoxLayout()
         layout.setSpacing(5)
         layout.setContentsMargins(5,5,5,5)
+        
+        top_layout = QHBoxLayout()
+        top_layout.setSpacing(10)
+
+        self.init_btn = QPushButton("INIT")
+        self.run_btn = QPushButton("RUN")
+        for b in [self.init_btn, self.run_btn]:
+            self.enlarge_button(b)
+            top_layout.addWidget(b)
+
+        layout.addLayout(top_layout)
 
         self.task_group = QButtonGroup(self)
         self.task_group.setExclusive(False)
@@ -262,10 +300,13 @@ class UI2(QWidget):
 
     def update_rough_align_log(self, msg: TaskState):
         self.update_task_log("rough_align", msg)
+    
     def update_precise_align_log(self, msg: TaskState):
         self.update_task_log("precise_align", msg)
+    
     def update_pick_log(self, msg: TaskState):
         self.update_task_log("pick", msg)
+    
     def update_assembly_log(self, msg: TaskState):
         self.update_task_log("assembly", msg)
 
@@ -883,7 +924,13 @@ class IntegratedUI(QWidget):
         # --- 上方三 log ---
         log_layout = QHBoxLayout()
         self.log1 = QTextEdit(); self.log1.setReadOnly(True)
-        self.log2 = QTextEdit(); self.log2.setReadOnly(True)
+        # self.log2 = QTextEdit(); self.log2.setReadOnly(True)
+
+        # log2 改成容器
+        self.log2 = QWidget()
+        log2_layout = QVBoxLayout()
+        log2_layout.setContentsMargins(2, 2, 2, 2)
+        log2_layout.setSpacing(2)
 
         # log3 改成容器
         self.log3 = QWidget()
@@ -927,7 +974,7 @@ class IntegratedUI(QWidget):
         container_layout.addWidget(self.ui1)
         container_layout.addWidget(self.ui2)
         self.ui12_container.setLayout(container_layout)
-        self.ui12_container.setFixedSize(800, 480)  # 固定左側大小
+        self.ui12_container.setFixedSize(800, 600)  # 固定左側大小
 
         # 添加到 splitter
         self.splitter.addWidget(self.ui12_container)
@@ -937,7 +984,7 @@ class IntegratedUI(QWidget):
         # --- 視覺 overlay ---
         self.visual_overlay = VisualOverlay(node)
         self.visual_overlay.setParent(self.ui12_container)  # 指定 parent
-        self.visual_overlay.setGeometry(0, 0, 800, 480)
+        self.visual_overlay.setGeometry(0, 0, 800, 600)
         self.visual_overlay.setVisible(False)  # 初始隱藏
 
         # --- 切換按鈕 ---
