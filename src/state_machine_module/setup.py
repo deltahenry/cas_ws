@@ -27,6 +27,7 @@ setup(
             'fsm_logic = state_machine_module.fsm_logic:main',
             'manual_align = state_machine_module.manual_align:main',
             'run = state_machine_module.run:main',
+            'stop = state_machine_module.stop:main',
         ],
     },
 )

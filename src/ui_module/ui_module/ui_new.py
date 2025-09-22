@@ -418,6 +418,7 @@ class UI3(QWidget):
         self.limit_open_btn = QPushButton("🚦 開啟 Limit")
         self.limit_close_btn = QPushButton("🛑 關閉 Limit")
         self.limit_stop_btn = QPushButton("⏹ 停止 Limit")
+        self.limit_reset_btn = QPushButton("🔄 重置 Limit")
         self.limit_status_label = QLabel("狀態: --")
         self.limit_status_label.setFixedHeight(20)  # 高度固定 20px
         self.limit_status_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
@@ -426,6 +427,7 @@ class UI3(QWidget):
         limit_layout.addWidget(self.limit_open_btn)
         limit_layout.addWidget(self.limit_close_btn)
         limit_layout.addWidget(self.limit_stop_btn)
+        limit_layout.addWidget(self.limit_reset_btn)
         self.limit_widget.setLayout(limit_layout)
 
         # Gripper 控制頁面
@@ -434,6 +436,7 @@ class UI3(QWidget):
         self.gripper_open_btn = QPushButton("🚦 開啟 Gripper")
         self.gripper_close_btn = QPushButton("🛑 關閉 Gripper")
         self.gripper_stop_btn = QPushButton("⏹ 停止 Gripper")
+        self.gripper_reset_btn = QPushButton("🔄 重置 Gripper")
         self.gripper_status_label = QLabel("狀態: --")
         self.gripper_status_label.setFixedHeight(20)  # 高度固定 20px
         self.gripper_status_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
@@ -442,6 +445,7 @@ class UI3(QWidget):
         gripper_layout.addWidget(self.gripper_open_btn)
         gripper_layout.addWidget(self.gripper_close_btn)
         gripper_layout.addWidget(self.gripper_stop_btn)
+        gripper_layout.addWidget(self.gripper_reset_btn)
         self.gripper_widget.setLayout(gripper_layout)
 
         self.fork_widget = QWidget()
@@ -643,10 +647,13 @@ class UI3(QWidget):
         self.limit_open_btn.clicked.connect(lambda: self.send_limit_cmd("open_limit"))
         self.limit_close_btn.clicked.connect(lambda: self.send_limit_cmd("close_limit"))
         self.limit_stop_btn.clicked.connect(lambda: self.send_limit_cmd("stop_limit"))
+        self.limit_reset_btn.clicked.connect(lambda: self.send_limit_cmd("reset_limit"))
 
         self.gripper_open_btn.clicked.connect(lambda: self.send_gripper_cmd("open_gripper"))
         self.gripper_close_btn.clicked.connect(lambda: self.send_gripper_cmd("close_gripper"))
         self.gripper_stop_btn.clicked.connect(lambda: self.send_gripper_cmd("stop_gripper"))
+        self.gripper_reset_btn.clicked.connect(lambda: self.send_gripper_cmd("reset_gripper"))
+
 
         self.pass_btn.clicked.connect(self.publish_pass_once)
         self.to_done_btn.clicked.connect(lambda: self.send_confirm_cmd("to_done"))

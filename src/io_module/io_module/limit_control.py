@@ -70,6 +70,9 @@ class LimitControlState(Enum):
 class LimitControl(Machine):
     def __init__(self, data_node: DataNode):
 
+        self.wait_start_time = None
+        self.TIMEOUT = 15.0  # 最大等待秒數
+
         self.phase = LimitControlState.IDLE  # 初始狀態
         self.data_node = data_node
 
@@ -87,6 +90,8 @@ class LimitControl(Machine):
             # 狀態轉換
             {'trigger': 'opening', 'source': [LimitControlState.IDLE.value,LimitControlState.CLOSED.value,], 'dest': LimitControlState.OPENING.value},
             {'trigger': 'closing', 'source': [LimitControlState.IDLE.value,LimitControlState.OPEN.value], 'dest': LimitControlState.CLOSING.value},
+            {'trigger': 'to_OPEN', 'source': LimitControlState.IDLE.value, 'dest': LimitControlState.OPEN.value},
+            {'trigger': 'to_CLOSED', 'source': LimitControlState.IDLE.value, 'dest': LimitControlState.CLOSED.value},
             {'trigger': 'open_finish', 'source': LimitControlState.OPENING.value, 'dest': LimitControlState.OPEN.value},
             {'trigger': 'close_finish', 'source': LimitControlState.CLOSING.value, 'dest': LimitControlState.CLOSED.value},
             {'trigger': 'stop', 'source': '*', 'dest': LimitControlState.STOP.value},
@@ -103,27 +108,6 @@ class LimitControl(Machine):
     def step(self):
         
         self.run()
-        # if self.data_node.state_cmd.get("pause_button", False):
-        #     print("[ManualAlignmentFSM] 被暫停中")
-        #     return  # 暫停中，不執行
-        
-        # if self.data_node.mode == "run":
-        #     print("[ForkliftControl] 開始執行叉車控制任務")
-        #     self.run()
-        #     return
-        
-        # else:
-        #     if self.state != ForkliftControlState.IDLE.value:
-        #         print("[ForkliftControl] 非執行模式，強制回到 IDLE 狀態")
-        #         self.return_to_idle()
-        #         self.data_node.can_forklift_cmd = True  # 允許發送新的命令
-        #         print(self.data_node.current_speed, self.data_node.current_direction)
-        #         self.forklift_controller("slow","stop", self.data_node.current_height)  # 停止叉車
-                
-        #     # else:
-        #     #     # print("[ForkliftControl] 叉車控制系統已經處於空閒狀態")
-
-            # return夾爪
 
 
     def Limit_controller(self, mode):
@@ -165,40 +149,63 @@ class LimitControl(Machine):
         return result
             
 
-
-
     def run(self):
         """執行狀態機的邏輯"""
         if self.state == LimitControlState.IDLE.value:
-            print("[LimitControl] 狀態機處於空閒狀態")
-            if self.data_node.mode == "open_limit":
-                print("[LimitControl] 開始開啟Limit")
-                self.opening()
-            elif self.data_node.mode == "close_limit":
-                print("[LimitControl] 開始關閉Limit")
-                self.closing()
+            
+            if self.data_node.limit_state == [0,0]:
+                self.to_OPEN()
+            
+            elif self.data_node.limit_state == [1,1]:
+                self.to_CLOSED()
+
+            elif self.data_node.limit_state == [2,2]:
+                print("[LimitControl] 狀態機處於空閒狀態")
+
+                if self.data_node.mode == "open_limit":
+                    print("[LimitControl] 開始開啟Limit")
+                    self.opening()
+
+                elif self.data_node.mode == "close_limit":
+                    print("[LimitControl] 開始關閉Limit")
+                    self.closing()
+
+                else:
+                    print("[LimitControl] 保持空閒狀態")
+
             else:
-                print("[LimitControl] 保持空閒狀態")
+                print("[LimitControl] Limit狀態異常，請檢查")
+                self.fail()
+                
             return
         
         elif self.state == LimitControlState.OPENING.value:
             print("[LimitControl] 狀態機正在開啟Limit")
             result = self.Limit_controller("open")
-            
+
             if result == 'done':
                 print("[LimitControl] Limit開啟完成")
                 self.open_finish()
+                self.wait_start_time = None  # 重置等待時間
 
             elif result == 'waiting':
+                if self.wait_start_time is None:
+                    self.wait_start_time = time.time()
+
+                elapsed = time.time() - self.wait_start_time
+
                 if self.data_node.mode == "stop_limit":
                     print("[LimitControl] 停止Limit操作")
                     self.stop()
-                else:
-                    print("[LimitControl] Limit正在開啟中...")
+                    self.wait_start_time = None
 
-            else:
-                print("[LimitControl] Limit開啟失敗")
-                self.fail()
+                elif elapsed < self.TIMEOUT:
+                    print(f"[LimitControl] Limit正在開啟中... ({elapsed:.2f}s)")
+
+                else:
+                    print("[LimitControl] Limit開啟超時，操作失敗")
+                    self.fail()
+                    self.wait_start_time = None
         
         elif self.state == LimitControlState.OPEN.value:
             print("[LimitControl] 狀態機處於Limit開啟狀態")
@@ -213,21 +220,27 @@ class LimitControl(Machine):
         elif self.state == LimitControlState.CLOSING.value:
             print("[LimitControl] 狀態機正在關閉Limit")
             result = self.Limit_controller("close")
-            
+
             if result == 'done':
                 print("[LimitControl] Limit關閉完成")
                 self.close_finish()
-            
+                self.wait_start_time = None  # 重置等待時間
+
             elif result == 'waiting':
+                if self.wait_start_time is None:
+                    self.wait_start_time = time.time()
+
+                elapsed = time.time() - self.wait_start_time
                 if self.data_node.mode == "stop_limit":
                     print("[LimitControl] 停止Limit操作")
                     self.stop()
+                    self.wait_start_time = None
+                elif elapsed < self.TIMEOUT:
+                    print(f"[LimitControl] Limit正在關閉中... ({elapsed:.2f}s)")
                 else:
-                    print("[LimitControl] Limit正在關閉中...")
-
-            else:
-                print("[LimitControl] Limit關閉失敗")
-                self.fail()
+                    print("[LimitControl] Limit關閉超時，操作失敗")
+                    self.fail()
+                    self.wait_start_time = None
         
         elif self.state == LimitControlState.CLOSED.value:
             print("[LimitControl] 狀態機處於Limit關閉狀態")
@@ -244,16 +257,31 @@ class LimitControl(Machine):
             result = self.Limit_controller("stop")
             if result == 'done':
                 print("[LimitControl] Limit已停止")
-                self.reset()
+
+                if self.data_node.mode == "open_limit":
+                    print("[LimitControl] 開始開啟Limit")
+                    self.reset()
+
+                elif self.data_node.mode == "close_limit":
+                    print("[LimitControl] 開始關閉Limit")
+                    self.reset()
+                
+                else:
+                    print("[LimitControl] 等待新的命令")
+
             else:
                 print("[LimitControl] 停止Limit失敗")
                 self.fail()
         
         elif self.state == LimitControlState.FAIL.value:
             print("[LimitControl] 狀態機處於失敗狀態")
-            # 在失敗狀態下，可以選擇重置或其他操作
-            self.reset()
-            return
+            result = self.Limit_controller("stop")
+
+            if self.data_node.mode == "reset_limit":
+                print("[LimitControl] 重置狀態機到空閒狀態")
+                self.reset()
+            else:
+                print("[LimitControl] 等待重置命令")
 
 
 

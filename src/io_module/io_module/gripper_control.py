@@ -72,6 +72,9 @@ class GripperControlState(Enum):
 class GripperControl(Machine):
     def __init__(self, data_node: DataNode):
 
+        self.wait_start_time = None
+        self.TIMEOUT = 15.0  # 最大等待秒數
+
         self.phase = GripperControlState.IDLE  # 初始狀態
         self.data_node = data_node
 
@@ -98,6 +101,8 @@ class GripperControl(Machine):
             # 狀態轉換
             {'trigger': 'opening', 'source': [GripperControlState.IDLE.value,GripperControlState.CLOSED.value,], 'dest': GripperControlState.OPENING.value},
             {'trigger': 'closing', 'source': [GripperControlState.IDLE.value,GripperControlState.OPEN.value], 'dest': GripperControlState.CLOSING.value},
+            {'trigger': 'to_OPEN', 'source': GripperControlState.IDLE.value, 'dest': GripperControlState.OPEN.value},
+            {'trigger': 'to_CLOSED', 'source': GripperControlState.IDLE.value, 'dest': GripperControlState.CLOSED.value},
             {'trigger': 'open_finish', 'source': GripperControlState.OPENING.value, 'dest': GripperControlState.OPEN.value},
             {'trigger': 'close_finish', 'source': GripperControlState.CLOSING.value, 'dest': GripperControlState.CLOSED.value},
             {'trigger': 'stop', 'source': '*', 'dest': GripperControlState.STOP.value},
@@ -201,31 +206,53 @@ class GripperControl(Machine):
     def run(self):
         """執行狀態機的邏輯"""
         if self.state == GripperControlState.IDLE.value:
-            print("[GripperControl] 狀態機處於空閒狀態")
-            if self.data_node.mode == "open_gripper":
-                print("[GripperControl] 開始開啟夾爪")
-                self.opening()
-            elif self.data_node.mode == "close_gripper":
-                print("[GripperControl] 開始關閉夾爪")
-                self.closing()
+
+            if self.data_node.gripper_state == [0,0]:
+                print("[GripperControl] 夾爪目前為開啟狀態")
+                self.to_OPEN()
+            
+            elif self.data_node.gripper_state == [1,1]:
+                print("[GripperControl] 夾爪目前為關閉狀態")
+                self.to_CLOSED()
+            else:
+                print("[GripperControl] 狀態機處於空閒狀態")
+                if self.data_node.mode == "open_gripper":
+                    print("[GripperControl] 開始開啟夾爪")
+                    self.opening()
+                elif self.data_node.mode == "close_gripper":
+                    print("[GripperControl] 開始關閉夾爪")
+                    self.closing()
+                else:
+                    print("[GripperControl] 等待夾爪命令")
             return
         
         elif self.state == GripperControlState.OPENING.value:
             print("[GripperControl] 狀態機正在開啟夾爪")
             result = self.gripper_controller("open")
-            
+
             if result == 'done':
                 print("[GripperControl] 夾爪開啟完成")
                 self.open_finish()
+                self.wait_start_time = None  # 重置等待時間
             elif result == 'waiting':
+                # 初始化等待開始時間
+                if self.wait_start_time is None:
+                    self.wait_start_time = time.time()
+
+                elapsed = time.time() - self.wait_start_time
+
                 if self.data_node.mode == "stop_gripper":
                     print("[GripperControl] 停止夾爪操作")
                     self.stop()
+                    self.wait_start_time = None
+
+                elif elapsed < self.TIMEOUT:
+                    print(f"[GripperControl] 夾爪正在開啟中... ({elapsed:.2f}s)")
+
                 else:
-                    print("[GripperControl] 夾爪正在開啟中...")
-            else:
-                print("[GripperControl] 夾爪開啟失敗")
-                self.fail()
+                    print("[GripperControl] 夾爪開啟失敗")
+                    self.fail()
+                    self.wait_start_time = None
         
         elif self.state == GripperControlState.OPEN.value:
             print("[GripperControl] 狀態機處於夾爪開啟狀態")
@@ -240,23 +267,32 @@ class GripperControl(Machine):
         elif self.state == GripperControlState.CLOSING.value:
             print("[GripperControl] 狀態機正在關閉夾爪")
             result = self.gripper_controller("close")
-            
+
             if result == 'done':
                 print("[GripperControl] 夾爪關閉完成")
                 self.close_finish()
-            
+                self.wait_start_time = None  # 重置等待時間
+
             elif result == 'waiting':
+                # 初始化等待開始時間
+                if self.wait_start_time is None:
+                    self.wait_start_time = time.time()
+
+                elapsed = time.time() - self.wait_start_time
+
                 if self.data_node.mode == "stop_gripper":
                     print("[GripperControl] 停止夾爪操作")
                     self.stop()
+                    self.wait_start_time = None
+
+                elif elapsed < self.TIMEOUT:
+                    print(f"[GripperControl] 夾爪正在關閉中... ({elapsed:.2f}s)")
+
                 else:
-                    print("[GripperControl] 夾爪正在關閉中...")
-    
-            else:
-                print("[GripperControl] 夾爪關閉失敗")
-                self.fail()
+                    print("[GripperControl] 夾爪關閉失敗")
+                    self.fail()
+                    self.wait_start_time = None
             
-        
         elif self.state == GripperControlState.CLOSED.value:
             print("[GripperControl] 狀態機處於夾爪關閉狀態")
             if self.data_node.mode == "open_gripper":
@@ -272,15 +308,32 @@ class GripperControl(Machine):
             result = self.gripper_controller("stop")
             if result == 'done':
                 print("[GripperControl] 夾爪已停止")
-                self.reset()
+
+                if self.data_node.mode == "open_gripper":
+                    print("[GripperControl] 開始開啟夾爪")
+                    self.reset()
+
+                elif self.data_node.mode == "close_gripper":
+                    print("[GripperControl] 開始關閉夾爪")
+                    self.reset()
+
+                else:
+                    print("waiting for command")
+                
             else:
                 print("[GripperControl] 停止夾爪失敗")
                 self.fail()
         
         elif self.state == GripperControlState.FAIL.value:
             print("[GripperControl] 狀態機處於失敗狀態")
-            # 在失敗狀態下，可以選擇重置或其他操作
-            self.reset()
+            result = self.gripper_controller("stop")
+
+            if self.data_node.mode == "reset_gripper":
+                print("[GripperControl] 重置狀態機到空閒狀態")
+                self.reset()
+            else:
+                print("[GripperControl] 等待重置命令")
+
             return
 
 

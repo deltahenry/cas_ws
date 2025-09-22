@@ -20,7 +20,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'init = task_module.init:main',
             'component_control = task_module.component_control:main',
             'rough_align = task_module.rough_align:main',
             'precise_align = task_module.precise_align:main',
