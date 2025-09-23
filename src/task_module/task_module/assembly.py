@@ -247,6 +247,7 @@ class AssemblyFSM(Machine):
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
             print("[AssemblymentFSM] 被暫停中")
+            return  # 暫停狀態下不進行任何操作
         
         elif self.data_node.task_cmd == "assembly":
             print("[AssemblymentFSM] 開始手動對齊任務")

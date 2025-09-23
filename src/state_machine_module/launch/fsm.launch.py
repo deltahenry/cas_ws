@@ -14,6 +14,12 @@ def generate_launch_description():
             output='screen'
         ),
         Node(
+            package='state_machine_module',
+            executable='stop',
+            name='stop_node',
+            output='screen'
+        ),
+        Node(
             package='task_module',
             executable='component_control',
             name='component_control',

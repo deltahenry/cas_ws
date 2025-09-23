@@ -1,10 +1,11 @@
 from uros_interface.msg import Joint2DArr,JointArr
 from common_msgs.msg import MultipleM,SingleM
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float32MultiArray,String
 from rclpy.node import Node
 import rclpy
 import numpy as np
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy
+from uros_interface.srv import ESMCmd
 
 
 class MotorController(Node):
@@ -16,6 +17,10 @@ class MotorController(Node):
             reliability=QoSReliabilityPolicy.BEST_EFFORT
         )
 
+        # Async service client
+        self.cli = self.create_client(ESMCmd, '/esm_command')
+        self.waiting_for_result = False
+
         # Publishers
         self.esp_control_publisher = self.create_publisher(Joint2DArr,'/theta_command',10)
         self.motors_info_publisher = self.create_publisher(MultipleM,'/multi_motor_info',10) 
@@ -23,9 +28,11 @@ class MotorController(Node):
         #Subscribers
         self.pos_ref_sub = self.create_subscription(Float32MultiArray, '/motor_position_ref',self.motor_cmd_callback , 10) #motor_node
         self.esp_info_subscriber = self.create_subscription(JointArr, '/theta_feedback', self.esp_info_callback ,qos_profile)
+        self.servo_cmd_subscriber = self.create_subscription(String, '/servo_cmd', self.servo_cmd_callback , 10)
     
         # Timer
         self.timer = self.create_timer(2, self.timer_callback)  #20Hz       
+
 
     def motor_cmd_callback(self,msg:Float32MultiArray):
         pos_ref_queue = np.reshape(msg.data,(10,3))
@@ -56,6 +63,41 @@ class MotorController(Node):
     def timer_callback(self):
         """This runs at 20Hz."""
         # print("motor_control")
+
+    def servo_cmd_callback(self, msg: String):
+        cmd = msg.data.strip().lower()
+        if cmd == "servo on":
+            self.get_logger().info("Received servo ON command")
+            self.call_servo(on=True)
+        elif cmd == "servo off":
+            self.get_logger().info("Received servo OFF command")
+            self.call_servo(on=False)
+        else:
+            self.get_logger().warn(f"Unknown servo command: {msg.data}")
+
+    def call_servo(self, on=True):
+        if not self.cli.service_is_ready():
+            self.get_logger().warn('Service not available')
+            return
+
+        request = ESMCmd.Request()
+        request.servo_status = on
+        request.mode = 4
+        request.speed_limit = 50
+        request.lpf = 10
+
+        future = self.cli.call_async(request)
+        self.waiting_for_result = True
+
+        def handle_response(fut):
+            self.waiting_for_result = False
+            if fut.result() is not None:
+                self.get_logger().info(f"Service {'ON' if on else 'OFF'} call succeeded")
+            else:
+                self.get_logger().error(f"Service {'ON' if on else 'OFF'} call failed")
+
+        future.add_done_callback(handle_response)
+
 
 def main(args=None):
     rclpy.init(args=args)

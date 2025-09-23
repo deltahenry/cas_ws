@@ -191,10 +191,10 @@ class RUNFSM(Machine):
         }
         self.data_node.task_cmd = "idle"  # 重置任務命令
 
-
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
             print("[RUNmentFSM] 被暫停中")
+            return  # 暫停狀態下不進行任何操作
 
         elif self.data_node.state_cmd.get("stop_button", False):
             print("[RUNmentFSM] 被停止中")

@@ -11,12 +11,14 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String, Float32MultiArray,Int32,Bool
-from common_msgs.msg import Recipe, TaskCmd, StateCmd, TaskState, LimitCmd,GripperCmd,ForkCmd,MotionCmd,MotionState,CurrentPose,ForkState
+from std_msgs.msg import String, Float32MultiArray,Int32,Bool,Int32MultiArray
+from common_msgs.msg import Recipe, TaskCmd, StateCmd, TaskState, LimitCmd,GripperCmd,ForkCmd,MotionCmd,MotionState,CurrentPose,ForkState,MH2State
 
 from PySide6.QtGui import QPixmap, QImage
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
+
+from uros_interface.srv import ESMCmd
 
 
 # -------------------
@@ -38,6 +40,11 @@ class RecipePublisher(Node):
         self.compensate_task_pub = self.create_publisher(TaskCmd, '/compensate_cmd', 10)
         self.compensate_pose_pub = self.create_publisher(Float32MultiArray, '/compensate_pose_cmd', 10)
         self.debug_pub = self.create_publisher(Bool,'/debug_cmd', 10)
+        self.servo_pub = self.create_publisher(String, "/servo_cmd", 10)
+
+        # Async service client
+        self.cli = self.create_client(ESMCmd, '/esm_command')
+        self.waiting_for_result = False
 
     def publish_recipe(self, mode, height, depth):
         msg = Recipe()
@@ -165,6 +172,8 @@ class UI2(QWidget):
         super().__init__()
         self.node = node
 
+        self.DI_subscriber = self.node.create_subscription(Int32MultiArray,'di_state',self.update_di_state,10)
+
         layout = QVBoxLayout()
         layout.setSpacing(5)
         layout.setContentsMargins(5,5,5,5)
@@ -177,6 +186,9 @@ class UI2(QWidget):
         for b in [self.init_btn, self.run_btn]:
             self.enlarge_button(b)
             top_layout.addWidget(b)
+
+        # self.init_btn.clicked.connect(lambda: self.send_state_cmd("init"))
+        self.run_btn.clicked.connect(lambda: self.send_state_cmd("run"))
 
         layout.addLayout(top_layout)
 
@@ -265,20 +277,47 @@ class UI2(QWidget):
         msg.mode = task_name
         self.node.task_cmd_publisher.publish(msg)
 
+    def update_di_state(self, msg: Int32MultiArray):
+        di_states = msg.data
+        estop_state = di_states[15]  # 假設第16個元素是 E-STOP 狀態
+        if estop_state == 0 and not self.stop_state:
+            self.set_state("stop", True, source="estop")
+        # elif estop_state == 1 and self.stop_state:
+        #     self.set_state("stop", False, source="estop")
+
+    # --- UI/外部事件觸發 ---
     def toggle_state_button(self, flag):
-        if flag == "pause":
-            self.pause_state = not self.pause_state
-            is_on = self.pause_state
+        if flag == "stop":
+            self.set_state("stop", not self.stop_state, source="ui")
+        elif flag == "pause":
+            self.set_state("pause", not self.pause_state, source="ui")
+    
+    def set_state(self, flag: str, state: bool, source="ui"):
+        """統一處理 stop/pause 狀態更新"""
+        if flag == "stop":
+            if self.stop_state == state:
+                return
+            self.stop_state = state
+            btn = self.stop_btn
+        elif flag == "pause":
+            if self.pause_state == state:
+                return
+            self.pause_state = state
             btn = self.pause_btn
         else:
-            self.stop_state = not self.stop_state
-            is_on = self.stop_state
-            btn = self.stop_btn
+            return
 
-        btn.setStyleSheet("background-color: red; color: white;" if is_on else "")
-        self.send_state_cmd(flag)
+        # 更新 UI
+        btn.setChecked(state)
+        btn.setStyleSheet("background-color: red; color: white;" if state else "")
+
+        # 如果來源是 UI，才發布 ROS cmd
+        if source == "ui":
+            self.send_state_cmd(flag)
+
+        # log
         for widgets in self.task_widgets.values():
-            widgets["log"].append(f"[UI2] {flag} {'ON' if is_on else 'OFF'}")
+            widgets["log"].append(f"[UI2] {flag} {'ON' if state else 'OFF'} (from {source})")
 
     def send_state_cmd(self, flag):
         msg = StateCmd()
@@ -291,6 +330,21 @@ class UI2(QWidget):
         elif flag == "pause": msg.pause_button = self.pause_state
         elif flag == "stop": msg.stop_button = self.stop_state
         self.node.state_cmd_publisher.publish(msg)
+
+    # def toggle_state_button(self, flag):
+    #     if flag == "pause":
+    #         self.pause_state = not self.pause_state
+    #         is_on = self.pause_state
+    #         btn = self.pause_btn
+    #     else:
+    #         self.stop_state = not self.stop_state
+    #         is_on = self.stop_state
+    #         btn = self.stop_btn
+
+    #     btn.setStyleSheet("background-color: red; color: white;" if is_on else "")
+    #     self.send_state_cmd(flag)
+    #     for widgets in self.task_widgets.values():
+    #         widgets["log"].append(f"[UI2] {flag} {'ON' if is_on else 'OFF'}")
 
     def update_task_log(self, task_name, msg: TaskState):
         log_widget = self.task_widgets[task_name]["log"]
@@ -318,6 +372,8 @@ class UI3(QWidget):
         self.node = node
         self.state = "idle"
         self.current_yaw = 0.0  # 存放 UI 回傳 yaw 值
+
+        self.servo_state = False  # 真實狀態 (True=ON, False=OFF, None=未知)
 
         self.debug_state = False  # 除錯模式
 
@@ -513,6 +569,12 @@ class UI3(QWidget):
         # --- 上方 Home / Y+ / Stop + Debug --- 
         top_layout = QGridLayout()
 
+        # Servo button (一開始顯示未知狀態)
+        self.servo_btn = QPushButton("⚙️ Servo ?")
+        self.servo_btn.setFixedSize(60, 30)
+        self.servo_btn.setStyleSheet("background-color: gray; font-size: 12px;")
+        self.servo_btn.clicked.connect(self.toggle_servo)
+
         self.home_btn = QPushButton("🏠 Home")
         self.debug_btn = QPushButton("🐞 Debug")
         self.stop_btn = QPushButton("🛑 Stop")
@@ -525,8 +587,10 @@ class UI3(QWidget):
         self.y_plus_btn.setFixedSize(40, 40)
         self.y_plus_btn.setStyleSheet("font-size: 16px;")
 
+        # 右上 Servo 在 Home 右方
+        top_layout.addWidget(self.servo_btn, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
         # 左上 Home
-        top_layout.addWidget(self.home_btn, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+        top_layout.addWidget(self.home_btn, 0, 0, alignment=Qt.AlignRight | Qt.AlignTop)
         # Debug 在 Home 下方
         top_layout.addWidget(self.debug_btn, 0, 2, alignment=Qt.AlignLeft | Qt.AlignTop)
         # 右上 Stop
@@ -635,6 +699,7 @@ class UI3(QWidget):
         node.create_subscription(String, 'gripper_control_state', self.update_gripper_state, 10)
         node.create_subscription(String, 'limit_control_state', self.update_limit_state, 10)
         node.create_subscription(Bool, 'debug_mode_state', self.update_debug_state, 10)
+        node.create_subscription(MH2State,'mh2_state', self.update_servo_state, 10)
 
         # 事件
         self.detect_btn.clicked.connect(lambda: self.send_detect_cmd("l_shape"))
@@ -659,6 +724,25 @@ class UI3(QWidget):
         self.to_done_btn.clicked.connect(lambda: self.send_confirm_cmd("to_done"))
 
     # ========= Callback / 功能 =========
+
+    def toggle_servo(self):
+        """UI 點擊事件 -> 發布 servo_cmd，UI 狀態由 mh2_state 回報決定"""
+        msg = String()
+        if self.servo_state:  # 如果現在是 ON -> 發 OFF
+            msg.data = "servo off"
+        else:                 # 如果現在是 OFF/未知 -> 發 ON
+            msg.data = "servo on"
+        self.node.servo_pub.publish(msg)
+
+    def update_servo_state(self, msg: MH2State):
+        """更新 Servo 狀態 (由 Controller 發佈的狀態決定)"""
+        self.servo_state = msg.servo_state
+        if self.servo_state:
+            self.servo_btn.setText("⚙️ Servo ON")
+            self.servo_btn.setStyleSheet("background-color: lightgreen; font-size: 12px;")
+        else:
+            self.servo_btn.setText("⚙️ Servo OFF")
+            self.servo_btn.setStyleSheet("background-color: lightgray; font-size: 12px;")
 
     # ---------------- 更新 yaw 值 ----------------
     def update_yaw(self, yaw: float):

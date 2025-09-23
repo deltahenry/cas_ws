@@ -6,7 +6,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Int32MultiArray,Bool
-from common_msgs.msg import DIDOCmd,MH2State
+from common_msgs.msg import DIDOCmd,MH2State,StateCmd
 from pymodbus.client import ModbusTcpClient
 import numpy as np
 
@@ -73,6 +73,18 @@ class DataNode(Node):
         self.MH2_state_publisher = self.create_publisher(
             MH2State,
             'mh2_state',
+            10
+        )
+
+        self.state_cmd_publisher = self.create_publisher(
+            StateCmd,
+            'state_cmd',
+            10
+        )
+
+        self.DI_state_publisher = self.create_publisher(
+            Int32MultiArray,
+            'di_state',
             10
         )
 
@@ -277,11 +289,18 @@ class ForkliftControl():
                     arr[i] = (reg_value >> i) & 0x1
                 print(f"[Slave {slave_id}] 讀取位址 {hex(addr)} 的值: {reg_value} (0b{reg_value:016b})")
         
+            #update E-STOP狀態
+            self.update_estop_state()
 
             # 更新夾爪狀態
             self.update_gripper_state()
             # 更新限位狀態
             self.update_limit_state()   
+
+            # 發佈 DI 狀態
+            di_msg = Int32MultiArray()
+            di_msg.data = self.data_node.DI_1.tolist()
+            self.data_node.DI_state_publisher.publish(di_msg)
 
         except Exception as e:
             print(f"Modbus DI 讀取異常: {e}")
@@ -320,6 +339,14 @@ class ForkliftControl():
         for i, bit in enumerate(bits):
             value |= (bit & 1) << i
         return value
+
+    def update_estop_state(self):
+        if self.data_node.DI_1[15] == 0:
+            self.data_node.get_logger().warn("❗️ E-STOP 被觸發！")
+            self.send_state_cmd("stop")
+
+        else:
+            self.data_node.get_logger().info("E-STOP 狀態正常")
 
     def update_gripper_state(self):
         #N.C. 狀態下為 1，動作時變為 0
@@ -368,7 +395,21 @@ class ForkliftControl():
         limit_msg.data = self.data_node.limit_state
         self.data_node.limit_state_pub.publish(limit_msg)
 
+    def send_state_cmd(self, flag):
+        msg = StateCmd()
+        msg.init_button = False
+        msg.run_button = False
+        msg.pause_button = False
+        msg.stop_button = False
 
+        if flag == "stop":
+            self.stop_state = True
+            msg.stop_button = True
+        else:
+            self.stop_state = False
+            msg.stop_button = False
+
+        self.data_node.state_cmd_publisher.publish(msg)
 
 def main():
     rclpy.init()
