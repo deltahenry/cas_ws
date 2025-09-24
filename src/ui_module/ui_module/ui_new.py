@@ -700,6 +700,7 @@ class UI3(QWidget):
         node.create_subscription(String, 'limit_control_state', self.update_limit_state, 10)
         node.create_subscription(Bool, 'debug_mode_state', self.update_debug_state, 10)
         node.create_subscription(MH2State,'mh2_state', self.update_servo_state, 10)
+        node.create_subscription(MotionState, 'motion_state', self.update_motion_state, 10)
 
         # 事件
         self.detect_btn.clicked.connect(lambda: self.send_detect_cmd("l_shape"))
@@ -724,6 +725,11 @@ class UI3(QWidget):
         self.to_done_btn.clicked.connect(lambda: self.send_confirm_cmd("to_done"))
 
     # ========= Callback / 功能 =========
+    def update_motion_state(self, msg: MotionState):
+        if msg.motion_finish:
+            self.step_combo.setStyleSheet("background-color: lightgreen; font-size: 12px;")
+        elif msg.motion_finish == False:
+            self.step_combo.setStyleSheet("background-color: lightgray; font-size: 12px;")
 
     def toggle_servo(self):
         """UI 點擊事件 -> 發布 servo_cmd，UI 狀態由 mh2_state 回報決定"""

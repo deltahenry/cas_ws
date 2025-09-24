@@ -19,7 +19,7 @@ import time
 import csv
 
 #parameters
-timer_period = 0.1  # seconds
+timer_period = 0.05  # seconds
 
 
 # --- ROS2 Node ---
@@ -29,7 +29,8 @@ class DataNode(Node):
 
         self.mode = "open"  
 
-        self.gripper_state = [0,0] # 初始狀態 [left, right] open=0, close=1, moving=2
+        self.left_gripper_state = 3   #open =0 , closed=1, moving=2, idle=3
+        self.right_gripper_state = 3  #open =0 , closed=1, moving=2, idle=3
        
         self.gripper_cmd_subscriber = self.create_subscription(
             GripperCmd,
@@ -54,9 +55,12 @@ class DataNode(Node):
     
     def gripper_state_callback(self, msg: Int32MultiArray):
         print(f"接收到夾爪狀態: {msg.data}")
+        # note!!!!! left = data[1], right = data[0]
         if len(msg.data) >= 2:
-            self.gripper_state[0] = msg.data[0]  # 左夾爪狀態
-            self.gripper_state[1] = msg.data[1]  # 右夾爪狀態
+            self.left_gripper_state = msg.data[1]
+            self.right_gripper_state = msg.data[0]
+            # self.gripper_state = [self.left_gripper_state, self.right_gripper_state]
+            print(f"更新後的夾爪狀態: Left - {self.left_gripper_state}, Right - {self.right_gripper_state}")
         else:
             self.get_logger().warn("接收到的夾爪狀態長度不足，無法更新。")
                 
@@ -73,7 +77,7 @@ class GripperControl(Machine):
     def __init__(self, data_node: DataNode):
 
         self.wait_start_time = None
-        self.TIMEOUT = 15.0  # 最大等待秒數
+        self.TIMEOUT = 20.0  # 最大等待秒數
 
         self.phase = GripperControlState.IDLE  # 初始狀態
         self.data_node = data_node
@@ -173,26 +177,52 @@ class GripperControl(Machine):
         result = 'waiting'
 
         if mode == "open":
-            value = Int32MultiArray(data=[0, 0, 0, 0, 0, 0])  # 封裝為 Int32MultiArray
-            self.data_node.gripper_io_cmd_publisher.publish(value)  #change receipt
-            value = Int32MultiArray(data=[0, 1, 0, 0, 1, 0])  # 封裝為 Int32MultiArray
-            self.data_node.gripper_io_cmd_publisher.publish(value)#open move
             
-            if self.data_node.gripper_state == [0,0]:
+            if self.data_node.left_gripper_state == 0 and self.data_node.right_gripper_state == 0: # left open, right open
+                print("[GripperControl] 夾爪已經是開啟狀態")
+                value = Int32MultiArray(data=[0, 0, 1, 0, 0, 1])  # 封裝為 Int32MultiArray
+                self.data_node.gripper_io_cmd_publisher.publish(value) #stop both
                 result = 'done'
-            else:
+            
+            elif self.data_node.left_gripper_state == 0 and self.data_node.right_gripper_state != 0: # left open, right moving
+                print("left open, right moving")
+                value = Int32MultiArray(data=[0, 0, 1, 0, 1, 0])  # 封裝為 Int32MultiArray
+                self.data_node.gripper_io_cmd_publisher.publish(value) #stop left 
+            
+            elif self.data_node.left_gripper_state != 0 and self.data_node.right_gripper_state == 0: # left moving, right open
+                print("left moving, right open")
+                value = Int32MultiArray(data=[0, 1, 0, 0, 0, 1])  # 封裝為 Int32MultiArray
+                self.data_node.gripper_io_cmd_publisher.publish(value) #stop right
+            
+            elif self.data_node.left_gripper_state != 0 and self.data_node.right_gripper_state != 0: # left moving, right moving
                 print("[GripperControl] 夾爪正在開啟中...")
+                value = Int32MultiArray(data=[0, 1, 0, 0, 1, 0])  # 封裝為 Int32MultiArray
+                self.data_node.gripper_io_cmd_publisher.publish(value)#open move
+                
 
-        elif mode == "close":
-            value = Int32MultiArray(data=[1, 0, 0, 1, 0, 0])  # 封裝為 Int32MultiArray
-            self.data_node.gripper_io_cmd_publisher.publish(value)#change receipt
-            value = Int32MultiArray(data=[1, 1, 0, 1, 1, 0])  # 封裝為 Int32MultiArray
-            self.data_node.gripper_io_cmd_publisher.publish(value)  #close move
-
-            if self.data_node.gripper_state == [1,1]:
+        elif mode == "close":   
+            print("Attempting to close gripper...")
+            print(f"Left gripper state: {self.data_node.left_gripper_state}, Right gripper state: {self.data_node.right_gripper_state}")
+            if self.data_node.left_gripper_state == 1 and self.data_node.right_gripper_state == 1: # left close, right close
+                print("[GripperControl] 夾爪已經是關閉狀態")
+                value = Int32MultiArray(data=[0, 0, 1, 0, 0, 1])  # 封裝為 Int32MultiArray
+                self.data_node.gripper_io_cmd_publisher.publish(value) #stop both
                 result = 'done'
-            else:
+            
+            elif self.data_node.left_gripper_state == 1 and self.data_node.right_gripper_state != 1: # left close, right moving
+                print("left close, right moving")
+                value = Int32MultiArray(data=[0, 0, 1, 1, 1, 0])  # 封裝為 Int32MultiArray
+                self.data_node.gripper_io_cmd_publisher.publish(value) #stop left 
+            
+            elif self.data_node.left_gripper_state != 1 and self.data_node.right_gripper_state == 1: # left moving, right close
+                print("left moving, right close")
+                value = Int32MultiArray(data=[1, 1, 0, 0, 0, 1])  # 封裝為 Int32MultiArray
+                self.data_node.gripper_io_cmd_publisher.publish(value) #stop right
+            
+            elif self.data_node.left_gripper_state != 1 and self.data_node.right_gripper_state != 1: # left moving, right moving
                 print("[GripperControl] 夾爪正在關閉中...")
+                value = Int32MultiArray(data=[1, 1, 0, 1, 1, 0])  # 封裝為 Int32MultiArray
+                self.data_node.gripper_io_cmd_publisher.publish(value)#close move
 
         elif mode == "stop":
             value = Int32MultiArray(data=[0, 0, 1, 0, 0, 1])    # 封裝為 Int32MultiArray
@@ -207,20 +237,25 @@ class GripperControl(Machine):
         """執行狀態機的邏輯"""
         if self.state == GripperControlState.IDLE.value:
 
-            if self.data_node.gripper_state == [0,0]:
+            if self.data_node.left_gripper_state == 0 and self.data_node.right_gripper_state == 0:
                 print("[GripperControl] 夾爪目前為開啟狀態")
                 self.to_OPEN()
             
-            elif self.data_node.gripper_state == [1,1]:
+            elif self.data_node.left_gripper_state == 1 and self.data_node.right_gripper_state == 1:
                 print("[GripperControl] 夾爪目前為關閉狀態")
                 self.to_CLOSED()
             else:
                 print("[GripperControl] 狀態機處於空閒狀態")
                 if self.data_node.mode == "open_gripper":
                     print("[GripperControl] 開始開啟夾爪")
+                    value = Int32MultiArray(data=[0, 0, 0, 0, 0, 0])  # 封裝為 Int32MultiArray
+                    self.data_node.gripper_io_cmd_publisher.publish(value)  #change receipt
                     self.opening()
+
                 elif self.data_node.mode == "close_gripper":
                     print("[GripperControl] 開始關閉夾爪")
+                    value = Int32MultiArray(data=[1, 0, 0, 1, 0, 0])  # 封裝為 Int32MultiArray
+                    self.data_node.gripper_io_cmd_publisher.publish(value)  #change receipt
                     self.closing()
                 else:
                     print("[GripperControl] 等待夾爪命令")
@@ -258,10 +293,14 @@ class GripperControl(Machine):
             print("[GripperControl] 狀態機處於夾爪開啟狀態")
             if self.data_node.mode == "close_gripper":
                 print("[GripperControl] 開始關閉夾爪")
+                value = Int32MultiArray(data=[1, 0, 0, 1, 0, 0])  # 封裝為 Int32MultiArray
+                self.data_node.gripper_io_cmd_publisher.publish(value)  #change receipt
                 self.closing()
+
             elif self.data_node.mode == "stop_gripper":
                 print("[GripperControl] 停止夾爪操作")
                 self.stop()
+                
             return
         
         elif self.state == GripperControlState.CLOSING.value:
@@ -297,10 +336,14 @@ class GripperControl(Machine):
             print("[GripperControl] 狀態機處於夾爪關閉狀態")
             if self.data_node.mode == "open_gripper":
                 print("[GripperControl] 開始開啟夾爪")
+                value = Int32MultiArray(data=[0, 0, 0, 0, 0, 0])  # 封裝為 Int32MultiArray
+                self.data_node.gripper_io_cmd_publisher.publish(value)  #change receipt
                 self.opening()
+
             elif self.data_node.mode == "stop_gripper":
                 print("[GripperControl] 停止夾爪操作")
                 self.stop()
+
             return
 
         elif self.state == GripperControlState.STOP.value:
