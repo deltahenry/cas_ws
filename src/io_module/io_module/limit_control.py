@@ -19,7 +19,7 @@ import time
 import csv
 
 #parameters
-timer_period = 0.1  # seconds
+timer_period = 0.05  # seconds
 
 
 # --- ROS2 Node ---
@@ -175,7 +175,7 @@ class LimitControl(Machine):
         """執行狀態機的邏輯"""
         if self.state == LimitControlState.IDLE.value:
             
-            if self.date_node.left_limit_state == 0 and self.data_node.right_limit_state == 0: # left open, right open
+            if self.data_node.left_limit_state == 0 and self.data_node.right_limit_state == 0: # left open, right open
                 self.to_OPEN()
             
             elif self.data_node.left_limit_state == 1 and self.data_node.right_limit_state == 1: # left close, right close

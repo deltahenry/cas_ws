@@ -92,6 +92,7 @@ class MotionController(Node):
         if self.motion_finished:
             if self.debug_mode:
                 if msg.command_type == MotionCmd.TYPE_GOTO_RELATIVE:
+                    # self.init_finished = False  # 在 debug 模式下，直接設為初始化完成
                     self.motion_finished = False  # 收到指令後，將 motion_finished 設為 False
                     joint_pose_cmd =[
                         self.current_motor_len[0] + (-msg.pose_data[1]),
@@ -140,6 +141,7 @@ class MotionController(Node):
 
                 else:
                     self.get_logger().error(f"Unknown command type: {msg.command_type}")
+        
         else:
             self.get_logger().warn("Cannot accept new motion command while in motion.")
             

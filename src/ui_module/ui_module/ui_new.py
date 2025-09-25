@@ -41,6 +41,7 @@ class RecipePublisher(Node):
         self.compensate_pose_pub = self.create_publisher(Float32MultiArray, '/compensate_pose_cmd', 10)
         self.debug_pub = self.create_publisher(Bool,'/debug_cmd', 10)
         self.servo_pub = self.create_publisher(String, "/servo_cmd", 10)
+        self.light_pub = self.create_publisher(String, 'light_cmd', 10)
 
         # Async service client
         self.cli = self.create_client(ESMCmd, '/esm_command')
@@ -1011,6 +1012,8 @@ class IntegratedUI(QWidget):
     def __init__(self,node):
         super().__init__()
         
+        self.light_pub = node.light_pub
+
         node.create_subscription(CurrentPose, '/current_pose', self.update_current_pose, 10)
         node.create_subscription(Float32MultiArray, 'depth_data', self.update_depth, 10)   
         node.create_subscription(Int32, 'lr_distance', self.update_height, 10)
@@ -1084,20 +1087,47 @@ class IntegratedUI(QWidget):
         self.visual_overlay.setGeometry(0, 0, 800, 600)
         self.visual_overlay.setVisible(False)  # 初始隱藏
 
+        # # --- 切換按鈕 ---
+        # self.toggle_visual_btn = QPushButton("切換視覺畫面")
+        # self.toggle_visual_btn.setCheckable(True)
+        # self.toggle_visual_btn.clicked.connect(self.toggle_visual)
+
         # --- 切換按鈕 ---
         self.toggle_visual_btn = QPushButton("切換視覺畫面")
         self.toggle_visual_btn.setCheckable(True)
         self.toggle_visual_btn.clicked.connect(self.toggle_visual)
 
+        # --- 新增光源按鈕 ---
+        self.toggle_light_btn = QPushButton("開啟光源")
+        self.toggle_light_btn.setCheckable(True)
+        self.toggle_light_btn.clicked.connect(self.toggle_light)  # 你需要定義 toggle_light 函式
+
+        # --- 按鈕水平佈局 ---
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(self.toggle_visual_btn)
+        button_layout.addWidget(self.toggle_light_btn)
+
         # --- 主 Layout ---
         main_layout = QVBoxLayout()
         main_layout.addLayout(log_layout, 2)
-        main_layout.addWidget(self.toggle_visual_btn)
+        main_layout.addLayout(button_layout)
         main_layout.addWidget(self.splitter, 8)
         self.setLayout(main_layout)
 
     def toggle_visual(self, checked):
         self.visual_overlay.setVisible(checked)
+
+    def toggle_light(self, checked):
+        msg = String()
+        if checked:
+            msg.data = "light on"
+            self.toggle_light_btn.setText("close光源")
+        else:
+            msg.data = "light off"
+            self.toggle_light_btn.setText("open光源")
+        
+        self.light_pub.publish(msg)
+
 
     def append_log(self, log_id, text):
         if log_id == 1: self.log1.append(text)

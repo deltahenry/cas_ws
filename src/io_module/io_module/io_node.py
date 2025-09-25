@@ -70,6 +70,13 @@ class DataNode(Node):
             10
         )
 
+        self.light_cmd_subscriber = self.create_subscription(
+            String,
+            'light_cmd',
+            self.handle_light_cmd,
+            10
+        )
+
         self.MH2_state_publisher = self.create_publisher(
             MH2State,
             'mh2_state',
@@ -206,6 +213,15 @@ class DataNode(Node):
         except Exception as e:
             self.get_logger().error(f"Failed to parse DO name '{msg.name}': {e}")
 
+    def handle_light_cmd(self, msg: String):
+        if msg.data == "light on":
+            self.DO_1[9] = 1  # 開啟光源
+            self.get_logger().info("Light ON command received.")
+        elif msg.data == "light off":
+            self.DO_1[9] = 0  # 關閉光源
+            self.get_logger().info("Light OFF command received.")
+        else:
+            self.get_logger().warn(f"Unknown light command: {msg.data}")
 
 class ForkliftControl():
     def __init__(self, data_node: DataNode):
@@ -220,6 +236,8 @@ class ForkliftControl():
 
     def run(self):
         # 每站的設定（可用清單定義來擴展性更強）
+
+        print("light:", self.data_node.DO_1[9])
 
         if not self.data_node.ensure_connection():
             self.data_node.get_logger().error("❌ Modbus 斷線，略過 DO 寫入")
