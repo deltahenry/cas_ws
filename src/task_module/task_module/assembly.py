@@ -10,9 +10,10 @@ from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray,Int32,Int32MultiArray
 from common_msgs.msg import StateCmd,TaskCmd,MotionCmd,TaskState,ForkCmd,ForkState,Recipe,CurrentPose,GripperCmd,LimitCmd
 import numpy as np
+import copy
 
 #parameters
-timer_period = 0.5  # seconds
+timer_period = 0.2  # seconds
 
 
 # --- ROS2 Node ---
@@ -185,6 +186,10 @@ class AssemblyState(Enum):
     INIT = "init"
     PUSH_READY = "push_ready"
     CLOSE_LIMIT = "close_limit"
+    PUSH_STEP_1 = "push_step_1"
+    PUSH_STEP_2 = "push_step_2"
+    HEIGHT_ADJUST = "height_adjust"
+    PUSH_VALUE_CHECK = "push_value_check"
     PUSH_ASSEMBLY = "push_assembly"
     OPEN_GRIPPER = "open_gripper"
     BACK_HOME = "back_home"
@@ -198,12 +203,18 @@ class AssemblyFSM(Machine):
         self.data_node = data_node
         self.motor_cmd_sent = False
         self.send_fork_cmd = False
+        self.push_step_2_cmd = [0.0,0.0,0.0]
+        self.next_height_cmd = 0.0
 
         states = [
             AssemblyState.IDLE.value,
             AssemblyState.INIT.value,       
             AssemblyState.PUSH_READY.value,
             AssemblyState.CLOSE_LIMIT.value,
+            AssemblyState.PUSH_STEP_1.value,
+            AssemblyState.PUSH_STEP_2.value,
+            AssemblyState.HEIGHT_ADJUST.value,
+            AssemblyState.PUSH_VALUE_CHECK.value,
             AssemblyState.PUSH_ASSEMBLY.value,
             AssemblyState.OPEN_GRIPPER.value,
             AssemblyState.BACK_HOME.value,
@@ -216,7 +227,13 @@ class AssemblyFSM(Machine):
             {'trigger': 'idle_to_init', 'source': AssemblyState.IDLE.value, 'dest': AssemblyState.INIT.value},
             {'trigger': 'init_to_push_ready', 'source': AssemblyState.INIT.value, 'dest': AssemblyState.PUSH_READY.value},
             {'trigger': 'push_ready_to_close_limit', 'source': AssemblyState.PUSH_READY.value, 'dest': AssemblyState.CLOSE_LIMIT.value},
-            {'trigger': 'close_limit_to_push_assembly', 'source': AssemblyState.CLOSE_LIMIT.value, 'dest': AssemblyState.PUSH_ASSEMBLY.value},
+            {'trigger': 'close_limit_to_push_step_1', 'source': AssemblyState.CLOSE_LIMIT.value, 'dest': AssemblyState.PUSH_STEP_1.value},
+            {'trigger': 'push_step_1_to_push_assembly', 'source': AssemblyState.PUSH_STEP_1.value, 'dest': AssemblyState.PUSH_ASSEMBLY.value},
+            {'trigger': 'push_step_1_to_push_step_2', 'source': AssemblyState.PUSH_STEP_1.value, 'dest': AssemblyState.PUSH_STEP_2.value},
+            {'trigger': 'push_step_2_to_height_adjust', 'source': AssemblyState.PUSH_STEP_2.value, 'dest': AssemblyState.HEIGHT_ADJUST.value},
+            {'trigger': 'height_adjust_to_push_value_check', 'source': AssemblyState.HEIGHT_ADJUST.value, 'dest': AssemblyState.PUSH_VALUE_CHECK.value},
+            {'trigger': 'push_value_check_to_push_step_2', 'source': AssemblyState.PUSH_VALUE_CHECK.value, 'dest': AssemblyState.PUSH_STEP_2.value},
+            {'trigger': 'push_value_check_to_push_assembly', 'source': AssemblyState.PUSH_VALUE_CHECK.value, 'dest': AssemblyState.PUSH_ASSEMBLY.value},
             {'trigger': 'push_assembly_to_open_gripper', 'source': AssemblyState.PUSH_ASSEMBLY.value, 'dest': AssemblyState.OPEN_GRIPPER.value},
             {'trigger': 'open_gripper_to_back_home', 'source': AssemblyState.OPEN_GRIPPER.value, 'dest': AssemblyState.BACK_HOME.value},
             {'trigger': 'back_home_to_move_forklift', 'source': AssemblyState.BACK_HOME.value, 'dest': AssemblyState.MOVE_FORKLIFT.value},
@@ -243,7 +260,6 @@ class AssemblyFSM(Machine):
         self.motor_cmd_sent = False
         self.send_fork_cmd = False
         
-
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
             print("[AssemblymentFSM] 被暫停中")
@@ -263,9 +279,16 @@ class AssemblyFSM(Machine):
 
     def run(self):
         # depth_cmd = (self.data_node.depth_data[0] + self.data_node.depth_data[1])/2.0
+        Y_THERESHOLD = 650.0  # Y 軸位置閾值,>進行兩步推進,<進行一步推進
+        PUSH_STEP_VALUE = 50.0  # step距離
+        HEIGHT_ADJUST_VALUE = -4.0  # 高度調整值
+
+        push_step_1_cmd = [0.0,Y_THERESHOLD,0.0]  # 推進階段的第一步目標位置
         push_pose_cmd = [0.0,self.data_node.target_depth,0.0]  # 推進階段的目標位置
         ready_pose_cmd = [0.0,150.0, 0.0]  # 拉取準備位置
         home_pose_cmd = [0.0, -45.0, 0.0]  # 回到家位置的目標位置
+
+
 
         if self.state == AssemblyState.IDLE.value:
             print("[AssemblymentFSM] 等待開始")
@@ -296,15 +319,85 @@ class AssemblyFSM(Machine):
         
         elif self.state == AssemblyState.CLOSE_LIMIT.value:
             print("[AssemblymentFSM] 關閉limit階段")
+            # self.close_limit_to_push_step_1()
             self.send_limit_cmd("close_limit")
 
             if self.data_node.limit_state == [1,1]:  # 假設 1 表示限位已關閉
                 print("[AssemblymentFSM] 限位已關閉")
-                self.close_limit_to_push_assembly()
+                # self.close_limit_to_push_assembly()
+                self.close_limit_to_push_step_1()
             elif self.data_node.limit_state == [2,2]:  # 假設 2 表示限位正在移動
                 print("[AssemblymentFSM] 限位正在移動，等待完成")
             else:
                 print("[AssemblymentFSM] 限位未關閉，繼續等待")
+
+        elif self.state == AssemblyState.PUSH_STEP_1.value:
+            print("[AssemblymentFSM] 推進階段 Step 1")
+            target_depth = copy.deepcopy(self.data_node.target_depth)
+
+            if target_depth > Y_THERESHOLD: 
+                print("[AssemblymentFSM] 目標深度大於閾值，兩步推進")
+                if not self.motor_cmd_sent:
+                    self.sent_motor_cmd(push_step_1_cmd)
+                    self.motor_cmd_sent = True  # 標記已發送初始化命令
+                else:
+                    print("[AssemblymentFSM] 馬達命令已發送，等待完成")
+                    push_arrive = self.check_pose(push_step_1_cmd)
+                    if push_arrive:
+                        self.motor_cmd_sent = False  # 重置標記
+                        self.push_step_1_to_push_step_2()
+                    else:
+                        print("[AssemblymentFSM] 馬達尚未到達")          
+            else:
+                self.push_step_1_to_push_assembly()
+
+        elif self.state == AssemblyState.PUSH_STEP_2.value:
+            print("[AssemblymentFSM] 推進階段 Step 2")
+            target_depth = copy.deepcopy(self.data_node.target_depth)
+
+            if not self.motor_cmd_sent:
+                current_y = copy.deepcopy(self.data_node.current_pose[1])
+                y_cmd = current_y + PUSH_STEP_VALUE
+                self.push_step_2_cmd = [0.0, y_cmd, 0.0]  # store once
+                self.sent_motor_cmd(self.push_step_2_cmd)
+                self.motor_cmd_sent = True
+            else:
+                print("[AssemblymentFSM] 馬達命令已發送，等待完成")
+                push_arrive = self.check_pose(self.push_step_2_cmd)  # always use stored value
+                if push_arrive:
+                    print("[AssemblymentFSM] 馬達已到達 Step 2 位置")
+                    self.motor_cmd_sent = False
+                    self.push_step_2_to_height_adjust()
+                else:
+                    print("[AssemblymentFSM] 馬達尚未到達 Step 2 位置，繼續等待")
+
+        elif self.state == AssemblyState.HEIGHT_ADJUST.value:
+            print("[AssemblymentFSM] 高度調整階段")
+            current_height = copy.deepcopy(self.data_node.current_height)
+            tolerance = 1.0
+            
+            if not self.send_fork_cmd:
+                self.next_height_cmd = current_height + HEIGHT_ADJUST_VALUE
+                self.fork_cmd(mode="run", speed="slow", direction="down", distance= self.next_height_cmd)
+                self.send_fork_cmd = True
+            else:
+                if abs(self.data_node.current_height - self.next_height_cmd) <= tolerance and self.data_node.forkstate == "idle":
+                    self.send_fork_cmd = False
+                    print("[AssemblymentFSM] 叉車已到達目標高度")
+                    self.height_adjust_to_push_value_check()
+                else:
+                    print("waiting")
+
+        elif self.state == AssemblyState.PUSH_VALUE_CHECK.value:
+            print("[AssemblymentFSM] 推進值檢查階段")
+            current_y = copy.deepcopy(self.data_node.current_pose[1])
+            target_depth = copy.deepcopy(self.data_node.target_depth)
+
+            if target_depth - current_y <= PUSH_STEP_VALUE:
+                self.push_value_check_to_push_assembly()    
+            else:
+                self.push_value_check_to_push_step_2()    
+            
 
         elif self.state == AssemblyState.PUSH_ASSEMBLY.value:
             print("[AssemblymentFSM] 推進階段")
@@ -391,12 +484,12 @@ class AssemblyFSM(Machine):
         msg = MotionCmd()
         msg.command_type = MotionCmd.TYPE_Y_MOVE
         msg.pose_data = [pose_cmd[0], pose_cmd[1], pose_cmd[2]]
-        msg.speed = 30.0
+        msg.speed = 20.0
         self.data_node.motion_cmd_publisher.publish(msg)
     
     def check_pose(self,pose_cmd):
         print(f"[AssemblymentFSM] 檢查Y位置: {pose_cmd[1]}")
-        if abs(self.data_node.current_pose[1] - pose_cmd[1]) < 2.0:
+        if abs(self.data_node.current_pose[1] - pose_cmd[1]) <= 2.0:
             print("馬達已經到位置")
             return True
         else:
