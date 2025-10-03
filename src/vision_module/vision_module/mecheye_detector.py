@@ -89,8 +89,7 @@ class Mecheye(Machine):
             {"trigger": "done", "source": MecheyeState.CALCULATE.value, "dest": MecheyeState.DONE.value},
             {"trigger": "stop", "source": "*", "dest": MecheyeState.STOP.value},
             {"trigger": "fail", "source": "*", "dest": MecheyeState.FAIL.value},
-            {"trigger": "return_to_idle", "source": [MecheyeState.DONE.value, MecheyeState.STOP.value, MecheyeState.FAIL.value],
-             "dest": MecheyeState.IDLE.value},
+            {"trigger": "return_to_idle", "source": "*", "dest": MecheyeState.IDLE.value},
         ]
 
         self.machine = Machine(model=self, states=states, transitions=transitions,
@@ -101,7 +100,14 @@ class Mecheye(Machine):
         self.phase = MecheyeState(self.state)
 
     def step(self):
-        self.run()
+        if self.data_node.detection_cmd == "start_detect":
+            self.run()
+        else:
+            self.reset_parameters()  # 重置參數
+            self.return_to_idle()  # 返回到空閒狀態
+            self.run()
+            return
+
 
     def run(self):
         if self.state == MecheyeState.IDLE.value:

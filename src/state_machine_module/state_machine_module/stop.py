@@ -8,7 +8,7 @@ from enum import Enum, auto
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray,Int32
-from common_msgs.msg import StateCmd,TaskState,MotionCmd,ForkCmd,GripperCmd,LimitCmd
+from common_msgs.msg import StateCmd,TaskState,MotionCmd,ForkCmd,GripperCmd,LimitCmd,TaskCmd
 import numpy as np
 
 #parameters

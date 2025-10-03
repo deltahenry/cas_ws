@@ -101,9 +101,9 @@ class ForkliftControlState(Enum):
 class ForkliftControl(Machine):
     def __init__(self, data_node: DataNode):
 
-        self.csv_file_path = '/home/henry/cas_ws/height_log.csv'
-        self.csv_file = open(self.csv_file_path, 'a', newline='')
-        self.csv_writer = csv.writer(self.csv_file)
+        # self.csv_file_path = '/home/henry/cas_ws/height_log.csv'
+        # self.csv_file = open(self.csv_file_path, 'a', newline='')
+        # self.csv_writer = csv.writer(self.csv_file)
 
         self.phase = ForkliftControlState.IDLE  # 初始狀態
         self.data_node = data_node
@@ -139,7 +139,7 @@ class ForkliftControl(Machine):
         height_info.data = [float(self.data_node.distance), float(self.data_node.current_height),float(self.data_node.control)]
         self.data_node.height_cmd_info_publisher.publish(height_info)
         # 寫入 CSV 文件
-        self.csv_writer.writerow([float(self.data_node.distance), float(self.data_node.current_height),float(self.data_node.control)])
+        # self.csv_writer.writerow([float(self.data_node.distance), float(self.data_node.current_height),float(self.data_node.control)])
 
 
         # if self.data_node.state_cmd.get("pause_button", False):
@@ -357,7 +357,7 @@ def main():
         pass
     finally:
         data.destroy_node()
-        system.csv_file.close()
+        # system.csv_file.close()
         rclpy.shutdown()
         plt.ioff()
         plt.show()

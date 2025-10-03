@@ -23,6 +23,7 @@ class DataNode(Node):
 
         self.state_cmd ={
             'pause_button': False,
+            'stop_button': False,
         }
 
         self.compensate_cmd = "idle"  # 'l_shape','screw'
@@ -122,6 +123,7 @@ class DataNode(Node):
         # 在這裡可以處理狀態命令
         self.state_cmd = {
             'pause_button': msg.pause_button,
+            'stop_button': msg.stop_button,
         }
 
     def compensate_cmd_callback(self, msg: TaskCmd):
@@ -305,6 +307,7 @@ class CompensateFSM(Machine):
 
         self.data_node.state_cmd = {
             'pause_button': False,
+            'stop_button': False,
         }
 
 
@@ -312,12 +315,22 @@ class CompensateFSM(Machine):
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
             print("[CompensatementFSM] 被暫停中")
+
+        elif self.data_node.state_cmd.get("stop_button", False):
+            print("被停止，返回空閒狀態")
+            self.data_node.detection_cmd_publisher.publish(String(data="stop_detect"))
+            self.reset_parameters()  # 重置參數
+            self.return_to_idle()  # 返回到空閒狀態
+            self.run()
+            return
         
         elif self.data_node.compensate_cmd == "l_shape" or self.data_node.compensate_cmd == "screw":
             print("[CompensatementFSM] 開始compensate")
             self.run()
+
         else:
             print("[CompensatementFSM] compensate未啟動，等待中")
+            self.data_node.detection_cmd_publisher.publish(String(data="stop_detect"))
             self.reset_parameters()  # 重置參數
             self.return_to_idle()  # 返回到空閒狀態
             self.run()
@@ -355,6 +368,7 @@ class CompensateFSM(Machine):
             print("[CompensatementFSM] 等待視覺檢測結果...")
             if self.data_node.get_detection:
                 self.compensate_z_wait_to_compensate_z_check()
+                self.data_node.detection_cmd_publisher.publish(String(data="stop_detect"))
             else:
                 print("[CompensatementFSM] wait for detection...")
                 return
@@ -415,6 +429,7 @@ class CompensateFSM(Machine):
             print("to_done:",self.data_node.to_done)
             if self.data_node.get_detection:
                 self.compensate_x_wait_to_compensate_x_check()
+                self.data_node.detection_cmd_publisher.publish(String(data="stop_detect"))
             else:
                 print("[CompensatementFSM] wait for detection...")
                 return
@@ -469,7 +484,7 @@ class CompensateFSM(Machine):
         
         elif self.state == CompensateState.COMPENSATE_YAW_START.value:
             print("[CompensatementFSM] 視覺檢測中...")
-            self.data_node.detection_cmd_publisher.publish(String(data="start_detect"))
+            # self.data_node.detection_cmd_publisher.publish(String(data="start_detect"))
             self.compensate_yaw_start_to_compensate_yaw_wait()
         
         elif self.state == CompensateState.COMPENSATE_YAW_WAIT.value:
@@ -548,6 +563,7 @@ class CompensateFSM(Machine):
             print("[CompensatementFSM] 等待視覺檢測結果...")
             if self.data_node.get_detection:
                 self.compensate_check_wait_to_compensate_check()
+                self.data_node.detection_cmd_publisher.publish(String(data="stop_detect"))
             else:
                 print("[CompensatementFSM] wait for detection...")
                 return

@@ -20,9 +20,9 @@ class LRSensorNode(Node):
         self.timer = self.create_timer(self.read_rate, self.read_sensor_data)
         self.get_logger().info(f'LR Sensor Node started. IP: {self.sensor_ip}, Instance: {self.instance_id}')
 
-        self.csv_file_path = '/home/henry/cas_ws/laser_height_data.csv'
-        self.csv_file = open(self.csv_file_path, 'a', newline='')
-        self.csv_writer = csv.writer(self.csv_file)
+        # self.csv_file_path = '/home/henry/cas_ws/laser_height_data.csv'
+        # self.csv_file = open(self.csv_file_path, 'a', newline='')
+        # self.csv_writer = csv.writer(self.csv_file)
 
     def read_sensor_data(self):
         try:
@@ -41,8 +41,8 @@ class LRSensorNode(Node):
                     msg.data = int_value
                     self.publisher_.publish(msg)
                     self.get_logger().info(f'Published Distance: {int_value} mm')
-                    # Write to CSV
-                    self.csv_writer.writerow([int_value])
+                    # # Write to CSV
+                    # self.csv_writer.writerow([int_value])
                 else:
                     self.get_logger().warn('No value returned from sensor.')
         except Exception as e:
@@ -54,5 +54,5 @@ def main(args=None):
     node = LRSensorNode()
     rclpy.spin(node)
     node.destroy_node()
-    node.csv_file.close()
+    # node.csv_file.close()
     rclpy.shutdown()
