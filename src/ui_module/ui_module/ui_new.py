@@ -38,7 +38,6 @@ class RecipePublisher(Node):
         self.pass_pub = self.create_publisher(Float32MultiArray, '/compensate_pose_cmd', 10)
         self.confirm_pub = self.create_publisher(String, '/confirm_cmd', 10)
         self.compensate_task_pub = self.create_publisher(TaskCmd, '/compensate_cmd', 10)
-        self.compensate_pose_pub = self.create_publisher(Float32MultiArray, '/compensate_pose_cmd', 10)
         self.debug_pub = self.create_publisher(Bool,'/debug_cmd', 10)
         self.servo_pub = self.create_publisher(String, "/servo_cmd", 10)
         self.light_pub = self.create_publisher(String, 'light_cmd', 10)
@@ -394,29 +393,48 @@ class UI3(QWidget):
 
         # 補償 Z / X
         # Z補償
-        self.z_input = QLineEdit()
-        self.z_input.setPlaceholderText("輸入Z值")
+        # self.z_input = QLineEdit()
+        # self.z_input.setPlaceholderText("輸入Z值")
+        # self.z_btn = QPushButton("✅ Z補償")
+        # self.z_btn.setFixedWidth(100)
+        # z_layout = QHBoxLayout()
+        # z_layout.addWidget(QLabel("Z補償值:"))
+        # z_layout.addWidget(self.z_input)
+        # z_layout.addWidget(self.z_btn)  # 按鈕貼右側
+        self.z_label = QLabel("Z補償值: 0.00")
+        self.z_label.setFixedWidth(200)
         self.z_btn = QPushButton("✅ Z補償")
         self.z_btn.setFixedWidth(100)
 
         z_layout = QHBoxLayout()
-        z_layout.addWidget(QLabel("Z:"))
-        z_layout.addWidget(self.z_input)
-        z_layout.addWidget(self.z_btn)  # 按鈕貼右側
+        z_layout.setContentsMargins(0, 0, 0, 0)
+        z_layout.addWidget(self.z_label)
+        z_layout.addStretch(1)       # 將按鈕推到右側
+        z_layout.addWidget(self.z_btn)
 
         # X補償
-        self.x_input = QLineEdit()
-        self.x_input.setPlaceholderText("輸入X值")
+        # self.x_input = QLineEdit()
+        # self.x_input.setPlaceholderText("輸入X值")
+        # self.x_btn = QPushButton("✅ X補償")
+        # self.x_btn.setFixedWidth(100)
+
+        # x_layout = QHBoxLayout()
+        # x_layout.addWidget(QLabel("X補償值:"))
+        # x_layout.addWidget(self.x_input)
+        # x_layout.addWidget(self.x_btn)
+        self.x_label = QLabel("X補償值: 0.00")
+        self.x_label.setFixedWidth(200)
         self.x_btn = QPushButton("✅ X補償")
         self.x_btn.setFixedWidth(100)
 
         x_layout = QHBoxLayout()
-        x_layout.addWidget(QLabel("X:"))
-        x_layout.addWidget(self.x_input)
+        x_layout.setContentsMargins(0, 0, 0, 0)
+        x_layout.addWidget(self.x_label)
+        x_layout.addStretch(1)       # 將按鈕推到右側
         x_layout.addWidget(self.x_btn)
 
         # Yaw補償 (前方顯示 UI 回傳 yaw)
-        self.yaw_label = QLabel("Yaw: 0.00")
+        self.yaw_label = QLabel("Yaw補償值: 0.00")
         self.yaw_label.setFixedWidth(200)
         self.yaw_btn = QPushButton("✅ Yaw補償")
         self.yaw_btn.setFixedWidth(100)
@@ -684,7 +702,6 @@ class UI3(QWidget):
 
         # Publisher
         self.task_cmd_pub = node.compensate_task_pub
-        self.pose_cmd_pub = node.compensate_pose_pub
         self.confirm_pub = node.confirm_pub
         self.pass_pub = node.pass_pub
         self.limit_pub = node.limit_pub
@@ -693,7 +710,8 @@ class UI3(QWidget):
         self.debug_pub = node.debug_pub
         
         # Subscriber
-        node.create_subscription(Float32MultiArray, "/ui_compensate_pose", self.pose_callback, 10)
+        node.create_subscription(Float32MultiArray, "/ui_target_pose", self.target_pose_callback, 10)
+        node.create_subscription(Float32MultiArray, "/ui_compensate_value", self.compensate_value_callback, 10)
         node.create_subscription(TaskState, '/task_state_compensate', self.compensate_state_callback, 10)
         node.create_subscription(Int32, 'lr_distance', self.update_fork_current_height, 10)
         node.create_subscription(ForkState, 'fork_state', self.update_fork_state, 10)
@@ -707,8 +725,8 @@ class UI3(QWidget):
         self.detect_btn.clicked.connect(lambda: self.send_detect_cmd("l_shape"))
         self.cancel_btn.clicked.connect(lambda: self.send_detect_cmd("stop"))
 
-        self.z_btn.clicked.connect(lambda: self.send_z_pose_cmd(self.z_input.text()))
-        self.x_btn.clicked.connect(lambda: self.send_x_pose_cmd(self.x_input.text()))
+        self.z_btn.clicked.connect(lambda: self.send_z_comfirm("confirm"))
+        self.x_btn.clicked.connect(lambda: self.send_x_comfirm("confirm"))
         self.yaw_btn.clicked.connect(lambda: self.send_yaw_comfirm("confirm"))
 
         self.limit_open_btn.clicked.connect(lambda: self.send_limit_cmd("open_limit"))
@@ -751,10 +769,13 @@ class UI3(QWidget):
             self.servo_btn.setText("⚙️ Servo OFF")
             self.servo_btn.setStyleSheet("background-color: lightgray; font-size: 12px;")
 
-    # ---------------- 更新 yaw 值 ----------------
-    def update_yaw(self, yaw: float):
-        self.current_yaw = yaw
-        self.yaw_label.setText(f"Yaw: {yaw:.2f}")
+    # ---------------- 更新 yaw 值 ----------------    
+    def compensate_value_callback(self, msg: Float32MultiArray):
+        x, y, yaw, z = msg.data
+        self.x_label.setText(f"X補償值: {x:.2f}")
+        self.z_label.setText(f"Z補償值: {z:.2f}")
+        self.yaw_label.setText(f"Yaw補償值: {yaw:.2f}")
+        self.current_yaw = yaw  # 更新目前 yaw 值
 
     def compensate_state_callback(self, msg: TaskState):
         self.state = msg.state
@@ -774,25 +795,35 @@ class UI3(QWidget):
         elif cmd == "stop":
             self.pose_label.setText("目標位置: 偵測已取消")
 
-    def send_z_pose_cmd(self, z_text: str):
-        try:
-            z = float(z_text)
-        except ValueError:
-            self.pose_label.setText("Z補償: 輸入錯誤")
-            return
-        msg = Float32MultiArray()
-        msg.data = [0.0, z]
-        self.pose_cmd_pub.publish(msg)
+    # def send_z_pose_cmd(self, z_text: str):
+    #     try:
+    #         z = float(z_text)
+    #     except ValueError:
+    #         self.pose_label.setText("Z補償: 輸入錯誤")
+    #         return
+    #     msg = Float32MultiArray()
+    #     msg.data = [0.0, z]
+    #     self.pose_cmd_pub.publish(msg)
 
-    def send_x_pose_cmd(self, x_text: str):
-        try:
-            x = float(x_text)
-        except ValueError:
-            self.pose_label.setText("X補償: 輸入錯誤")
-            return
-        msg = Float32MultiArray()
-        msg.data = [x, 0.0]
-        self.pose_cmd_pub.publish(msg)
+    # def send_x_pose_cmd(self, x_text: str):
+    #     try:
+    #         x = float(x_text)
+    #     except ValueError:
+    #         self.pose_label.setText("X補償: 輸入錯誤")
+    #         return
+    #     msg = Float32MultiArray()
+    #     msg.data = [x, 0.0]
+    #     self.pose_cmd_pub.publish(msg)
+
+    def send_z_comfirm(self, cmd: str):
+        msg = String()
+        msg.data = cmd
+        self.confirm_pub.publish(msg)
+
+    def send_x_comfirm(self, cmd: str):
+        msg = String()
+        msg.data = cmd
+        self.confirm_pub.publish(msg)
     
     def send_yaw_comfirm(self, cmd: str):
         msg = String()
@@ -822,7 +853,7 @@ class UI3(QWidget):
         msg.mode = cmd
         self.node.gripper_pub.publish(msg)
 
-    def pose_callback(self, msg: Float32MultiArray):
+    def target_pose_callback(self, msg: Float32MultiArray):
         x, y, yaw, z = msg.data
         self.pose_label.setText(f"目標位置: (x: {x:.2f}, y: {y:.2f}, yaw: {yaw:.2f}, z: {z:.2f})")      
 

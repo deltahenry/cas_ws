@@ -49,6 +49,7 @@ setup(
             'get_matrix = vision_module.get_matrix:main',
             'detection_origin = vision_module.detection_origin:main',
             'compensate_aider = vision_module.compensate_aider:main',
+            'mecheye_detector = vision_module.mecheye_detector:main',
         ],
     },
 )
