@@ -6,6 +6,7 @@ from enum import Enum
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32MultiArray
+from common_msgs.msg import Recipe
 import socket
 
 # parameters
@@ -32,12 +33,21 @@ class DataNode(Node):
         self.current_x = 0.0
         self.current_z = 0.0
 
+        self.target_layer = 0
+
         self.init_tcp()
 
         self.dection_cmd_subscriber = self.create_subscription(
             String,
             'detection_cmd',
             self.dection_cmd_callback,
+            10
+        )
+
+        self.recipe_data_subscriber = self.create_subscription(
+            Recipe,
+            'recipe_cmd',
+            self.recipe_callback,
             10
         )
 
@@ -61,6 +71,10 @@ class DataNode(Node):
         self.detection_cmd = msg.data
         print(f"[DataNode] 接收到 dection_cmd: {self.detection_cmd}")
 
+    def recipe_callback(self, msg: Recipe):
+        # print(f"[DataNode] 接收到 recipe_data: layer={msg.layer}")
+        self.target_layer = str(msg.layer)
+        print(f"[DataNode] 更新 target_layer: {self.target_layer}")
 
 class MecheyeState(Enum):
     IDLE = "idle"
@@ -130,7 +144,9 @@ class Mecheye(Machine):
                     return  # 等下一輪
 
             try:
-                self.data_node.conn.send(b"00")  # 發送開始檢測命令
+                # message = f"00,{self.data_node.target_layer}"
+                message = f"00"
+                self.data_node.conn.send(message.encode('utf-8'))
                 print("[Server] Sent: 00")
                 self.wait_detect()
             except Exception as e:
@@ -177,8 +193,8 @@ class Mecheye(Machine):
                 self.detect_again()
             else:
                 x_modify,z_modify = self.data_process(self.data_node.current_x_queue,self.data_node.current_z_queue)
-                self.data_node.compensate_x = x_modify - self.data_node.golden_x
-                self.data_node.compensate_z = z_modify - self.data_node.golden_z
+                self.data_node.compensate_x = x_modify - self.data_node.golden_x + 2.0
+                self.data_node.compensate_z = z_modify - self.data_node.golden_z*0.53
                 print(f"[Mecheye] 計算結果: compensate_x={self.data_node.compensate_x}, compensate_z={self.data_node.compensate_z}")
                 msg = Float32MultiArray()
                 msg.data = [self.data_node.compensate_x, self.data_node.compensate_z]

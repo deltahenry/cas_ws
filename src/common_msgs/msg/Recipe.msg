@@ -6,3 +6,6 @@ float32 height
 
 #depth
 float32 depth
+
+#layer
+int8 layer

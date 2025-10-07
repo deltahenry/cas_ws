@@ -157,6 +157,7 @@ class PreciseAlignFSM(Machine):
         self.phase = PreciseAlignState.IDLE  # 初始狀態
         self.data_node = data_node
         self.send_fork_cmd = False
+        self.act_height = 0.0 
 
         states = [
             PreciseAlignState.IDLE.value,
@@ -200,6 +201,8 @@ class PreciseAlignFSM(Machine):
             'pause_button': False,
         }
         self.send_fork_cmd = False
+
+        self.act_height = 0.0
         
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
@@ -293,15 +296,20 @@ class PreciseAlignFSM(Machine):
                 print("waiting for precise align done")
         
         elif self.state == PreciseAlignState.MOVE_ACT.value:
-            height_cmd = self.data_node.target_height
+            # height_cmd = self.data_node.target_height
             tolerance = 1.0
 
             if not self.send_fork_cmd:
-                self.fork_cmd(mode="run", speed="slow", direction="down", distance=height_cmd)
+                if abs(self.data_node.target_height) - 226.0 < 10.0: #2nd cabinent
+                    self.act_height = self.data_node.current_height + 123.0
+                else:
+                    self.act_height = self.data_node.current_height + 130.0
+                    
+                self.fork_cmd(mode="run", speed="slow", direction="down", distance=self.act_height)
                 self.send_fork_cmd = True
-            
+                
             else:
-                if abs(self.data_node.current_height - height_cmd) <= tolerance and self.data_node.forkstate == "idle":
+                if abs(self.data_node.current_height - self.act_height) <= tolerance and self.data_node.forkstate == "idle":
                     self.send_fork_cmd = False
                     print("[PreciseAlignmentFSM] 叉車已到達目標高度，進入電池檢測階段")
                     self.move_act_to_done()

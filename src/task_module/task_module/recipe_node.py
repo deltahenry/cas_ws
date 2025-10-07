@@ -14,6 +14,7 @@ class RecipeNode(Node):
         self.mode = "assembly"
         self.target_height = 150.0
         self.target_depth = 0.0
+        self.target_layer = 1
         
 
         # 初始化 ROS2 Node
@@ -38,6 +39,7 @@ class RecipeNode(Node):
         self.mode = msg.mode 
         self.target_height = msg.height
         self.target_depth = msg.depth
+        self.target_layer = msg.layer
         # 在這裡可以添加更多的處理邏輯
         # 例如，根據接收到的 recipe 更新其他狀態或觸發其他操作
 

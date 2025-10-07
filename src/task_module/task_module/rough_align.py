@@ -244,8 +244,9 @@ class RoughAlignFSM(Machine):
         # 任務完成或失敗時自動清除任務旗標
 
     def run(self):
-        pick_height = 112.0  # pick模式下的初始高度
-        assem_height = 112.0
+        mech_eye = 10.0
+        pick_height = 112.0 - mech_eye # pick模式下的初始高度
+        assem_height = 112.0 - mech_eye # 推模式下的初始高度
         tolerance = 1.0  # 容差值
 
         if self.state == RoughAlignState.IDLE.value:

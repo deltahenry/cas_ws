@@ -55,8 +55,9 @@ class DataNode(Node):
         print(f"接收到限位狀態: {msg.data}")
         # note!!!!! left = data[1], right = data[0]
         if len(msg.data) >= 2:
-            self.left_limit_state = msg.data[1]  # 左限位狀態
-            self.right_limit_state = msg.data[0]  # 右限位狀態
+            self.left_limit_state = msg.data[0]  # 左限位狀態
+            self.right_limit_state = msg.data[1]  # 右限位狀態
+            print(f"更新後的左限位狀態: {self.left_limit_state}, 右限位狀態: {self.right_limit_state}")
         else:
             self.get_logger().warn("接收到的限位狀態長度不足，無法更新。")
                 
@@ -153,10 +154,12 @@ class LimitControl(Machine):
             elif self.data_node.left_limit_state != 1 and self.data_node.right_limit_state == 1: # left moving, right close
                 print("left moving, right close")
                 value = Int32MultiArray(data=[0, 0, 1, 0, 0, 0, 0, 0, 1, 0])  # 封裝為 Int32MultiArray
+                # value = Int32MultiArray(data=[0, 0, 0, 1, 0, 0, 0, 0, 1, 0])   #test
                 self.data_node.limit_io_cmd_publisher.publish(value)#close move
             
             else:
                 print("[LimitControl] Limit正在關閉中...")
+                # value = Int32MultiArray(data=[0, 0, 0, 1, 0, 0, 0, 1, 0, 0])   #test
                 value = Int32MultiArray(data=[0, 0, 1, 0, 0, 0, 0, 1, 0, 0])  # 封裝為 Int32MultiArray
                 self.data_node.limit_io_cmd_publisher.publish(value)#close move
 

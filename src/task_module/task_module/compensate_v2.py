@@ -272,7 +272,8 @@ class CompensateFSM(Machine):
             {'trigger': 'compensate_check_start_to_compensate_check_wait', 'source': CompensateState.COMPENSATE_CHECK_START.value, 'dest': CompensateState.COMPENSATE_CHECK_WAIT.value},
             {'trigger': 'compensate_check_wait_to_compensate_check', 'source': CompensateState.COMPENSATE_CHECK_WAIT.value, 'dest': CompensateState.COMPENSATE_CHECK.value},
             {'trigger': 'compensate_check_to_done', 'source': CompensateState.COMPENSATE_CHECK.value, 'dest': CompensateState.DONE.value},
-            {'trigger': 'compensate_check_to_compensate_x_start', 'source': CompensateState.COMPENSATE_CHECK.value, 'dest': CompensateState.COMPENSATE_X_START.value},
+            # {'trigger': 'compensate_check_to_compensate_x_start', 'source': CompensateState.COMPENSATE_CHECK.value, 'dest': CompensateState.COMPENSATE_X_START.value},
+            {'trigger': 'compensate_check_to_compensate_z_start', 'source': CompensateState.COMPENSATE_CHECK.value, 'dest': CompensateState.COMPENSATE_Z_START.value},
 
             {'trigger': 'fail', 'source': '*', 'dest': CompensateState.FAIL.value},  
             {'trigger': 'return_to_idle', 'source': '*', 'dest': CompensateState.IDLE.value},
@@ -581,8 +582,9 @@ class CompensateFSM(Machine):
                 self.compensate_check_to_done()
             else:
                 print("[CompensatementFSM] 最終補償量過大，進行補償")
-                self.compensate_check_to_compensate_x_start()
-                      
+                # self.compensate_check_to_compensate_x_start()
+                self.compensate_check_to_compensate_z_start()
+
         elif self.state == CompensateState.DONE.value:
             print("[CompensatementFSM] 補償完成!")
 

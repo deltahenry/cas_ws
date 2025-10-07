@@ -46,11 +46,12 @@ class RecipePublisher(Node):
         self.cli = self.create_client(ESMCmd, '/esm_command')
         self.waiting_for_result = False
 
-    def publish_recipe(self, mode, height, depth):
+    def publish_recipe(self, mode, height, depth,layer):
         msg = Recipe()
         msg.mode = mode
         msg.height = height
         msg.depth = depth
+        msg.layer = layer
         self.recipe_publisher.publish(msg)
         self.get_logger().info(f"Published Recipe: {msg}")
 
@@ -66,6 +67,7 @@ class RecipeUI(QWidget):
         self.selected_height = None
         self.selected_depth = None
         self.selected_name = None
+        self.selected_layer = None
         self.log_callback = None
 
         self.pick_depth = 500.0
@@ -114,10 +116,11 @@ class RecipeUI(QWidget):
         layout = QGridLayout(page)
         col_name, heights = list(height_dict.items())[0]
         for r,h in enumerate(heights):
+            layer = r + 1  # 第1層＝最上面
             name = f"{col_name}R{r+1}"
-            btn = QPushButton(f"{name}\nH={h:.1f}, D={depth_func():.1f}")
+            btn = QPushButton(f"{name}\n層={layer},H={h:.1f}, D={depth_func():.1f}")
             btn.setCheckable(True)
-            btn.clicked.connect(lambda checked, h=h, d_func=depth_func, b=btn, m=mode, n=name: self.select_cell(m,h,d_func(),b,n))
+            btn.clicked.connect(lambda checked, h=h, d_func=depth_func, b=btn, m=mode, n=name, l=layer: self.select_cell(m,h,d_func(),b,n,l))
             layout.addWidget(btn, r, 0)
         return page
 
@@ -129,7 +132,7 @@ class RecipeUI(QWidget):
             self.stack.setCurrentIndex(1)
             self.depth_spin.setValue(self.assembly_depth)
 
-    def select_cell(self, mode, height, depth, button, name):
+    def select_cell(self, mode, height, depth, button, name, layer):
         if self.selected_button: 
             self.selected_button.setChecked(False)
         self.selected_button = button
@@ -137,8 +140,9 @@ class RecipeUI(QWidget):
         self.selected_height = height
         self.selected_depth = depth
         self.selected_name = name
+        self.selected_layer = layer
         if self.log_callback:
-            self.log_callback(1,f"👉 選擇 {mode} -> {name}, Depth={depth:.1f}")
+            self.log_callback(1, f"👉 選擇 {mode} -> {name}, 層={layer}, Depth={depth:.1f}")
 
     def update_depth(self, val):
         """當手動輸入深度時更新"""
@@ -161,9 +165,9 @@ class RecipeUI(QWidget):
         else:
             self.selected_depth = self.assembly_depth
             self.update_depth(self.assembly_depth)
-        self.node.publish_recipe(self.selected_mode,self.selected_height,self.selected_depth)
+        self.node.publish_recipe(self.selected_mode,self.selected_height,self.selected_depth,self.selected_layer)
         if self.log_callback:
-            self.log_callback(1,f"💾 已儲存: Mode={self.selected_mode},櫃體={self.selected_name}, Depth={self.selected_depth:.1f}")
+            self.log_callback(1,f"💾 已儲存: Mode={self.selected_mode}, 櫃體={self.selected_name}, 層={self.selected_layer}, Depth={self.selected_depth:.1f}")
 
 # -------------------
 # UI2: Task UI
