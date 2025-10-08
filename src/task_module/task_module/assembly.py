@@ -202,6 +202,7 @@ class AssemblyFSM(Machine):
         self.phase = AssemblyState.IDLE  # 初始狀態
         self.data_node = data_node
         self.motor_cmd_sent = False
+        self.limit_cmd_send = False
         self.send_fork_cmd = False
         self.push_step_2_cmd = [0.0,0.0,0.0]
         self.next_height_cmd = 0.0
@@ -259,6 +260,7 @@ class AssemblyFSM(Machine):
         """重置參數"""
         self.motor_cmd_sent = False
         self.send_fork_cmd = False
+        self.limit_cmd_send = False
         
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
@@ -320,12 +322,18 @@ class AssemblyFSM(Machine):
         elif self.state == AssemblyState.CLOSE_LIMIT.value:
             print("[AssemblymentFSM] 關閉limit階段")
             # self.close_limit_to_push_step_1()
-            self.send_limit_cmd("close_limit")
+            if not self.limit_cmd_send:
+                self.send_limit_cmd("close_limit")
+                self.limit_cmd_send = True
+            else:
+                print("[AssemblymentFSM] 限位命令已發送，等待完成")
 
             if self.data_node.limit_state == [1,1]:  # 假設 1 表示限位已關閉
                 print("[AssemblymentFSM] 限位已關閉")
                 # self.close_limit_to_push_assembly()
                 self.close_limit_to_push_step_1()
+                self.limit_cmd_send = False
+
             elif self.data_node.limit_state == [2,2]:  # 假設 2 表示限位正在移動
                 print("[AssemblymentFSM] 限位正在移動，等待完成")
             else:

@@ -199,6 +199,7 @@ class PickFSM(Machine):
         self.phase = PickState.IDLE  # 初始狀態
         self.data_node = data_node
         self.motor_cmd_sent = False
+        self.limit_cmd_send = False
         self.send_fork_cmd = False
 
         states = [
@@ -244,8 +245,8 @@ class PickFSM(Machine):
         """重置參數"""
         self.motor_cmd_sent = False
         self.send_fork_cmd = False
+        self.limit_cmd_send = False
         
-
     def step(self):
         if self.data_node.state_cmd.get("pause_button", False):
             print("[PickmentFSM] 被暫停中")
@@ -337,10 +338,17 @@ class PickFSM(Machine):
         
         elif self.state == PickState.OPEN_LIMIT.value:
             print("[PickmentFSM] 開啟limit階段")
-            self.send_limit_cmd("open_limit")
+            if not self.limit_cmd_send:
+                self.send_limit_cmd("open_limit")
+                self.limit_cmd_send = True
+            else:
+                print("[PickmentFSM] 限位命令已發送，等待完成")
+
             if self.data_node.limit_state == [0,0]:  # 假設 0 表示限位已開啟
                 print("[PickmentFSM] 限位已開啟")
                 self.open_limit_to_pull_home()
+                self.limit_cmd_send = False  # 重置標記
+
             elif self.data_node.limit_state == [2,2]:  # 假設 2 表示限位正在移動
                 print("[PickmentFSM] 限位正在移動，等待完成")
             else:
