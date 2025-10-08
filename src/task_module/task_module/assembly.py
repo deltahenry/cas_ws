@@ -334,22 +334,23 @@ class AssemblyFSM(Machine):
         elif self.state == AssemblyState.PUSH_STEP_1.value:
             print("[AssemblymentFSM] 推進階段 Step 1")
             target_depth = copy.deepcopy(self.data_node.target_depth)
+            self.push_step_1_to_push_assembly()
 
-            if target_depth > Y_THERESHOLD: 
-                print("[AssemblymentFSM] 目標深度大於閾值，兩步推進")
-                if not self.motor_cmd_sent:
-                    self.sent_motor_cmd(push_step_1_cmd)
-                    self.motor_cmd_sent = True  # 標記已發送初始化命令
-                else:
-                    print("[AssemblymentFSM] 馬達命令已發送，等待完成")
-                    push_arrive = self.check_pose(push_step_1_cmd)
-                    if push_arrive:
-                        self.motor_cmd_sent = False  # 重置標記
-                        self.push_step_1_to_push_step_2()
-                    else:
-                        print("[AssemblymentFSM] 馬達尚未到達")          
-            else:
-                self.push_step_1_to_push_assembly()
+            # if target_depth > Y_THERESHOLD: 
+            #     print("[AssemblymentFSM] 目標深度大於閾值，兩步推進")
+            #     if not self.motor_cmd_sent:
+            #         self.sent_motor_cmd(push_step_1_cmd)
+            #         self.motor_cmd_sent = True  # 標記已發送初始化命令
+            #     else:
+            #         print("[AssemblymentFSM] 馬達命令已發送，等待完成")
+            #         push_arrive = self.check_pose(push_step_1_cmd)
+            #         if push_arrive:
+            #             self.motor_cmd_sent = False  # 重置標記
+            #             self.push_step_1_to_push_step_2()
+            #         else:
+            #             print("[AssemblymentFSM] 馬達尚未到達")          
+            # else:
+            #     self.push_step_1_to_push_assembly()
 
         elif self.state == AssemblyState.PUSH_STEP_2.value:
             print("[AssemblymentFSM] 推進階段 Step 2")
@@ -398,7 +399,6 @@ class AssemblyFSM(Machine):
             else:
                 self.push_value_check_to_push_step_2()    
             
-
         elif self.state == AssemblyState.PUSH_ASSEMBLY.value:
             print("[AssemblymentFSM] 推進階段")
             if not self.motor_cmd_sent:

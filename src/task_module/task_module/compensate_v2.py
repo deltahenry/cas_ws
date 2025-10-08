@@ -344,7 +344,11 @@ class CompensateFSM(Machine):
         """FSM的主循環"""
         TOL_X_MM = 1.0  # 容差值 mm
         TOL_Z_MM = 1.0  # 容差值 mm
-        TOL_YAW_RAD = 0.00175  # 容差值 radian (約0.1度)  #0.8mm
+        TOL_YAW_RAD = 0.00417  # 容差值 radian  #2.0mm
+
+        # left = self.data_node.depth_data[0]
+        # right = self.data_node.depth_data[1]
+        # yaw_compensate = math.atan2((right - left), 480.0)
 
         if self.state == CompensateState.IDLE.value:
             # print("[CompensatementFSM] 空閒中...")

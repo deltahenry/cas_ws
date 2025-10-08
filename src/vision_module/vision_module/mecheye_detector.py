@@ -187,14 +187,14 @@ class Mecheye(Machine):
         elif self.state == MecheyeState.CALCULATE.value:
             print("[Mecheye] 狀態: CALCULATE")
             if self.count < self.COUNT_THRESHOLD:
-                self.data_node.current_x_queue[self.count] = self.data_node.current_x
-                self.data_node.current_z_queue[self.count] = self.data_node.current_z
+                self.data_node.current_x_queue[self.count-1] = self.data_node.current_x
+                self.data_node.current_z_queue[self.count-1] = self.data_node.current_z
                 print(f"[Mecheye] 收集資料中: {self.count}/3")
                 self.detect_again()
             else:
                 x_modify,z_modify = self.data_process(self.data_node.current_x_queue,self.data_node.current_z_queue)
-                self.data_node.compensate_x = x_modify - self.data_node.golden_x + 2.0
-                self.data_node.compensate_z = z_modify - self.data_node.golden_z*0.53
+                self.data_node.compensate_x = -(x_modify - self.data_node.golden_x) - 2.0
+                self.data_node.compensate_z = -(z_modify - self.data_node.golden_z)*0.53
                 print(f"[Mecheye] 計算結果: compensate_x={self.data_node.compensate_x}, compensate_z={self.data_node.compensate_z}")
                 msg = Float32MultiArray()
                 msg.data = [self.data_node.compensate_x, self.data_node.compensate_z]
