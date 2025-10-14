@@ -4,7 +4,7 @@ from rclpy.node import Node
 from common_msgs.msg import Recipe
 
 #parameters
-timer_period = 0.5  # seconds
+timer_period = 0.2  # seconds
 
 
 # --- ROS2 Node ---

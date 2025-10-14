@@ -70,8 +70,8 @@ class RecipeUI(QWidget):
         self.selected_layer = None
         self.log_callback = None
 
-        self.pick_depth = 500.0
-        self.assembly_depth = 600.0
+        self.pick_depth = 150.0
+        self.assembly_depth = 150.0
 
         main_layout = QVBoxLayout()
 
@@ -95,6 +95,17 @@ class RecipeUI(QWidget):
         depth_layout.addWidget(depth_label)
         depth_layout.addWidget(self.depth_spin)
         main_layout.addLayout(depth_layout)
+
+        # 手動輸入 Modify_z
+        mz_layout = QHBoxLayout()
+        mz_label = QLabel("Modify_z:")
+        self.mz_spin = QDoubleSpinBox()
+        self.mz_spin.setRange(-50, 50)   # 可正可負的偏移範圍
+        self.mz_spin.setValue(0.0)
+        self.mz_spin.valueChanged.connect(self.update_modify_z)
+        mz_layout.addWidget(mz_label)
+        mz_layout.addWidget(self.mz_spin)
+        main_layout.addLayout(mz_layout)
 
         # Stack
         self.stack = QStackedWidget()
@@ -124,6 +135,22 @@ class RecipeUI(QWidget):
             layout.addWidget(btn, r, 0)
         return page
 
+    # def create_grid_page(self, mode, height_dict, depth_func):
+    #     page = QWidget()
+    #     layout = QGridLayout(page)
+    #     col_name, heights = list(height_dict.items())[0]
+    #     for r, h in enumerate(heights):
+    #         layer = r + 1  # 第1層＝最上面
+    #         name = f"{col_name}R{r+1}"
+    #         btn = QPushButton(f"{name}\n層={layer},H={h:.1f}, D={depth_func():.1f}, Mz=0.0")
+    #         btn.setCheckable(True)
+    #         # 每個按鈕都有自己的 modify_z 值
+    #         btn.modify_z = 0.0
+    #         btn.clicked.connect(lambda checked, h=h, d_func=depth_func, b=btn, m=mode, n=name, l=layer: 
+    #                             self.select_cell(m, h, d_func(), b, n, l))
+    #         layout.addWidget(btn, r, 0)
+    #     return page
+
     def switch_page(self, mode):
         if mode=="pick":
             self.stack.setCurrentIndex(0)
@@ -144,6 +171,25 @@ class RecipeUI(QWidget):
         if self.log_callback:
             self.log_callback(1, f"👉 選擇 {mode} -> {name}, 層={layer}, Depth={depth:.1f}")
 
+    # def select_cell(self, mode, height, depth, button, name, layer):
+    #     if self.selected_button: 
+    #         self.selected_button.setChecked(False)
+    #     self.selected_button = button
+    #     self.selected_mode = mode
+    #     self.selected_height = height
+    #     self.selected_depth = depth
+    #     self.selected_name = name
+    #     self.selected_layer = layer
+
+    #     # 顯示該 cell 的 modify_z
+    #     self.mz_spin.blockSignals(True)
+    #     self.mz_spin.setValue(button.modify_z)
+    #     self.mz_spin.blockSignals(False)
+
+    #     if self.log_callback:
+    #         self.log_callback(1, f"👉 選擇 {mode} -> {name}, 層={layer}, Depth={depth:.1f}, Mz={button.modify_z:.1f}")
+
+
     def update_depth(self, val):
         """當手動輸入深度時更新"""
         if self.mode_box.currentText() == "pick":
@@ -154,6 +200,17 @@ class RecipeUI(QWidget):
         if self.selected_button:
             self.selected_button.setText(f"{self.selected_name}\nH={self.selected_height:.1f}, D={val:.1f}")
             self.selected_depth = val
+
+    def update_modify_z(self, val):
+        """更新當前選擇格子的 modify_z 偏移值"""
+        if not self.selected_button:
+            return
+        self.selected_button.modify_z = val
+        self.selected_button.setText(
+            f"{self.selected_name}\nH={self.selected_height:.1f}, D={self.selected_depth:.1f}, Mz={val:.1f}"
+        )
+        if self.log_callback:
+            self.log_callback(1, f"🔧 修改 {self.selected_name} 的 Mz={val:.1f}")
 
     def save_recipe(self):
         if not self.selected_mode:

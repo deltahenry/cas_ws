@@ -85,8 +85,8 @@ class MotionController(Node):
             self.get_logger().info("Emergency Stop Activated!")
             self.trajectory_queue.clear()  # 清空軌跡隊列
             self.motion_finished = True  # 設定為運動完成狀態
-            self.debug_mode = True  # 進入 debug 模式
-            self.debug_mode_state_publisher.publish(Bool(data=self.debug_mode))  # 發佈 debug 模式狀態
+            # self.debug_mode = True  # 進入 debug 模式
+            # self.debug_mode_state_publisher.publish(Bool(data=self.debug_mode))  # 發佈 debug 模式狀態
             return  # 不進行其他動作
 
         if self.motion_finished:

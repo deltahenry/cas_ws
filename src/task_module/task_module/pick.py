@@ -31,7 +31,7 @@ class DataNode(Node):
 
         self.current_height = 0.0
 
-        self.target_depth = 20.0
+        self.target_depth = 150.0
 
         self.gripper_state = [0,0] # 初始狀態 [left, right] open=0, close=1, moving=2
         self.limit_state = [0,0] # 初始狀態 [left, right] open=0, close=1, moving=2

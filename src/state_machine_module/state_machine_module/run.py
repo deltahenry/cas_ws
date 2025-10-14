@@ -155,8 +155,9 @@ class RUNFSM(Machine):
         
         transitions = [
             {'trigger': 'idle_to_init', 'source': RUNState.IDLE.value, 'dest': RUNState.INIT.value},
-            {'trigger': 'init_to_rough_align', 'source': RUNState.INIT.value, 'dest': RUNState.ROUGH_ALIGN.value},
-            {'trigger': 'rough_align_to_precise_align', 'source': RUNState.ROUGH_ALIGN.value, 'dest': RUNState.PRECISE_ALIGN.value},
+            # {'trigger': 'init_to_rough_align', 'source': RUNState.INIT.value, 'dest': RUNState.ROUGH_ALIGN.value},
+            # {'trigger': 'rough_align_to_precise_align', 'source': RUNState.ROUGH_ALIGN.value, 'dest': RUNState.PRECISE_ALIGN.value},
+            {'trigger': 'init_to_precise_align', 'source': RUNState.INIT.value, 'dest': RUNState.PRECISE_ALIGN.value},
             {'trigger': 'precise_align_to_pick', 'source': RUNState.PRECISE_ALIGN.value, 'dest': RUNState.PICK.value},
             {'trigger': 'pick_to_assembly', 'source': RUNState.PICK.value, 'dest': RUNState.ASSEMBLY.value},
             {'trigger': 'assembly_to_done', 'source': RUNState.ASSEMBLY.value, 'dest': RUNState.DONE.value},
@@ -228,11 +229,16 @@ class RUNFSM(Machine):
         elif self.state == RUNState.INIT.value:
             print("[RUNmentFSM] 初始化階段")
 
-            print("[RUNmentFSM] 發送任務命令: rough_align")
-            self.send_task_cmd("rough_align")
+            # print("[RUNmentFSM] 發送任務命令: rough_align")
+            # self.send_task_cmd("rough_align")
 
-            print("[RUNmentFSM] 狀態轉換到 ROUGH_ALIGN")
-            self.init_to_rough_align()
+            # print("[RUNmentFSM] 狀態轉換到 ROUGH_ALIGN")
+            # self.init_to_rough_align()
+
+            print("[RUNmentFSM] 發送任務命令: precise_align")
+            self.send_task_cmd("precise_align")
+            print("[RUNmentFSM] 狀態轉換到 PRECISE_ALIGN")
+            self.init_to_precise_align()
 
         elif self.state == RUNState.ROUGH_ALIGN.value:
             print("[RUNmentFSM] 粗對齊階段")

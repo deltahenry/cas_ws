@@ -1,0 +1,10 @@
+Timestamp,Layer,DataType,X,Y,Z,Yaw,Roll,Pitch
+2025-10-13 21:33:45.127667,7,Raw_Data,-117.05,None,-110.0,-20.05,-1.5,-1.5
+2025-10-13 21:33:46.130362,7,Raw_Data,-117.05,None,-110.0,-20.05,-1.5,-1.5
+2025-10-13 21:33:47.134972,7,Raw_Data,-50.0,None,-200.0,99.9,10.0,10.0
+2025-10-13 21:33:47.342744,7,Filter_Data,-94.7,None,-140.0,None,None,None
+2025-10-13 21:33:47.342821,7,Golden_Value,84.6,None,-67.6,None,None,None
+2025-10-13 21:33:47.342833,7,Compensate_Value,179.3,None,-36.2,None,None,None
+2025-10-13 21:33:47.755127,7,Current_Pose,0.0,0.0,0,0.0,None,None
+2025-10-13 21:33:47.755369,7,Z_Compensate,None,None,-36.20000076293945,None,None,None
+2025-10-13 21:33:47.755400,7,Target_Pose,0.0,0.0,-36.20000076293945,0.0,None,None

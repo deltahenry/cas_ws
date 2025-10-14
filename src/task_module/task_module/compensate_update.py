@@ -428,6 +428,7 @@ class CompensateFSM(Machine):
             self.compensate_z_done_to_compensate_x_start()
             self.ui_update = False
 
+
         elif self.state == CompensateState.COMPENSATE_X_START.value:
             print("[CompensatementFSM] 視覺檢測中...")
             print("to_done:",self.data_node.to_done)
