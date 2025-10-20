@@ -28,6 +28,7 @@ setup(
             'recipe_node = task_module.recipe_node:main',
             'compensate_v2 = task_module.compensate_v2:main',
             'compensate_origin = task_module.compensate_origin:main',
+            'compensate_update = task_module.compensate_update:main',
         ],
     },
 )

@@ -254,7 +254,8 @@ class CompensateFSM(Machine):
             {'trigger': 'compensate_z_check_to_compensate_z', 'source': CompensateState.COMPENSATE_Z_CHECK.value, 'dest': CompensateState.COMPENSATE_Z.value},
             {'trigger': 'compensate_z_check_to_compensate_z_done', 'source': CompensateState.COMPENSATE_Z_CHECK.value, 'dest': CompensateState.COMPENSATE_Z_DONE.value},
             {'trigger': 'compensate_z_to_compensate_z_done', 'source': CompensateState.COMPENSATE_Z.value, 'dest': CompensateState.COMPENSATE_Z_DONE.value},
-            {'trigger': 'compensate_z_done_to_compensate_x_start', 'source': CompensateState.COMPENSATE_Z_DONE.value, 'dest': CompensateState.COMPENSATE_X_START.value},
+            # {'trigger': 'compensate_z_done_to_compensate_x_start', 'source': CompensateState.COMPENSATE_Z_DONE.value, 'dest': CompensateState.COMPENSATE_X_START.value},
+            {'trigger': 'compensate_z_done_to_compensate_x_check', 'source': CompensateState.COMPENSATE_Z_DONE.value, 'dest': CompensateState.COMPENSATE_X_CHECK.value},
 
             {'trigger': 'compensate_x_start_to_compensate_x_wait', 'source': CompensateState.COMPENSATE_X_START.value, 'dest': CompensateState.COMPENSATE_X_WAIT.value},
             {'trigger': 'compensate_x_wait_to_compensate_x_check', 'source': CompensateState.COMPENSATE_X_WAIT.value, 'dest': CompensateState.COMPENSATE_X_CHECK.value},
@@ -274,7 +275,9 @@ class CompensateFSM(Machine):
             {'trigger': 'compensate_check_wait_to_compensate_check', 'source': CompensateState.COMPENSATE_CHECK_WAIT.value, 'dest': CompensateState.COMPENSATE_CHECK.value},
             {'trigger': 'compensate_check_to_done', 'source': CompensateState.COMPENSATE_CHECK.value, 'dest': CompensateState.DONE.value},
             # {'trigger': 'compensate_check_to_compensate_x_start', 'source': CompensateState.COMPENSATE_CHECK.value, 'dest': CompensateState.COMPENSATE_X_START.value},
-            {'trigger': 'compensate_check_to_compensate_z_start', 'source': CompensateState.COMPENSATE_CHECK.value, 'dest': CompensateState.COMPENSATE_Z_START.value},
+            {'trigger': 'compensate_check_to_compensate_z_check', 'source': CompensateState.COMPENSATE_CHECK.value, 'dest': CompensateState.COMPENSATE_Z_CHECK.value},
+            {'trigger': 'compensate_check_to_compensate_x_check', 'source': CompensateState.COMPENSATE_CHECK.value, 'dest': CompensateState.COMPENSATE_X_CHECK.value},
+            {'trigger': 'compensate_check_to_compensate_yaw_start', 'source': CompensateState.COMPENSATE_CHECK.value, 'dest': CompensateState.COMPENSATE_YAW_START.value},
 
             {'trigger': 'fail', 'source': '*', 'dest': CompensateState.FAIL.value},  
             {'trigger': 'return_to_idle', 'source': '*', 'dest': CompensateState.IDLE.value},
@@ -425,9 +428,9 @@ class CompensateFSM(Machine):
             self.data_node.to_done = False
             self.data_node.confirm_compensate = False
             self.send_compensate = False
-            self.compensate_z_done_to_compensate_x_start()
+            # self.compensate_z_done_to_compensate_x_start()
+            self.compensate_z_done_to_compensate_x_check()
             self.ui_update = False
-
 
         elif self.state == CompensateState.COMPENSATE_X_START.value:
             print("[CompensatementFSM] 視覺檢測中...")
@@ -596,10 +599,20 @@ class CompensateFSM(Machine):
             if abs(x_compensate) < TOL_X_MM and abs(z_compensate) < TOL_Z_MM and abs(yaw_compensate) < TOL_YAW_RAD:
                 print("[CompensatementFSM] 最終補償量過小，補償完成")
                 self.compensate_check_to_done()
+            
             else:
                 print("[CompensatementFSM] 最終補償量過大，進行補償")
-                # self.compensate_check_to_compensate_x_start()
-                self.compensate_check_to_compensate_z_start()
+                if abs(z_compensate) >= TOL_Z_MM:
+                    print("[CompensatementFSM] Z方向補償量過大，進行Z補償")
+                    self.compensate_check_to_compensate_z_check()
+                    return
+                elif abs(x_compensate) >= TOL_X_MM:
+                    print("[CompensatementFSM] X方向補償量過大，進行X補償")
+                    self.compensate_check_to_compensate_x_check()
+                    return
+                elif abs(yaw_compensate) >= TOL_YAW_RAD:
+                    print("[CompensatementFSM] YAW方向補償量過大，進行YAW補償")
+                    self.compensate_check_to_compensate_yaw_start()
 
         elif self.state == CompensateState.DONE.value:
             print("[CompensatementFSM] 補償完成!")

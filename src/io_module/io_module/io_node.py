@@ -9,6 +9,9 @@ from std_msgs.msg import String,Int32MultiArray,Bool
 from common_msgs.msg import DIDOCmd,MH2State,StateCmd
 from pymodbus.client import ModbusTcpClient
 import numpy as np
+import csv
+from datetime import datetime
+
 
 #parameters
 timer_period = 0.05  # seconds
@@ -19,6 +22,25 @@ timer_period = 0.05  # seconds
 class DataNode(Node):
     def __init__(self):
         super().__init__('data_node')
+
+        # CSV 檔案初始化
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.csv_file_path = '/home/henry/cas_ws/src/io_logs/' + timestamp + '.csv'
+        self.csv_file = open(self.csv_file_path, 'a', newline='')
+        self.csv_writer = csv.writer(self.csv_file)
+
+        self.csv_writer.writerow(["Timestamp",
+                                  "DI_1",
+                                  "DO_1",
+                                  "DO_2",
+                                  "DO_3",
+                                  "on12_state",
+                                  "on34_state",
+                                  "J12_state",
+                                  "J34_state",
+                                  "J1_error",
+                                  "J2_error",
+                                  "J3_error",])
 
         self.tcp_connected = False   # 紀錄 TCP 狀態
        
@@ -227,7 +249,6 @@ class ForkliftControl():
     def __init__(self, data_node: DataNode):
         self.data_node = data_node
 
-        
     def encode_outputs(self, do_array):
         value = 0
         for i, bit in enumerate(do_array):
@@ -442,6 +463,21 @@ def main():
             executor.spin_once(timeout_sec=0.1)
             system.run()      # DO 控制
             system.read_di()  # 讀取 DI 狀態
+            
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            data.csv_writer.writerow([timestamp,
+                                        data.DI_1.tolist(),
+                                        data.DO_1.tolist(),
+                                        data.DO_2.tolist(),
+                                        data.DO_3.tolist(),
+                                        data.on12_state.tolist(),
+                                        data.on34_state.tolist(),
+                                        data.J12_state.tolist(),
+                                        data.J34_state.tolist(),
+                                        data.J1_error.tolist(),
+                                        data.J2_error.tolist(),
+                                        data.J3_error.tolist(),])
+            
             time.sleep(timer_period) #timer period = 50ms
 
     except KeyboardInterrupt:

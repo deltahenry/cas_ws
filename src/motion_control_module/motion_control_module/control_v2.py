@@ -1,15 +1,18 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool
-from common_msgs.msg import MotionCmd,MultipleM, SingleM,MotionState,CurrentPose
+from common_msgs.msg import MotionCmd,MultipleM, SingleM,MotionState,CurrentPose,LimitCmd
 from collections import deque
 from model_module.magic_cube import RobotModel  # 自訂 model.py 模組
 from copy import deepcopy
 import numpy as np
-from std_msgs.msg import Float32MultiArray,Int32,Bool
+from std_msgs.msg import Float32MultiArray,Int32,Bool,Int32MultiArray
 import math
 from geometry_msgs.msg import Pose
 from scipy.spatial.transform import Rotation as R
+import copy
+import csv      
+from datetime import datetime       
 
 
 time_period = 0.04  # Timer 的時間間隔，單位為秒
@@ -19,6 +22,20 @@ class MotionController(Node):
     def __init__(self):
         super().__init__('motion_controller')
 
+        # CSV 檔案初始化
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.csv_file_path = '/home/henry/cas_ws/src/motion_logs/' + timestamp + '.csv'
+        self.csv_file = open(self.csv_file_path, 'a', newline='')
+        self.csv_writer = csv.writer(self.csv_file)
+
+        self.csv_writer.writerow(["Timestamp",
+                                  "Motion_Type",
+                                  "Current_Pose",
+                                  "Target_Pose",
+                                  "Motor_Positions",
+                                  "Limit_State"
+                                  ])
+
         self.current_height = 0.0
 
         # 機器人模型
@@ -27,6 +44,11 @@ class MotionController(Node):
         self.trajectory_queue = deque()
 
         self.debug_mode = False  # 是否啟用除錯模式
+
+        self.limit_cmd_send = False
+
+        #limit state
+        self.limit_state = [0,0] # 初始狀態 [left, right] open=0, close=1, moving=2
 
         # ROS 2 介面
         #Subscriber
@@ -45,12 +67,20 @@ class MotionController(Node):
             10
         )
         
+        self.limit_state_subscriber = self.create_subscription(
+            Int32MultiArray,
+            'limit_state',
+            self.limit_state_callback,
+            10
+        )
+        
         #Publisher
         self.motor_cmd_publisher = self.create_publisher(Float32MultiArray, '/motor_position_ref', 10)
         self.motion_state_publisher = self.create_publisher(MotionState, '/motion_state', 10)
         self.current_cartesian_pose_publisher = self.create_publisher(CurrentPose, '/current_pose', 10)
         self.current_arm_pose_publisher = self.create_publisher(Pose, '/current_arm_pose', 10)
         self.debug_mode_state_publisher = self.create_publisher(Bool, '/debug_mode_state', 10)
+        self.limit_pub = self.create_publisher(LimitCmd, "/limit_cmd", 10)
 
         # Timer，每次發送 1 筆指令（從 queue 中）
         self.timer = self.create_timer(time_period, self.send_next_batch)
@@ -62,7 +92,7 @@ class MotionController(Node):
         self.check_home = False
         self.check_position = False
         
-        self.current_motor_len = [-10.0, 0.0, 0.0]
+        self.current_motor_len = [-10.0, 0.0, 0.0]   # m3,m2,m1
         self.current_cartesian_pose = [0.0,0.0,0.0]  # 初始 cartesian pose x y yaw
         self.last_sent_joint_command = [0.0, 0.0, 0.0]  # 上次發送的關節指令
         self.get_logger().info('MotionController ready.')
@@ -77,9 +107,28 @@ class MotionController(Node):
         self.get_logger().info(f"Received height info: {msg.data} mm")
         self.current_height = (float(msg.data)-52.0) / 1000.0  # mm to m
 
+    def limit_state_callback(self, msg: Int32MultiArray):
+        print(f"接收到限位狀態: {msg.data}")
+        if len(msg.data) >= 2:
+            self.limit_state[0] = msg.data[0]  # 左限位狀態
+            self.limit_state[1] = msg.data[1]  # 右限位狀態
+
+
+        else:
+            self.get_logger().warn("接收到的限位狀態長度不足，無法更新。")
+
+
     #--motion command callback--
     def motion_cmd_callback(self, msg=MotionCmd):
         self.get_logger().info(f"Received motion command: {msg.command_type}")
+
+        self.csv_writer.writerow([
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            msg.command_type,
+            self.current_cartesian_pose,
+            msg.pose_data,
+            self.current_motor_len,
+            self.limit_state])
 
         if msg.command_type == MotionCmd.TYPE_STOP:
             self.get_logger().info("Emergency Stop Activated!")
@@ -147,7 +196,13 @@ class MotionController(Node):
             
     def motors_info_callback(self, msg:MultipleM):
         self.current_motor_len = [msg.motor_info[0].fb_position,msg.motor_info[1].fb_position,msg.motor_info[2].fb_position]
+        self.update_current_cartesian_pose()
         # print("motor_info callback",self.current_motor_len)
+
+    def update_current_cartesian_pose(self):
+        """使用正運動學更新當前 Cartesian 位置"""
+        self.current_cartesian_pose = self.robot_model.forward_kinematics(self.current_motor_len)
+        # print("x,y,yaw",pose_test)
 
     #--motion function--
     # back to motor home position
@@ -184,7 +239,6 @@ class MotionController(Node):
             joint_trajectory = []
             for cartesian_point in cartesian_trajectory:
                 joint_point = self.robot_model.inverse_kinematics(cartesian_point)
-                # joint_point = -self.robot_model.inverse_kinematics(cartesian_point)  # 注意: reverse sign
                 joint_trajectory.append(joint_point)
 
             # 3. 載入 joint_trajectory 進隊列（會自動切成 batch）
@@ -355,33 +409,57 @@ class MotionController(Node):
         
         # 情況 1：如果有軌跡資料（送出一個 batch）
         if self.trajectory_queue:
-            batch = self.trajectory_queue.popleft()
-            self.send_motor_command(batch)
-            self.last_sent_joint_command = batch[-1]
+            target_y = self.trajectory_queue[-1][-1][0]  # 取最後一包的最後一個點的 Y 值
+            y_move_is_safe = self.can_move_judge(self.current_cartesian_pose[1],target_y)
+            # print("target_y:",target_y) 
+            # print(f"Current Y: {self.current_cartesian_pose[1]}, Target Y: {target_y}, Y move is safe: {y_move_is_safe}")
+            
+            # y_move_is_safe = True  #暫時關閉限位判斷    
+
+            if not y_move_is_safe:
+                print("Y move is not safe due to limit switch.")
+                return
+            else:
+                batch = self.trajectory_queue.popleft()
+                self.send_motor_command(batch)
+                self.last_sent_joint_command = batch[-1]
             return
 
-        # 情況 2：還沒初始化，等待馬達抵達 [0, 0, 0]
+        # 情況 2：初始化完成，且沒有軌跡，判斷是否到達目標
+        if np.allclose(self.current_motor_len, self.last_sent_joint_command, atol=0.05):
+
+            self.motion_finished = True
+            # 狀態處理：是否是回 Home 或 GOTO
+            if self.check_home:
+                self.check_home = False
+
+                self.csv_writer.writerow([
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Motion_Completed",
+                self.current_cartesian_pose,
+                self.last_sent_joint_command,
+                self.current_motor_len,
+                self.limit_state])
+                
+            elif self.check_position:
+                 self.check_position = False
+                 
+                 self.csv_writer.writerow([
+                 datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                 "Motion_Completed",
+                 self.current_cartesian_pose,
+                 self.last_sent_joint_command,
+                 self.current_motor_len,
+                 self.limit_state])
+            
+
+        # 情況 3：還沒初始化，等待馬達抵達 [0, 0, 0]
         if not self.init_finished:
             # print("Waiting for motor initialization...")
             if np.allclose(self.current_motor_len, [0, 0, 0], atol=0.05):
                 self.init_finished = True
             return
-
-        # 情況 3：初始化完成，且沒有軌跡，判斷是否到達目標
-        if np.allclose(self.current_motor_len, self.last_sent_joint_command, atol=0.05):
-            # print("Motors have arrived.")
-            self.motion_finished = True
-
-            # 狀態處理：是否是回 Home 或 GOTO
-            if self.check_home:
-                # print("Motor is in home position.")
-                self.current_cartesian_pose = self.robot_model.home_position
-                self.check_home = False
-
-            elif self.check_position:
-                # print("Motor is in target position.")
-                self.current_cartesian_pose = self.cartesian_pos_cmd
-                self.check_position = False
+               
         # else:
         #     # 尚未到達，持續追蹤命令
         #     # print("Tracking...")
@@ -395,6 +473,50 @@ class MotionController(Node):
         msg = Float32MultiArray()
         msg.data = flat_positions
         self.motor_cmd_publisher.publish(msg)
+
+    def can_move_judge(self, current_y_cmd, target_y_cmd):
+        can_move = False
+
+        current_y = copy.deepcopy(current_y_cmd)
+        target_y = -copy.deepcopy(target_y_cmd)
+        judge_point = 170.0
+        THRESHOLD = 15.0
+
+        # 當前位置接近判斷點且移動方向遠離判斷點時，需檢查限位
+        if abs(current_y - judge_point) <= THRESHOLD and abs(current_y - target_y) >= abs(target_y - judge_point):
+            self.csv_writer.writerow([
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Limit_Judge_Triggered",
+                self.current_cartesian_pose,
+                ["target_y",target_y_cmd],
+                self.current_motor_len,
+                self.limit_state])  
+            
+            if self.limit_state[0] == 1 and self.limit_state[1] == 1:
+                can_move = True
+                self.limit_cmd_send = False
+            else:
+                if not self.limit_cmd_send:
+                    self.send_limit_cmd("close_limit")
+                    self.limit_cmd_send = True
+                else:
+                    print("[AssemblymentFSM] 限位命令已發送，等待完成")
+        else:
+            # 不在限位區域內，允許移動
+            can_move = True
+
+        return can_move
+
+    def send_limit_cmd(self, cmd: str):
+        msg = LimitCmd()
+        msg.mode = cmd
+        self.limit_pub.publish(msg)
+        if cmd == "open_limit":
+            print("[UI] 發布 LimitCmd: 開啟")
+        elif cmd == "close_limit":
+            print("[UI] 發布 LimitCmd: 關閉")
+        elif cmd == "stop_limit":
+            print("[UI] 發布 LimitCmd: 停止")
 
 
 

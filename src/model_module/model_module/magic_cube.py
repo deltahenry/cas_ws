@@ -10,7 +10,7 @@ class RobotModel:
     #model information
     def magic_cube_model(self):
 
-        self.home_position = [0.0, 0.0, 0.0] #robot home position
+        self.home_position = [0.0, -45.0, 0.0] #robot home position
         #link length
 
         #Relative Position definition
@@ -21,9 +21,12 @@ class RobotModel:
 
         return
     
-    def forward_kinematics(self, joint_angles):
-        current_pose = joint_angles
-        return current_pose
+    def forward_kinematics(self, motor_lengths):
+        M3_len, M2_len, M1_len = motor_lengths
+        yaw = math.asin((-M2_len-(-M1_len))/480.0)
+        y = -M3_len
+        x = ((-M1_len) + (-M2_len) - 1280*math.sin(yaw))/2
+        return [x, y, yaw]
 
     def inverse_kinematics(self, target_pose):
         sin = math.sin
@@ -37,6 +40,10 @@ class RobotModel:
         M2 = -880.0 * -sin(yaw) + x
         M3 = y #need to change
         joint_length = [-M3,-M2,-M1]
+
+        # M3_len = -M3 Y-axis
+        # M2_len = -M2 back motor
+        # M1_len = -M1 front motor
 
         return joint_length
 

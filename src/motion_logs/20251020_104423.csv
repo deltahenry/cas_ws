@@ -1,0 +1,2 @@
+Timestamp,Motion_Type,Current_Pose,Target_Pose,Motor_Positions,Limit_State
+2025-10-20 10:44:41,0,"[-0.0033333334916581716, -45.0, 8.333333729241878e-06]",[0. 0. 0.],"[45.0, -0.004000000189989805, 0.0]","[2, 2]"

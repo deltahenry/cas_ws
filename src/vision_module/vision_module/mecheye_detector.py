@@ -118,7 +118,6 @@ class DataNode(Node):
             10
         )
 
-
     def init_tcp(self):
         HOST = "0.0.0.0"
         PORT = 8000
